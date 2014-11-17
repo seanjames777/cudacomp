@@ -1,0 +1,4 @@
+build/
+out/
+project.*
+.DS_Store
