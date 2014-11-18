@@ -6,5 +6,10 @@
 
 #include <ast/astnode.h>
 
+ASTMalformedException::ASTMalformedException()
+    : runtime_error("Malformed AST")
+{
+}
+
 ASTNode::~ASTNode() {
 }

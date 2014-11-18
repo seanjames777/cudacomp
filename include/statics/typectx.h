@@ -17,6 +17,7 @@ private:
 
     LLVMContext & context;
 
+    std::unordered_map<std::string, Type *> symbols;
     std::unordered_map<ASTExpNode *, Type *> types;
 
 public:
@@ -28,6 +29,10 @@ public:
     void setType(ASTExpNode *exp, Type *type);
 
     Type *getType(ASTExpNode *exp);
+
+    void setSymbol(std::string id, Type *type);
+
+    Type *getSymbol(std::string id);
 
 };
 

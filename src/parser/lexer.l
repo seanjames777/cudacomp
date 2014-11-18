@@ -6,6 +6,10 @@
 #include <ast/astbinop.h>
 #include <ast/astseqnode.h>
 #include <ast/astreturnstmt.h>
+#include <ast/asttype.h>
+#include <ast/astintegertype.h>
+#include <ast/astvardeclstmt.h>
+#include <ast/astvardefnstmt.h>
 
 #include "parser.hpp"
 %}

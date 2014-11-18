@@ -5,10 +5,13 @@
  */
 
 #include <codegen/codegen.h>
+#include <ast/astidentifier.h>
 #include <ast/astinteger.h>
 #include <ast/astbinop.h>
 #include <ast/astseqnode.h>
 #include <ast/astreturnstmt.h>
+#include <ast/astvardeclstmt.h>
+#include <ast/astvardefnstmt.h>
 
 namespace Codegen {
 
@@ -29,8 +32,12 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
         case ASTBinop::DIV: return builder->CreateBinOp(Instruction::SDiv, v1, v2);
         }
     }
+    else if (ASTIdentifier *id_exp = dynamic_cast<ASTIdentifier *>(node)) {
+        Value *id_ptr = ctx->getSymbol(id_exp->getId());
+        return builder->CreateLoad(id_ptr);
+    }
     else {
-        throw 0; // TODO
+        throw new ASTMalformedException();
     }
 
     return NULL;
@@ -63,8 +70,22 @@ void codegen_stmt(CodegenCtx *ctx, ASTStmtNode *node) {
         else
             builder->CreateRet(NULL);
     }
+    else if (ASTVarDeclStmt *decl_stmt = dynamic_cast<ASTVarDeclStmt *>(node)) {
+        // Creates an alloca. TODO maybe getOrCreateId()
+        Value *mem = ctx->getSymbol(decl_stmt->getId());
+
+        if (decl_stmt->getExp()) {
+            Value *exp_val = codegen_exp(ctx, decl_stmt->getExp());
+            builder->CreateStore(exp_val, mem);
+        }
+    }
+    else if (ASTVarDefnStmt *decl_stmt = dynamic_cast<ASTVarDefnStmt *>(node)) {
+        Value *mem = ctx->getSymbol(decl_stmt->getId());
+        Value *exp_val = codegen_exp(ctx, decl_stmt->getExp());
+        builder->CreateStore(exp_val, mem);
+    }
     else {
-        throw 0; // TODO
+        throw new ASTMalformedException();
     }
 }
 

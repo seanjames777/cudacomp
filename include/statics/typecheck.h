@@ -12,12 +12,35 @@
 #include <statics/typectx.h>
 #include <ast/aststmtnode.h>
 #include <ast/astexpnode.h>
+#include <stdexcept>
 
 namespace Statics {
 
-    Type *typecheck_exp(TypeCtx *ctx, ASTExpNode *node);
+    class UndefinedException : public std::runtime_error {
+    public:
+        UndefinedException();
+    };
 
-    void typecheck_stmt(TypeCtx *ctx, ASTStmtNode *node);
+    class UndeclaredException : public std::runtime_error {
+    public:
+        UndeclaredException();
+    };
+
+    class RedeclaredException : public std::runtime_error {
+    public:
+        RedeclaredException();
+    };
+
+    class IllegalTypeException : public std::runtime_error {
+    public:
+        IllegalTypeException();
+    };
+
+    typedef std::unordered_set<std::string> idset;
+
+    Type *typecheck_exp(TypeCtx *ctx, idset & decl, idset & def, ASTExpNode *node);
+
+    void typecheck_stmt(TypeCtx *ctx, idset & decl, idset & def, ASTStmtNode *node);
 
 };
 

@@ -25,9 +25,11 @@ CodegenCtx::CodegenCtx(bool emit_device, TypeCtx *types)
 
     cc_main = Function::Create(ftype, GlobalValue::ExternalLinkage, "_cc_main", module);
 
-    bblock = BasicBlock::Create(context, "entry", cc_main, 0);
+    def_bblock = BasicBlock::Create(context, "defs", cc_main, NULL);
+    body_bblock = BasicBlock::Create(context, "body", cc_main, NULL);
 
-    builder = new IRBuilder<>(bblock);
+    def_builder = new IRBuilder<>(def_bblock);
+    body_builder = new IRBuilder<>(body_bblock);
 }
 
 void CodegenCtx::markKernel(Function *kernel) {
@@ -42,6 +44,8 @@ void CodegenCtx::markKernel(Function *kernel) {
 }
 
 void CodegenCtx::emit(char *out_file) {
+    def_builder->CreateBr(body_bblock);
+
     if (emit_device) {
         markKernel(cc_main);
         module->setTargetTriple("nvptx64-nvidia-cuda");
@@ -83,7 +87,7 @@ LLVMContext & CodegenCtx::getContext() {
 }
 
 BasicBlock *CodegenCtx::getBBlock() {
-    return bblock;
+    return body_bblock;
 }
 
 Function *CodegenCtx::getFunction() {
@@ -95,9 +99,19 @@ bool CodegenCtx::getEmitDevice() {
 }
 
 IRBuilder<> *CodegenCtx::getBuilder() {
-    return builder;
+    return body_builder;
 }
 
-TypeCtx *CodegenCtx::getTypes() {
-    return types;
+Type *CodegenCtx::getType(ASTExpNode *exp) {
+    return types->getType(exp);
+}
+
+Value *CodegenCtx::getSymbol(std::string id) {
+    if (symbols.find(id) == symbols.end()) {
+        Value *instr = def_builder->CreateAlloca(types->getSymbol(id));
+        symbols[id] = instr;
+        return instr;
+    }
+
+    return symbols[id];
 }

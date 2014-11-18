@@ -11,6 +11,13 @@
 
 #include <defs.h>
 
+class ASTMalformedException : public std::runtime_error {
+public:
+
+    ASTMalformedException();
+
+};
+
 class ASTNode {
 public:
 

@@ -33,6 +33,9 @@ add_executable(cc
     src/ast/aststmtnode.cpp
     src/ast/astseqnode.cpp
     src/ast/astreturnstmt.cpp
+    src/ast/astvardeclstmt.cpp
+    src/ast/astvardefnstmt.cpp
+    src/ast/asttype.cpp
     src/parser/parse.cpp
     src/codegen/codegenctx.cpp
     src/codegen/codegen.cpp

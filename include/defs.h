@@ -14,6 +14,7 @@
 #include <vector>
 #include <fstream>
 #include <unordered_map>
+#include <unordered_set>
 
 // TODO move me
 #include <llvm/IR/Module.h>
@@ -30,6 +31,7 @@
 #include <llvm/ADT/Triple.h>
 #include <llvm/Support/raw_os_ostream.h>
 #include <llvm/IR/IRBuilder.h>
+#include <llvm/Transforms/Scalar.h>
 
 using namespace llvm;
 

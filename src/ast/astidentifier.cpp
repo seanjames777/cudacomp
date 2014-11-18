@@ -6,15 +6,14 @@
 
 #include <ast/astidentifier.h>
 
-ASTIdentifier::ASTIdentifier(char *value)
+ASTIdentifier::ASTIdentifier(std::string value)
     : value(value)
 {
 }
 
 ASTIdentifier::~ASTIdentifier() {
-    free(value);
 }
 
-char *ASTIdentifier::getValue() {
+std::string ASTIdentifier::getId() {
     return value;
 }

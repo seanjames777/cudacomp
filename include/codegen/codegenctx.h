@@ -11,17 +11,19 @@
 
 #include <defs.h>
 #include <statics/typectx.h>
+#include <statics/typecheck.h>
 
 class CodegenCtx {
 private:
 
     Module *module;
-    BasicBlock *bblock;
+    BasicBlock *def_bblock, *body_bblock;
     LLVMContext & context;
     Function *cc_main;
     bool emit_device;
-    IRBuilder<> *builder;
+    IRBuilder<> *def_builder, *body_builder;
     TypeCtx *types;
+    std::unordered_map<std::string, Value *> symbols;
 
 public:
 
@@ -43,7 +45,9 @@ public:
 
     IRBuilder<> *getBuilder();
 
-    TypeCtx *getTypes();
+    Type *getType(ASTExpNode *exp);
+
+    Value *getSymbol(std::string symbol);
 
 };
 

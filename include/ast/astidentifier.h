@@ -16,15 +16,15 @@
 class ASTIdentifier : public ASTExpNode {
 private:
 
-    char *value;
+    std::string value;
 
 public:
 
-    ASTIdentifier(char *value);
+    ASTIdentifier(std::string value);
 
     ~ASTIdentifier();
 
-    char *getValue();
+    std::string getId();
 
 };
 

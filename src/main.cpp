@@ -39,7 +39,28 @@ int main(int argc, char *argv[]) {
         return -1;
 
     TypeCtx typeCtx;
-    Statics::typecheck_stmt(&typeCtx, node);
+
+    try {
+        Statics::idset decl;
+        Statics::idset def;
+        Statics::typecheck_stmt(&typeCtx, decl, def, node);
+    }
+    catch (Statics::UndefinedException *except) {
+        std::cout << "undefined" << std::endl;
+        return -2;
+    }
+    catch (Statics::UndeclaredException *except) {
+        std::cout << "undeclared" << std::endl;
+        return -2;
+    }
+    catch (Statics::RedeclaredException *except) {
+        std::cout << "redeclared" << std::endl;
+        return -2;
+    }
+    catch (Statics::IllegalTypeException *except) {
+        std::cout << "illegaltype" << std::endl;
+        return -2;
+    }
 
     CodegenCtx cgCtx(args.emit_device, &typeCtx);
     Codegen::codegen_stmt(&cgCtx, node);
@@ -47,4 +68,6 @@ int main(int argc, char *argv[]) {
     cgCtx.emit(args.out_file);
 
     delete node;
+
+    return 0;
 }
