@@ -26,10 +26,18 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
         Value *v2 = codegen_exp(ctx, binop_exp->getE2());
 
         switch(binop_exp->getOp()) {
-        case ASTBinop::ADD: return builder->CreateBinOp(Instruction::Add, v1, v2);
-        case ASTBinop::SUB: return builder->CreateBinOp(Instruction::Sub, v1, v2);
-        case ASTBinop::MUL: return builder->CreateBinOp(Instruction::Mul, v1, v2);
-        case ASTBinop::DIV: return builder->CreateBinOp(Instruction::SDiv, v1, v2);
+        case ASTBinop::ADD:  return builder->CreateBinOp(Instruction::Add, v1, v2);
+        case ASTBinop::SUB:  return builder->CreateBinOp(Instruction::Sub, v1, v2);
+        case ASTBinop::MUL:  return builder->CreateBinOp(Instruction::Mul, v1, v2);
+        case ASTBinop::DIV:  return builder->CreateBinOp(Instruction::SDiv, v1, v2);
+        case ASTBinop::MOD:  return builder->CreateBinOp(Instruction::SRem, v1, v2);
+        case ASTBinop::SHL:  return builder->CreateBinOp(Instruction::Shl, v1, v2);
+        case ASTBinop::SHR:  return builder->CreateBinOp(Instruction::AShr, v1, v2);
+        case ASTBinop::AND:  return builder->CreateBinOp(Instruction::And, v1, v2);
+        case ASTBinop::OR:   return builder->CreateBinOp(Instruction::Or, v1, v2);
+        case ASTBinop::BAND: return builder->CreateBinOp(Instruction::And, v1, v2);
+        case ASTBinop::BOR:  return builder->CreateBinOp(Instruction::Or, v1, v2);
+        case ASTBinop::BXOR: return builder->CreateBinOp(Instruction::Xor, v1, v2);
         }
     }
     else if (ASTIdentifier *id_exp = dynamic_cast<ASTIdentifier *>(node)) {

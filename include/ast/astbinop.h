@@ -20,8 +20,18 @@ public:
         ADD,
         SUB,
         MUL,
-        DIV
+        DIV,
+        MOD,
+        SHL,
+        SHR,
+        AND,
+        OR,
+        BAND,
+        BOR,
+        BXOR
     };
+
+    // TODO: Negative, Not, BitNot
 
 private:
 

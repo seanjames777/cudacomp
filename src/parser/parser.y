@@ -40,7 +40,7 @@ int yylex(void);
 
 %token <number> NUMBER
 %token <string> IDENT
-%token PLUS MINUS DIV TIMES
+%token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR
 %token ASSIGN SEMI
 %token INT
 %token RETURN
@@ -70,6 +70,14 @@ exp:
   | exp MINUS exp              { $$ = new ASTBinop(ASTBinop::SUB, $1, $3); }
   | exp DIV exp                { $$ = new ASTBinop(ASTBinop::DIV, $1, $3); }
   | exp TIMES exp              { $$ = new ASTBinop(ASTBinop::MUL, $1, $3); }
+  | exp MOD exp                { $$ = new ASTBinop(ASTBinop::MOD, $1, $3); }
+  | exp SHL exp                { $$ = new ASTBinop(ASTBinop::SHL, $1, $3); }
+  | exp SHR exp                { $$ = new ASTBinop(ASTBinop::SHR, $1, $3); }
+  | exp AND exp                { $$ = new ASTBinop(ASTBinop::AND, $1, $3); }
+  | exp OR exp                 { $$ = new ASTBinop(ASTBinop::OR, $1, $3); }
+  | exp BAND exp               { $$ = new ASTBinop(ASTBinop::BAND, $1, $3); }
+  | exp BOR exp                { $$ = new ASTBinop(ASTBinop::BOR, $1, $3); }
+  | exp BXOR exp               { $$ = new ASTBinop(ASTBinop::BXOR, $1, $3); }
   ;
 
 type:

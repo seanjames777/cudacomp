@@ -70,9 +70,19 @@ Type *typecheck_exp(TypeCtx *ctx, idset & decl, idset & def, ASTExpNode *node) {
         case ASTBinop::SUB:
         case ASTBinop::MUL:
         case ASTBinop::DIV:
+        case ASTBinop::MOD:
+        case ASTBinop::SHL:
+        case ASTBinop::SHR:
+        case ASTBinop::BAND:
+        case ASTBinop::BOR:
+        case ASTBinop::BXOR:
             if (t1 != int32 || t2 != int32)
                 throw new IllegalTypeException();
             type = int32;
+            break;
+        case ASTBinop::OR:
+        case ASTBinop::AND:
+            throw new ASTMalformedException();
         }
     }
 

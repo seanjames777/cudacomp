@@ -25,6 +25,14 @@
 "*"                     { return TIMES; }
 "-"                     { return MINUS; }
 "/"                     { return DIV; }
+"%"                     { return MOD; }
+"<<"                    { return SHL; }
+">>"                    { return SHR; }
+"&&"                    { return AND; }
+"||"                    { return OR; }
+"&"                     { return BAND; }
+"|"                     { return BOR; }
+"^"                     { return BXOR; }
 "="                     { return ASSIGN; }
 ";"                     { return SEMI; }
 
