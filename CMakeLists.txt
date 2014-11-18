@@ -10,9 +10,6 @@ execute_process(COMMAND llvm-config-mp-3.5 --ldflags OUTPUT_VARIABLE LLVM_LD_FLA
 execute_process(COMMAND llvm-config-mp-3.5 --libs core native OUTPUT_VARIABLE LLVM_LIBS OUTPUT_STRIP_TRAILING_WHITESPACE)
 execute_process(COMMAND llvm-config-mp-3.5 --system-libs core native OUTPUT_VARIABLE LLVM_SYS_LIBS OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-add_definitions(-std=c++11 -Wno-deprecated-register)
-add_definitions(${LLVM_CXX_FLAGS})
-
 include_directories(include)
 
 find_package(FLEX)
@@ -24,6 +21,8 @@ ADD_FLEX_BISON_DEPENDENCY(lexer parser)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+include_directories("/Developer/NVIDIA/CUDA-6.5/include/")
+
 add_executable(cc
     src/main.cpp
     src/ast/ast.cpp
@@ -31,6 +30,8 @@ add_executable(cc
     ${BISON_parser_OUTPUTS}
     ${FLEX_lexer_OUTPUTS}
 )
+
+set_target_properties(cc PROPERTIES COMPILE_FLAGS "-std=c++11 -Wno-deprecated-register ${LLVM_CXX_FLAGS}")
 
 target_link_libraries(cc
     ${FLEX_LIBRARIES}
@@ -40,4 +41,15 @@ target_link_libraries(cc
     ${LLVM_SYS_LIBS}
 )
 
+add_library(host_rt
+    driver/host_rt.c
+)
+
+add_library(device_rt
+    driver/device_rt.c
+)
+
 install(TARGETS cc DESTINATION bin/)
+
+install(TARGETS host_rt DESTINATION bin/)
+install(TARGETS device_rt DESTINATION bin/)

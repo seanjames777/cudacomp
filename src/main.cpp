@@ -9,16 +9,35 @@
 #include <defs.h>
 #include <parser/parse.h>
 
-int main(int argc, char *argv[]) {
-    ASTNode *node = Parser::parse(argc > 1 ? argv[1] : NULL);
+struct CCArgs {
+    bool  emit_device;
+    char *in_file;
+    char *out_file;
+} args;
 
-    if (!node) {
-        std::cout << "Error parsing " << argv[1] << std::endl;
-        return -1;
+void parseArgs(int argc, char *argv[]) {
+    memset(&args, 0, sizeof(args));
+
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--emit-device") == 0)
+            args.emit_device = true;
+        else if (strcmp(argv[i], "-o") == 0)
+            args.out_file = argv[i++ + 1];
+        else
+            args.in_file = argv[i];
     }
+}
 
-    CodegenCtx ctx;
-    ctx.finish(node->codegen(&ctx));
+int main(int argc, char *argv[]) {
+    parseArgs(argc, argv);
+
+    ASTNode *node = Parser::parse(args.in_file);
+
+    if (!node)
+        return -1;
+
+    CodegenCtx ctx(args.emit_device);
+    ctx.emit(node->codegen(&ctx), args.out_file);
 
     delete node;
 }
