@@ -31,13 +31,14 @@ void parseArgs(int argc, char *argv[]) {
 int main(int argc, char *argv[]) {
     parseArgs(argc, argv);
 
-    ASTNode *node = Parser::parse(args.in_file);
+    ASTStmtNode *node = Parser::parse(args.in_file);
 
     if (!node)
         return -1;
 
     CodegenCtx ctx(args.emit_device);
-    ctx.emit(node->codegen(&ctx), args.out_file);
+    node->codegen(&ctx);
+    ctx.emit(args.out_file);
 
     delete node;
 }

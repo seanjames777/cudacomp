@@ -10,10 +10,10 @@
 #define __ASTBINOP_H
 
 #include <defs.h>
-#include <ast/astnode.h>
+#include <ast/astexpnode.h>
 #include <codegen/codegenctx.h>
 
-class ASTBinop : public ASTNode {
+class ASTBinop : public ASTExpNode {
 public:
 
     enum op {
@@ -26,20 +26,20 @@ public:
 private:
 
     enum op op;
-    ASTNode *e1;
-    ASTNode *e2;
+    ASTExpNode *e1;
+    ASTExpNode *e2;
 
 public:
 
-    ASTBinop(enum op op, ASTNode *e1, ASTNode *e2);
+    ASTBinop(enum op op, ASTExpNode *e1, ASTExpNode *e2);
 
     ~ASTBinop();
 
     enum op getOp();
 
-    ASTNode *getE1();
+    ASTExpNode *getE1();
 
-    ASTNode *getE2();
+    ASTExpNode *getE2();
 
     Value *codegen(CodegenCtx *ctx);
 

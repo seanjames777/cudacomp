@@ -10,10 +10,10 @@
 #define __ASTIDENTIFIER_H
 
 #include <defs.h>
-#include <ast/astnode.h>
+#include <ast/astexpnode.h>
 #include <codegen/codegenctx.h>
 
-class ASTIdentifier : public ASTNode {
+class ASTIdentifier : public ASTExpNode {
 private:
 
     char *value;

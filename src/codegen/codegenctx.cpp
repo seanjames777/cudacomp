@@ -13,12 +13,20 @@ CodegenCtx::CodegenCtx(bool emit_device)
     module = new Module("", context);
 
     std::vector<Type *> argTypes;
-    argTypes.push_back(Type::getInt32PtrTy(context));
-    FunctionType *ftype = FunctionType::get(Type::getVoidTy(context), argTypes, false);
+    FunctionType *ftype;
+
+    if (emit_device) {
+        argTypes.push_back(Type::getInt32PtrTy(context));
+        ftype = FunctionType::get(Type::getVoidTy(context), argTypes, false);
+    }
+    else
+        ftype = FunctionType::get(Type::getInt32Ty(context), argTypes, false);
 
     cc_main = Function::Create(ftype, GlobalValue::ExternalLinkage, "_cc_main", module);
 
     bblock = BasicBlock::Create(context, "entry", cc_main, 0);
+
+    builder = new IRBuilder<>(bblock);
 }
 
 void CodegenCtx::markKernel(Function *kernel) {
@@ -32,14 +40,7 @@ void CodegenCtx::markKernel(Function *kernel) {
     cat->addOperand(node);
 }
 
-void CodegenCtx::emit(Value *retval, char *out_file) {
-    Value *out_arg = cc_main->arg_begin();
-
-    IRBuilder<> builder(bblock);
-
-    builder.CreateStore(retval, out_arg);
-    builder.CreateRet(NULL);
-
+void CodegenCtx::emit(char *out_file) {
     if (emit_device) {
         markKernel(cc_main);
         module->setTargetTriple("nvptx64-nvidia-cuda");
@@ -82,4 +83,16 @@ LLVMContext & CodegenCtx::getContext() {
 
 BasicBlock *CodegenCtx::getBBlock() {
     return bblock;
+}
+
+Function *CodegenCtx::getFunction() {
+    return cc_main;
+}
+
+bool CodegenCtx::getEmitDevice() {
+    return emit_device;
+}
+
+IRBuilder<> *CodegenCtx::getBuilder() {
+    return builder;
 }

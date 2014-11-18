@@ -1,10 +1,9 @@
 #include <stdio.h>
 
-extern void _cc_main(int *result);
+extern int _cc_main();
 
 int main(int argc, char *argv[]) {
-    int result;
-    _cc_main(&result);
+    int result = _cc_main(&result);
 
     printf("%d\n", result);
 

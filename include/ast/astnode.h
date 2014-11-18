@@ -15,9 +15,7 @@
 class ASTNode {
 public:
 
-    virtual ~ASTNode() = 0;
-
-    virtual Value *codegen(CodegenCtx *ctx) = 0;
+    virtual ~ASTNode();
 
 };
 

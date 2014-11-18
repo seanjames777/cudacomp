@@ -4,19 +4,14 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#ifndef __PARSE_H
-#define __PARSE_H
-
-#include <defs.h>
-#include <ast/astnode.h>
 #include <parser/parse.h>
 
-extern int yyparse(ASTNode **root);
+extern int yyparse(ASTStmtNode **root);
 extern FILE *yyin;
 
 namespace Parser {
 
-ASTNode *parse(const char *file) {
+ASTStmtNode *parse(const char *file) {
     FILE *fp = NULL;
 
     if (file) {
@@ -28,7 +23,7 @@ ASTNode *parse(const char *file) {
         yyin = fp;
     }
 
-    ASTNode *root = NULL;
+    ASTStmtNode *root = NULL;
 
     if (yyparse(&root)) {
         if (file)
@@ -44,5 +39,3 @@ ASTNode *parse(const char *file) {
 }
 
 };
-
-#endif

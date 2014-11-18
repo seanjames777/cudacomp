@@ -48,7 +48,9 @@ if target == "host":
     run_shell([ "../out/bin/cc", "-o", "host.ll", input ])
     run_shell([ "llc-mp-3.5", "-o", "host.o", "-filetype=obj", "host.ll" ])
     run_shell([ "clang", "-o", "host", "host.o", "../out/bin/libhost_rt.a" ])
+    run_shell([ "./host" ])
 else:
     run_shell([ "../out/bin/cc", "-o", "device.ll", "--emit-device", input ])
     run_shell([ "llc-mp-3.5", "-o", "device.ptx", "device.ll" ])
     run_shell([ "clang", "-o", "device", "../out/bin/libdevice_rt.a", "-framework", "CUDA" ])
+    run_shell([ "./device" ])

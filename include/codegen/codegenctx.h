@@ -36,6 +36,7 @@ private:
     LLVMContext & context;
     Function *cc_main;
     bool emit_device;
+    IRBuilder<> *builder;
 
 public:
 
@@ -43,13 +44,19 @@ public:
 
     void markKernel(Function *kernel);
 
-    void emit(Value *retval, char *out_file);
+    void emit(char *out_file);
 
     Module *getModule();
 
     LLVMContext & getContext();
 
     BasicBlock *getBBlock();
+
+    Function *getFunction();
+
+    bool getEmitDevice();
+
+    IRBuilder<> *getBuilder();
 
 };
 

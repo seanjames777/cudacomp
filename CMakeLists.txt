@@ -29,6 +29,10 @@ add_executable(cc
     src/ast/astinteger.cpp
     src/ast/astidentifier.cpp
     src/ast/astbinop.cpp
+    src/ast/astexpnode.cpp
+    src/ast/aststmtnode.cpp
+    src/ast/astseqnode.cpp
+    src/ast/astreturnstmt.cpp
     src/parser/parse.cpp
     src/codegen/codegenctx.cpp
     ${BISON_parser_OUTPUTS}

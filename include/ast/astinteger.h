@@ -10,10 +10,10 @@
 #define __ASTINTEGER_H
 
 #include <defs.h>
-#include <ast/astnode.h>
+#include <ast/astexpnode.h>
 #include <codegen/codegenctx.h>
 
-class ASTInteger : public ASTNode {
+class ASTInteger : public ASTExpNode {
 private:
 
     int value;
