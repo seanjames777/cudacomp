@@ -13,10 +13,6 @@
 #include <ast/astnode.h>
 
 class ASTStmtNode : public ASTNode {
-public:
-
-    virtual void codegen(CodegenCtx *ctx) = 0;
-
 };
 
 #endif

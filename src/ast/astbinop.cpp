@@ -29,19 +29,3 @@ ASTExpNode *ASTBinop::getE1() {
 ASTExpNode *ASTBinop::getE2() {
     return e2;
 }
-
-Value *ASTBinop::codegen(CodegenCtx *ctx) {
-    Value *v1 = e1->codegen(ctx);
-    Value *v2 = e2->codegen(ctx);
-
-    Instruction::BinaryOps llopt;
-
-    switch(op) {
-    case ADD: llopt = Instruction::Add; break;
-    case SUB: llopt = Instruction::Sub; break;
-    case MUL: llopt = Instruction::Mul; break;
-    case DIV: llopt = Instruction::SDiv; break;
-    }
-
-    return ctx->getBuilder()->CreateBinOp(llopt, v1, v2);
-}

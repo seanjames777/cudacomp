@@ -19,13 +19,6 @@ ASTSeqNode::~ASTSeqNode() {
         delete tail;
 }
 
-void ASTSeqNode::codegen(CodegenCtx *ctx) {
-    head->codegen(ctx);
-
-    if (tail)
-        tail->codegen(ctx);
-}
-
 ASTStmtNode *ASTSeqNode::getHead() {
     return head;
 }

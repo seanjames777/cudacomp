@@ -18,7 +18,3 @@ ASTIdentifier::~ASTIdentifier() {
 char *ASTIdentifier::getValue() {
     return value;
 }
-
-Value *ASTIdentifier::codegen(CodegenCtx *ctx) {
-    return NULL;
-}

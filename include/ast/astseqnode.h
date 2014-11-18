@@ -24,8 +24,6 @@ public:
 
     ~ASTSeqNode();
 
-    void codegen(CodegenCtx *ctx);
-
     ASTStmtNode *getHead();
 
     ASTSeqNode *getTail();

@@ -12,10 +12,6 @@
 #include <ast/astnode.h>
 
 class ASTExpNode : public ASTNode {
-public:
-
-    virtual Value *codegen(CodegenCtx *ctx) = 0;
-
 };
 
 #endif

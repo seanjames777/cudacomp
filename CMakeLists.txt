@@ -35,6 +35,7 @@ add_executable(cc
     src/ast/astreturnstmt.cpp
     src/parser/parse.cpp
     src/codegen/codegenctx.cpp
+    src/codegen/codegen.cpp
     ${BISON_parser_OUTPUTS}
     ${FLEX_lexer_OUTPUTS}
 )

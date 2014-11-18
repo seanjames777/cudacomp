@@ -17,9 +17,3 @@ ASTInteger::~ASTInteger() {
 int ASTInteger::getValue() {
     return value;
 }
-
-Value *ASTInteger::codegen(CodegenCtx *ctx) {
-    return ConstantInt::get(Type::getInt32Ty(ctx->getContext()), value);
-
-
-}

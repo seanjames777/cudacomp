@@ -41,8 +41,6 @@ public:
 
     ASTExpNode *getE2();
 
-    Value *codegen(CodegenCtx *ctx);
-
 };
 
 #endif

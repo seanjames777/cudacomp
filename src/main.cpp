@@ -8,6 +8,7 @@
 
 #include <defs.h>
 #include <parser/parse.h>
+#include <codegen/codegen.h>
 
 struct CCArgs {
     bool  emit_device;
@@ -37,7 +38,7 @@ int main(int argc, char *argv[]) {
         return -1;
 
     CodegenCtx ctx(args.emit_device);
-    node->codegen(&ctx);
+    Codegen::codegen_stmt(&ctx, node);
     ctx.emit(args.out_file);
 
     delete node;

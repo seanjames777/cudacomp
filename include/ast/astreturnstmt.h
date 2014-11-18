@@ -24,8 +24,6 @@ public:
 
     ~ASTReturnStmt();
 
-    void codegen(CodegenCtx *ctx);
-
     ASTExpNode *getExp();
 
 };

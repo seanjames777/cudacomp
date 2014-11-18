@@ -26,8 +26,6 @@ public:
 
     char *getValue();
 
-    Value *codegen(CodegenCtx *ctx);
-
 };
 
 #endif

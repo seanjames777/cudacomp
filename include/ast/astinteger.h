@@ -26,8 +26,6 @@ public:
 
     int getValue();
 
-    Value *codegen(CodegenCtx *ctx);
-
 };
 
 #endif
