@@ -15,13 +15,10 @@ int main(int argc, char *argv[]) {
     CUmodule cudaModule;
     CUfunction function;
 
-    printf("Initializing...\n");
-
     checkCudaErrors(cuInit(0));
 
     int devCount;
     checkCudaErrors(cuDeviceGetCount(&devCount));
-    printf("%d device(s)\n", devCount);
 
     checkCudaErrors(cuDeviceGet(&device, 0));
 
@@ -29,7 +26,6 @@ int main(int argc, char *argv[]) {
     int devMajor, devMinor;
     checkCudaErrors(cuDeviceGetName(name, 128, device));
     checkCudaErrors(cuDeviceComputeCapability(&devMajor, &devMinor, device));
-    printf("Device: %s, Compute %d.%d\n", name, devMajor, devMinor);
 
     checkCudaErrors(cuCtxCreate(&context, 0, device));
 
@@ -57,7 +53,7 @@ int main(int argc, char *argv[]) {
     CUjit_option options[16];
 
     options[nOptions]  = CU_JIT_ERROR_LOG_BUFFER_SIZE_BYTES;
-    values[nOptions++] = LOG_SZ;
+    values[nOptions++] = (void *)LOG_SZ;
     options[nOptions]  = CU_JIT_ERROR_LOG_BUFFER;
     values[nOptions++] = errors;
 
@@ -69,11 +65,7 @@ int main(int argc, char *argv[]) {
     free(errors);
     free(kernel);
 
-    printf("Loaded module\n");
-
     checkCudaErrors(cuModuleGetFunction(&function, cudaModule, "_cc_main"));
-
-    printf("Loaded function\n");
 
     int retVal;
     CUdeviceptr devRetVal;
@@ -83,11 +75,7 @@ int main(int argc, char *argv[]) {
     void *kernelParams[1];
     kernelParams[0] = &devRetVal;
 
-    printf("Launching kernel\n");
-
     checkCudaErrors(cuLaunchKernel(function, 1, 1, 1, 1, 1, 1, 0, NULL, kernelParams, NULL));
-
-    printf("Kernel finished\n");
 
     checkCudaErrors(cuMemcpyDtoH(&retVal, devRetVal, sizeof(int)));
 

@@ -1,7 +1,10 @@
 %{
 #include <iostream>
 #include <string>
-#include <ast/ast.h>
+#include <ast/astnode.h>
+#include <ast/astinteger.h>
+#include <ast/astidentifier.h>
+#include <ast/astbinop.h>
 
 int yylex(void);
 

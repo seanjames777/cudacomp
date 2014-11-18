@@ -1,5 +1,5 @@
 %{
-#include <ast/ast.h>
+#include <ast/astnode.h>
 #include "parser.hpp"
 %}
 

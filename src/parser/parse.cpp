@@ -8,7 +8,7 @@
 #define __PARSE_H
 
 #include <defs.h>
-#include <ast/ast.h>
+#include <ast/astnode.h>
 #include <parser/parse.h>
 
 extern int yyparse(ASTNode **root);

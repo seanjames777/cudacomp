@@ -25,7 +25,10 @@ include_directories("/Developer/NVIDIA/CUDA-6.5/include/")
 
 add_executable(cc
     src/main.cpp
-    src/ast/ast.cpp
+    src/ast/astnode.cpp
+    src/ast/astinteger.cpp
+    src/ast/astidentifier.cpp
+    src/ast/astbinop.cpp
     src/parser/parse.cpp
     ${BISON_parser_OUTPUTS}
     ${FLEX_lexer_OUTPUTS}
