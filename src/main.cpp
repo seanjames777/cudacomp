@@ -8,6 +8,7 @@
 
 #include <defs.h>
 #include <parser/parse.h>
+#include <statics/typecheck.h>
 #include <codegen/codegen.h>
 
 struct CCArgs {
@@ -37,9 +38,13 @@ int main(int argc, char *argv[]) {
     if (!node)
         return -1;
 
-    CodegenCtx ctx(args.emit_device);
-    Codegen::codegen_stmt(&ctx, node);
-    ctx.emit(args.out_file);
+    TypeCtx typeCtx;
+    Statics::typecheck_stmt(&typeCtx, node);
+
+    CodegenCtx cgCtx(args.emit_device, &typeCtx);
+    Codegen::codegen_stmt(&cgCtx, node);
+
+    cgCtx.emit(args.out_file);
 
     delete node;
 }

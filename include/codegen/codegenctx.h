@@ -10,23 +10,7 @@
 #define __CODEGENCTX_H
 
 #include <defs.h>
-
-#include <llvm/IR/Module.h>
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Value.h>
-#include <llvm/IR/Constants.h>
-#include <llvm/IR/Type.h>
-#include <llvm/IR/Function.h>
-#include <llvm/IR/DerivedTypes.h>
-#include <llvm/IR/Instructions.h>
-#include <llvm/PassManager.h>
-#include <llvm/Support/raw_ostream.h>
-#include <llvm/IR/IRPrintingPasses.h>
-#include <llvm/ADT/Triple.h>
-#include <llvm/Support/raw_os_ostream.h>
-#include <llvm/IR/IRBuilder.h>
-
-using namespace llvm;
+#include <statics/typectx.h>
 
 class CodegenCtx {
 private:
@@ -37,10 +21,11 @@ private:
     Function *cc_main;
     bool emit_device;
     IRBuilder<> *builder;
+    TypeCtx *types;
 
 public:
 
-    CodegenCtx(bool emit_device);
+    CodegenCtx(bool emit_device, TypeCtx *types);
 
     void markKernel(Function *kernel);
 
@@ -57,6 +42,8 @@ public:
     bool getEmitDevice();
 
     IRBuilder<> *getBuilder();
+
+    TypeCtx *getTypes();
 
 };
 

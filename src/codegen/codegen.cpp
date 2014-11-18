@@ -29,6 +29,9 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
         case ASTBinop::DIV: return builder->CreateBinOp(Instruction::SDiv, v1, v2);
         }
     }
+    else {
+        throw 0; // TODO
+    }
 
     return NULL;
 }
@@ -59,6 +62,9 @@ void codegen_stmt(CodegenCtx *ctx, ASTStmtNode *node) {
         }
         else
             builder->CreateRet(NULL);
+    }
+    else {
+        throw 0; // TODO
     }
 }
 

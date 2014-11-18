@@ -36,11 +36,14 @@ add_executable(cc
     src/parser/parse.cpp
     src/codegen/codegenctx.cpp
     src/codegen/codegen.cpp
+    src/statics/typectx.cpp
+    src/statics/typecheck.cpp
     ${BISON_parser_OUTPUTS}
     ${FLEX_lexer_OUTPUTS}
 )
 
-set_target_properties(cc PROPERTIES COMPILE_FLAGS "-std=c++11 -Wno-deprecated-register ${LLVM_CXX_FLAGS}")
+# TODO: -fexceptions hack might break exceptions
+set_target_properties(cc PROPERTIES COMPILE_FLAGS "-std=c++11 -Wno-deprecated-register ${LLVM_CXX_FLAGS} -fexceptions")
 
 target_link_libraries(cc
     ${FLEX_LIBRARIES}

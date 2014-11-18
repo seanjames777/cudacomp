@@ -6,9 +6,10 @@
 
 #include <codegen/codegenctx.h>
 
-CodegenCtx::CodegenCtx(bool emit_device)
+CodegenCtx::CodegenCtx(bool emit_device, TypeCtx *types)
     : context(getGlobalContext()),
-      emit_device(emit_device)
+      emit_device(emit_device),
+      types(types)
 {
     module = new Module("", context);
 
@@ -95,4 +96,8 @@ bool CodegenCtx::getEmitDevice() {
 
 IRBuilder<> *CodegenCtx::getBuilder() {
     return builder;
+}
+
+TypeCtx *CodegenCtx::getTypes() {
+    return types;
 }

@@ -10,7 +10,6 @@
 #define __ASTNODE_H
 
 #include <defs.h>
-#include <codegen/codegenctx.h>
 
 class ASTNode {
 public:
