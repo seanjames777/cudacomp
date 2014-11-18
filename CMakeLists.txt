@@ -30,6 +30,7 @@ add_executable(cc
     src/ast/astidentifier.cpp
     src/ast/astbinop.cpp
     src/parser/parse.cpp
+    src/codegen/codegenctx.cpp
     ${BISON_parser_OUTPUTS}
     ${FLEX_lexer_OUTPUTS}
 )

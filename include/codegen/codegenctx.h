@@ -39,83 +39,17 @@ private:
 
 public:
 
-    CodegenCtx(bool emit_device)
-        : context(getGlobalContext()),
-          emit_device(emit_device)
-    {
-        module = new Module("", context);
+    CodegenCtx(bool emit_device);
 
-        std::vector<Type *> argTypes;
-        argTypes.push_back(Type::getInt32PtrTy(context));
-        FunctionType *ftype = FunctionType::get(Type::getVoidTy(context), argTypes, false);
+    void markKernel(Function *kernel);
 
-        cc_main = Function::Create(ftype, GlobalValue::ExternalLinkage, "_cc_main", module);
+    void emit(Value *retval, char *out_file);
 
-        bblock = BasicBlock::Create(context, "entry", cc_main, 0);
-    }
+    Module *getModule();
 
-    void markKernel(Function *kernel) {
-        std::vector<Value *> meta;
-        meta.push_back(cc_main);
-        meta.push_back(MDString::get(context, "kernel"));
-        meta.push_back(ConstantInt::get(Type::getInt32Ty(context), 1));
-        MDNode *node = MDNode::get(context, meta);
+    LLVMContext & getContext();
 
-        NamedMDNode *cat = module->getOrInsertNamedMetadata("nvvm.annotations");
-        cat->addOperand(node);
-    }
-
-    void emit(Value *retval, char *out_file) {
-        Value *out_arg = cc_main->arg_begin();
-
-        IRBuilder<> builder(bblock);
-
-        builder.CreateStore(retval, out_arg);
-        builder.CreateRet(NULL);
-
-        if (emit_device) {
-            markKernel(cc_main);
-            module->setTargetTriple("nvptx64-nvidia-cuda");
-        }
-        else {
-            module->setTargetTriple("x86_64-apple-macosx10.10.0");
-        }
-
-        PassManager pm;
-
-        if (!out_file) {
-            pm.add(createPrintModulePass(outs()));
-            pm.run(*module);
-        }
-        else {
-            std::ofstream out(out_file, std::ios::out);
-
-            if (!out) {
-                // TODO explode
-                return;
-            }
-
-            raw_os_ostream outs(out);
-
-            pm.add(createPrintModulePass(outs));
-
-            pm.run(*module);
-
-            out.close();
-        }
-    }
-
-    Module *getModule() {
-        return module;
-    }
-
-    LLVMContext & getContext() {
-        return context;
-    }
-
-    BasicBlock *getBBlock() {
-        return bblock;
-    }
+    BasicBlock *getBBlock();
 
 };
 
