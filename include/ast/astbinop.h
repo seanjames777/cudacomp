@@ -28,7 +28,13 @@ public:
         OR,
         BAND,
         BOR,
-        BXOR
+        BXOR,
+        LT,
+        GT,
+        LEQ,
+        GEQ,
+        EQ,
+        NEQ
     };
 
 private:

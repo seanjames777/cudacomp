@@ -9,6 +9,8 @@ target = "host"
 
 tests = [
     ("../tests/testBinOps1.cc", 14),
+    ("../tests/testBinOps2.cc", 2),
+    ("../tests/testCmp1.cc", 1),
     ("../tests/testUndeclared.cc", "undeclared"),
     ("../tests/testUndefined.cc", "undefined"),
     ("../tests/testRedeclared.cc", "redeclared"),

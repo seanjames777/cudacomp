@@ -53,6 +53,7 @@ int yylex(void);
 %token INT BOOL
 %token RETURN IF ELSE
 %token LPAREN RPAREN LBRACE RBRACE
+%token EQ NEQ LEQ GEQ LT GT
 
 %type <exp> exp
 %type <stmt> stmt
@@ -66,6 +67,8 @@ int yylex(void);
 %left BOR
 %left BXOR
 %left BAND
+%left EQ NEQ
+%left LEQ GEQ LT GT
 %left SHL SHR
 %left PLUS MINUS
 %left TIMES DIV MOD
@@ -102,6 +105,12 @@ exp:
   | exp BAND exp                      { $$ = new ASTBinop(ASTBinop::BAND, $1, $3); }
   | exp BOR exp                       { $$ = new ASTBinop(ASTBinop::BOR, $1, $3); }
   | exp BXOR exp                      { $$ = new ASTBinop(ASTBinop::BXOR, $1, $3); }
+  | exp EQ exp                        { $$ = new ASTBinop(ASTBinop::EQ, $1, $3); }
+  | exp NEQ exp                       { $$ = new ASTBinop(ASTBinop::NEQ, $1, $3); }
+  | exp GT exp                        { $$ = new ASTBinop(ASTBinop::GT, $1, $3); }
+  | exp LT exp                        { $$ = new ASTBinop(ASTBinop::LT, $1, $3); }
+  | exp GEQ exp                       { $$ = new ASTBinop(ASTBinop::GEQ, $1, $3); }
+  | exp LEQ exp                       { $$ = new ASTBinop(ASTBinop::LEQ, $1, $3); }
   | NOT exp                           { $$ = new ASTUnop(ASTUnop::NOT, $2); }
   | BNOT exp                          { $$ = new ASTUnop(ASTUnop::BNOT, $2); }
   | MINUS exp %prec UMINUS            { $$ = new ASTUnop(ASTUnop::NEG, $2); }

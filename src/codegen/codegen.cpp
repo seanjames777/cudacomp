@@ -53,6 +53,12 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
         case ASTBinop::BAND: return builder->CreateBinOp(Instruction::And, v1, v2);
         case ASTBinop::BOR:  return builder->CreateBinOp(Instruction::Or, v1, v2);
         case ASTBinop::BXOR: return builder->CreateBinOp(Instruction::Xor, v1, v2);
+        case ASTBinop::EQ:   return builder->CreateICmpEQ(v1, v2);
+        case ASTBinop::NEQ:  return builder->CreateICmpNE(v1, v2);
+        case ASTBinop::LEQ:  return builder->CreateICmpSLE(v1, v2);
+        case ASTBinop::GEQ:  return builder->CreateICmpSGE(v1, v2);
+        case ASTBinop::LT:   return builder->CreateICmpSLT(v1, v2);
+        case ASTBinop::GT:   return builder->CreateICmpSGT(v1, v2);
         }
     }
     else if (ASTIdentifier *id_exp = dynamic_cast<ASTIdentifier *>(node)) {
@@ -137,13 +143,13 @@ void codegen_stmt(CodegenCtx *ctx, ASTStmtNode *node) {
 
             // Generate 'false' branch
             ctx->pushBlock(falseBlock);
-            // TODO check if it optimizes falseBlock -> doneBlock
-            if (if_node->getFalseStmt())
-                codegen_stmt(ctx, if_node->getFalseStmt());
+            codegen_stmt(ctx, if_node->getFalseStmt());
             ctx->getBuilder()->CreateBr(doneBlock);
 
             // 'doneBlock' remains on the stack
             ctx->pushBlock(doneBlock);
+
+            // TODO: check if this is making phi nodes
         }
         else if (ASTNopStmt *nop_node = dynamic_cast<ASTNopStmt *>(head)) {
             // Nothing to do

@@ -103,13 +103,27 @@ ASTType *typecheck_exp(TypeCtx *ctx, idset & decl, idset & def, ASTExpNode *node
         case ASTBinop::BXOR:
             if (!t1->equal(ASTIntegerType::get()) || !t2->equal(ASTIntegerType::get()))
                 throw new IllegalTypeException();
-            type = t1;
+            type = ASTIntegerType::get();
             break;
         case ASTBinop::OR:
         case ASTBinop::AND:
             if (!t1->equal(ASTBooleanType::get()) || !t2->equal(ASTBooleanType::get()))
                 throw new IllegalTypeException();
-            type = t1;
+            type = ASTBooleanType::get();
+            break;
+        case ASTBinop::LEQ:
+        case ASTBinop::GEQ:
+        case ASTBinop::LT:
+        case ASTBinop::GT:
+            if (!t1->equal(ASTIntegerType::get()) || !t2->equal(ASTIntegerType::get()))
+                throw new IllegalTypeException();
+            type = ASTBooleanType::get();
+            break;
+        case ASTBinop::EQ:
+        case ASTBinop::NEQ:
+            if (!t1->equal(t2) || (!t1->equal(ASTIntegerType::get()) && !t1->equal(ASTBooleanType::get())))
+                throw new IllegalTypeException();
+            type = ASTBooleanType::get();
             break;
         }
     }

@@ -40,6 +40,12 @@
 "^"                     { return BXOR; }
 "~"                     { return BNOT; }
 "!"                     { return NOT; }
+"<="                    { return LEQ; }
+"<"                     { return LT; }
+">="                    { return GEQ; }
+">"                     { return GT; }
+"=="                    { return EQ; }
+"!="                    { return NEQ; }
 "="                     { return ASSIGN; }
 ";"                     { return SEMI; }
 "("                     { return LPAREN; }
