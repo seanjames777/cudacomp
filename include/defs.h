@@ -15,6 +15,7 @@
 #include <fstream>
 #include <unordered_map>
 #include <unordered_set>
+#include <algorithm>
 
 // TODO move me
 #include <llvm/IR/Module.h>

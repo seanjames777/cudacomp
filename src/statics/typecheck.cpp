@@ -15,6 +15,7 @@
 #include <ast/astintegertype.h>
 #include <ast/astunop.h>
 #include <ast/astbooleantype.h>
+#include <ast/astscope.h>
 
 namespace Statics {
 
@@ -108,6 +109,8 @@ ASTType *typecheck_exp(TypeCtx *ctx, idset & decl, idset & def, ASTExpNode *node
             break;
         }
     }
+    else
+        throw new ASTMalformedException();
 
     // Store the type for code generation
     ctx->setType(node, ctx->convert_type(type));
@@ -177,15 +180,34 @@ void typecheck_stmt(TypeCtx *ctx, idset & decl, idset & def, ASTStmtNode *node) 
             // control flow across a return statement.
             def = decl;
         }
+        // Scope statement
+        else if (ASTScope *scope_node = dynamic_cast<ASTScope *>(head)) {
+            // Scope inherits outside definitions/declarations
+            idset scope_decl = decl;
+            idset scope_def = def;
+
+            typecheck_stmt(ctx, scope_decl, scope_def, scope_node->getBody());
+
+            idset new_def;
+
+            // Definitions of variables that were declared outside the scope
+            // propogate out
+            std::set_intersection(scope_def.begin(), scope_def.end(),
+                decl.begin(), decl.end(),
+                std::inserter(new_def, new_def.end()));
+
+            def = new_def;
+        }
+        else
+            throw new ASTMalformedException();
 
         // Typecheck the rest of the list
         if (seq_node->getTail())
             typecheck_stmt(ctx, decl, def, seq_node->getTail());
     }
     // Illegal. The AST is always a linked list of statements.
-    else {
+    else
         throw new ASTMalformedException();
-    }
 }
 
 };

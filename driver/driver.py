@@ -19,7 +19,10 @@ tests = [
     ("../tests/testId5.cc", "undeclared"),
     ("../tests/testId6.cc", 100),
     ("../tests/testReturnDeclDef.cc", 5),
-    ("../tests/testUnOps.cc", -1)
+    ("../tests/testUnOps.cc", -1),
+    ("../tests/testScope1.cc", 10),
+    ("../tests/testScope2.cc", "undeclared"),
+    ("../tests/testScope1.cc", 10),
 ]
 
 #############################
@@ -60,9 +63,9 @@ if buildstat != 0:
 
 run_shell([ "make", "install" ])
 
-print "\033[34;1m**************************\033[0m"
-print "\033[34;1m* Running Tests...       *\033[0m"
-print "\033[34;1m**************************\033[0m"
+print "\033[34;1m***************************************************\033[0m"
+print "\033[34;1m* Running Tests...                                *\033[0m"
+print "\033[34;1m***************************************************\033[0m"
 
 for (name, expected) in tests:
     print "\033[37;1mTest '", name, "'\033[0m"

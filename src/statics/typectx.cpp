@@ -6,6 +6,7 @@
 
 #include <statics/typectx.h>
 #include <ast/astintegertype.h>
+#include <ast/astbooleantype.h>
 
 TypeCtx::TypeCtx()
     : context(getGlobalContext())
@@ -39,6 +40,8 @@ ASTType *TypeCtx::getSymbolAST(std::string id) {
 Type *TypeCtx::convert_type(ASTType *type) {
     if (ASTIntegerType *int_type = dynamic_cast<ASTIntegerType *>(type))
         return Type::getInt32Ty(context);
+    else if (ASTBooleanType *bool_type = dynamic_cast<ASTBooleanType *>(type))
+        return Type::getInt8Ty(context);
 
     throw new ASTMalformedException();
 }

@@ -13,6 +13,7 @@
 #include <ast/astvardeclstmt.h>
 #include <ast/astvardefnstmt.h>
 #include <ast/astunop.h>
+#include <ast/astscope.h>
 
 namespace Codegen {
 
@@ -54,9 +55,8 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
         Value *id_ptr = ctx->getSymbol(id_exp->getId());
         return builder->CreateLoad(id_ptr);
     }
-    else {
+    else
         throw new ASTMalformedException();
-    }
 
     return NULL;
 }
@@ -95,6 +95,7 @@ void codegen_stmt(CodegenCtx *ctx, ASTStmtNode *node) {
             // after the return anyway.
             return;
         }
+        // Variable declaration
         else if (ASTVarDeclStmt *decl_stmt = dynamic_cast<ASTVarDeclStmt *>(head)) {
             // Creates an alloca. TODO maybe getOrCreateId()
             Value *mem = ctx->getSymbol(decl_stmt->getId());
@@ -104,19 +105,25 @@ void codegen_stmt(CodegenCtx *ctx, ASTStmtNode *node) {
                 builder->CreateStore(exp_val, mem);
             }
         }
+        // Variable definution
         else if (ASTVarDefnStmt *decl_stmt = dynamic_cast<ASTVarDefnStmt *>(head)) {
             Value *mem = ctx->getSymbol(decl_stmt->getId());
             Value *exp_val = codegen_exp(ctx, decl_stmt->getExp());
             builder->CreateStore(exp_val, mem);
         }
+        // Scope
+        else if (ASTScope *scope_stmt = dynamic_cast<ASTScope *>(head)) {
+            codegen_stmt(ctx, scope_stmt->getBody());
+        }
+        else
+            throw new ASTMalformedException();
 
         if (seq_node->getTail())
             codegen_stmt(ctx, seq_node->getTail());
     }
     // Should always be a null terminated linked list
-    else {
+    else
         throw new ASTMalformedException();
-    }
 }
 
 }
