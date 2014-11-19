@@ -12,6 +12,7 @@
 #include <statics/typectx.h>
 #include <ast/aststmtnode.h>
 #include <ast/astexpnode.h>
+#include <ast/asttype.h>
 #include <stdexcept>
 
 namespace Statics {
@@ -38,7 +39,7 @@ namespace Statics {
 
     typedef std::unordered_set<std::string> idset;
 
-    Type *typecheck_exp(TypeCtx *ctx, idset & decl, idset & def, ASTExpNode *node);
+    ASTType *typecheck_exp(TypeCtx *ctx, idset & decl, idset & def, ASTExpNode *node);
 
     void typecheck_stmt(TypeCtx *ctx, idset & decl, idset & def, ASTStmtNode *node);
 

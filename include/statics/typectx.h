@@ -11,13 +11,14 @@
 
 #include <defs.h>
 #include <ast/astexpnode.h>
+#include <ast/asttype.h>
 
 class TypeCtx {
 private:
 
     LLVMContext & context;
 
-    std::unordered_map<std::string, Type *> symbols;
+    std::unordered_map<std::string, ASTType *> symbols;
     std::unordered_map<ASTExpNode *, Type *> types;
 
 public:
@@ -30,9 +31,13 @@ public:
 
     Type *getType(ASTExpNode *exp);
 
-    void setSymbol(std::string id, Type *type);
+    void setSymbol(std::string id, ASTType *type);
 
     Type *getSymbol(std::string id);
+
+    ASTType *getSymbolAST(std::string id);
+
+    Type *convert_type(ASTType *type);
 
 };
 

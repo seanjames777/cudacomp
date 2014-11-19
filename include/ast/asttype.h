@@ -9,10 +9,14 @@
 #ifndef __ASTTYPE_H
 #define __ASTTYPE_H
 
+#include <defs.h>
+
 class ASTType {
 public:
 
     virtual ~ASTType() = 0;
+
+    virtual bool equal(ASTType *other) = 0;
 
 };
 

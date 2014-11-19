@@ -24,23 +24,28 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories("/Developer/NVIDIA/CUDA-6.5/include/")
 
 add_executable(cc
-    src/main.cpp
     src/ast/astnode.cpp
-    src/ast/astinteger.cpp
-    src/ast/astidentifier.cpp
-    src/ast/astbinop.cpp
-    src/ast/astexpnode.cpp
-    src/ast/aststmtnode.cpp
-    src/ast/astseqnode.cpp
-    src/ast/astreturnstmt.cpp
-    src/ast/astvardeclstmt.cpp
-    src/ast/astvardefnstmt.cpp
-    src/ast/asttype.cpp
-    src/parser/parse.cpp
-    src/codegen/codegenctx.cpp
+    src/ast/expr/astbinop.cpp
+    src/ast/expr/astboolean.cpp
+    src/ast/expr/astexpnode.cpp
+    src/ast/expr/astidentifier.cpp
+    src/ast/expr/astinteger.cpp
+    src/ast/expr/astunop.cpp
+    src/ast/stmt/astreturnstmt.cpp
+    src/ast/stmt/astscope.cpp
+    src/ast/stmt/astseqnode.cpp
+    src/ast/stmt/aststmtnode.cpp
+    src/ast/stmt/astvardeclstmt.cpp
+    src/ast/stmt/astvardefnstmt.cpp
+    src/ast/type/astbooleantype.cpp
+    src/ast/type/astintegertype.cpp
+    src/ast/type/asttype.cpp
     src/codegen/codegen.cpp
-    src/statics/typectx.cpp
+    src/codegen/codegenctx.cpp
+    src/main.cpp
+    src/parser/parse.cpp
     src/statics/typecheck.cpp
+    src/statics/typectx.cpp
     ${BISON_parser_OUTPUTS}
     ${FLEX_lexer_OUTPUTS}
 )

@@ -12,6 +12,7 @@
 #include <ast/astreturnstmt.h>
 #include <ast/astvardeclstmt.h>
 #include <ast/astvardefnstmt.h>
+#include <ast/astunop.h>
 
 namespace Codegen {
 
@@ -20,6 +21,15 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
 
     if (ASTInteger *int_exp = dynamic_cast<ASTInteger *>(node)) {
         return ConstantInt::get(Type::getInt32Ty(ctx->getContext()), int_exp->getValue());
+    }
+    else if (ASTUnop *unop_exp = dynamic_cast<ASTUnop *>(node)) {
+        Value *v = codegen_exp(ctx, unop_exp->getExp());
+
+        switch(unop_exp->getOp()) {
+        case ASTUnop::NOT:  return builder->CreateBinOp(Instruction::Xor, v, v);
+        case ASTUnop::BNOT: return builder->CreateNot(v);
+        case ASTUnop::NEG:  return builder->CreateNeg(v);
+        }
     }
     else if (ASTBinop *binop_exp = dynamic_cast<ASTBinop *>(node)) {
         Value *v1 = codegen_exp(ctx, binop_exp->getE1());
@@ -54,44 +64,56 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
 void codegen_stmt(CodegenCtx *ctx, ASTStmtNode *node) {
     IRBuilder<> *builder = ctx->getBuilder();
 
+    // Sequence node
     if (ASTSeqNode *seq_node = dynamic_cast<ASTSeqNode *>(node)) {
-        codegen_stmt(ctx, seq_node->getHead());
+        // We always have a head
+        ASTStmtNode *head = seq_node->getHead();
+
+        // Return instruction
+        if (ASTReturnStmt *ret_node = dynamic_cast<ASTReturnStmt *>(head)) {
+            ASTExpNode *ret_exp = ret_node->getExp();
+
+            // Need to return a value
+            if (ret_exp) {
+                Value *ret_val = codegen_exp(ctx, ret_exp);
+
+                // In device mode, have to move into return value argument because kernels
+                // must return void
+                if (ctx->getEmitDevice()) {
+                    Value *out_arg = ctx->getFunction()->arg_begin();
+
+                    builder->CreateStore(ret_val, out_arg);
+                    builder->CreateRet(NULL);
+                }
+                else
+                    builder->CreateRet(ret_val);
+            }
+            else
+                builder->CreateRet(NULL);
+
+            // Don't keep generating code because we've returned and we can't add a basic block
+            // after the return anyway.
+            return;
+        }
+        else if (ASTVarDeclStmt *decl_stmt = dynamic_cast<ASTVarDeclStmt *>(head)) {
+            // Creates an alloca. TODO maybe getOrCreateId()
+            Value *mem = ctx->getSymbol(decl_stmt->getId());
+
+            if (decl_stmt->getExp()) {
+                Value *exp_val = codegen_exp(ctx, decl_stmt->getExp());
+                builder->CreateStore(exp_val, mem);
+            }
+        }
+        else if (ASTVarDefnStmt *decl_stmt = dynamic_cast<ASTVarDefnStmt *>(head)) {
+            Value *mem = ctx->getSymbol(decl_stmt->getId());
+            Value *exp_val = codegen_exp(ctx, decl_stmt->getExp());
+            builder->CreateStore(exp_val, mem);
+        }
 
         if (seq_node->getTail())
             codegen_stmt(ctx, seq_node->getTail());
     }
-    else if (ASTReturnStmt *ret_node = dynamic_cast<ASTReturnStmt *>(node)) {
-        ASTExpNode *ret_exp = ret_node->getExp();
-
-        if (ret_exp) {
-            Value *ret_val = codegen_exp(ctx, ret_exp);
-
-            if (ctx->getEmitDevice()) {
-                Value *out_arg = ctx->getFunction()->arg_begin();
-
-                builder->CreateStore(ret_val, out_arg);
-                builder->CreateRet(NULL);
-            }
-            else
-                builder->CreateRet(ret_val);
-        }
-        else
-            builder->CreateRet(NULL);
-    }
-    else if (ASTVarDeclStmt *decl_stmt = dynamic_cast<ASTVarDeclStmt *>(node)) {
-        // Creates an alloca. TODO maybe getOrCreateId()
-        Value *mem = ctx->getSymbol(decl_stmt->getId());
-
-        if (decl_stmt->getExp()) {
-            Value *exp_val = codegen_exp(ctx, decl_stmt->getExp());
-            builder->CreateStore(exp_val, mem);
-        }
-    }
-    else if (ASTVarDefnStmt *decl_stmt = dynamic_cast<ASTVarDefnStmt *>(node)) {
-        Value *mem = ctx->getSymbol(decl_stmt->getId());
-        Value *exp_val = codegen_exp(ctx, decl_stmt->getExp());
-        builder->CreateStore(exp_val, mem);
-    }
+    // Should always be a null terminated linked list
     else {
         throw new ASTMalformedException();
     }

@@ -24,6 +24,7 @@ private:
     IRBuilder<> *def_builder, *body_builder;
     TypeCtx *types;
     std::unordered_map<std::string, Value *> symbols;
+    std::vector<BasicBlock *> blocks;
 
 public:
 
@@ -48,6 +49,10 @@ public:
     Type *getType(ASTExpNode *exp);
 
     Value *getSymbol(std::string symbol);
+
+    BasicBlock *push_block();
+
+    void pop_block();
 
 };
 

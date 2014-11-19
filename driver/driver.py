@@ -17,7 +17,9 @@ tests = [
     ("../tests/testId3.cc", "undeclared"),
     ("../tests/testId4.cc", 20),
     ("../tests/testId5.cc", "undeclared"),
-    ("../tests/testId6.cc", 100)
+    ("../tests/testId6.cc", 100),
+    ("../tests/testReturnDeclDef.cc", 5),
+    ("../tests/testUnOps.cc", -1)
 ]
 
 #############################
@@ -93,7 +95,7 @@ for (name, expected) in tests:
         if output[0] == expected:
             print "\033[32;1m    PASS:", expected, "\033[0m"
         else:
-            print "\033[32;1m    FAILED: expected", expected, "\033[0m"
+            print "\033[31;1m    FAILED: expected", expected, "\033[0m"
     elif type(expected) is int:
         if int(output[0]) != expected:
             print "\033[31;1m    FAILED: expected", expected, "- returned", output[0], "\033[0m"

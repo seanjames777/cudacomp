@@ -12,6 +12,10 @@
 #include <ast/astintegertype.h>
 #include <ast/astvardeclstmt.h>
 #include <ast/astvardefnstmt.h>
+#include <ast/astbooleantype.h>
+#include <ast/astboolean.h>
+#include <ast/astscope.h>
+#include <ast/astunop.h>
 
 #define YYERROR_VERBOSE
 
@@ -36,14 +40,17 @@ int yylex(void);
     ASTType *type;
     int number;
     char *string;
+    bool boolean;
 }
 
 %token <number> NUMBER
 %token <string> IDENT
-%token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR
+%token <boolean> TRUE FALSE
+%token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR NOT BITNOT
 %token ASSIGN SEMI
-%token INT
-%token RETURN
+%token INT BOOL
+%token RETURN IF ELSE
+%token LPAREN RPAREN LBRACE RBRACE
 
 %type <exp> exp
 %type <stmt> stmt
@@ -65,6 +72,8 @@ stmt_list:
 
 exp:
     NUMBER                     { $$ = new ASTInteger($1); }
+  | TRUE                       { $$ = new ASTBoolean(true); }
+  | FALSE                      { $$ = new ASTBoolean(false); }
   | IDENT                      { $$ = new ASTIdentifier(std::string($1)); free($1); }
   | exp PLUS exp               { $$ = new ASTBinop(ASTBinop::ADD, $1, $3); }
   | exp MINUS exp              { $$ = new ASTBinop(ASTBinop::SUB, $1, $3); }
@@ -78,10 +87,15 @@ exp:
   | exp BAND exp               { $$ = new ASTBinop(ASTBinop::BAND, $1, $3); }
   | exp BOR exp                { $$ = new ASTBinop(ASTBinop::BOR, $1, $3); }
   | exp BXOR exp               { $$ = new ASTBinop(ASTBinop::BXOR, $1, $3); }
+  | NOT exp                    { $$ = new ASTUnop(ASTUnop::NOT, $2); }
+  | BITNOT exp                 { $$ = new ASTUnop(ASTUnop::BNOT, $2); }
+  | MINUS exp                  { $$ = new ASTUnop(ASTUnop::NEG, $2); }
+  | LPAREN exp RPAREN          { $$ = $2; }
   ;
 
 type:
     INT                        { $$ = new ASTIntegerType(); }
+  | BOOL                       { $$ = new ASTBooleanType(); }
   ;
 
 stmt:
@@ -89,4 +103,5 @@ stmt:
   | type IDENT SEMI            { $$ = new ASTVarDeclStmt($1, std::string($2), NULL); free($2); }
   | type IDENT ASSIGN exp SEMI { $$ = new ASTVarDeclStmt($1, std::string($2), $4); free($2); }
   | IDENT ASSIGN exp SEMI      { $$ = new ASTVarDefnStmt(std::string($1), $3); free($1); } // TODO free
+  | LBRACE stmt_list  RBRACE   { $$ = new ASTScope($2); }
   ;

@@ -12,6 +12,17 @@
 #include <ast/asttype.h>
 
 class ASTIntegerType : public ASTType {
+private:
+
+    static ASTIntegerType *instance;
+
+public:
+
+    ASTIntegerType();
+
+    static ASTIntegerType *get();
+
+    bool equal(ASTType *other);
 };
 
 #endif

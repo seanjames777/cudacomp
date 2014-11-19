@@ -13,6 +13,8 @@
 #include <ast/astvardeclstmt.h>
 #include <ast/astvardefnstmt.h>
 #include <ast/astintegertype.h>
+#include <ast/astunop.h>
+#include <ast/astbooleantype.h>
 
 namespace Statics {
 
@@ -36,14 +38,12 @@ IllegalTypeException::IllegalTypeException()
 {
 }
 
-Type *typecheck_exp(TypeCtx *ctx, idset & decl, idset & def, ASTExpNode *node) {
-    Type *type = NULL;
-
-    Type *int32 = Type::getInt32Ty(ctx->getContext());
+ASTType *typecheck_exp(TypeCtx *ctx, idset & decl, idset & def, ASTExpNode *node) {
+    ASTType *type;
 
     // Integer constant
     if (ASTInteger *int_exp = dynamic_cast<ASTInteger *>(node)) {
-        type = int32;
+        type = ASTIntegerType::get();
     }
     // Variable reference
     else if (ASTIdentifier *id_exp = dynamic_cast<ASTIdentifier *>(node)) {
@@ -56,13 +56,33 @@ Type *typecheck_exp(TypeCtx *ctx, idset & decl, idset & def, ASTExpNode *node) {
             throw new UndefinedException();
 
         // Just look up type
-        type = ctx->getSymbol(id_exp->getId());
+        type = ctx->getSymbolAST(id_exp->getId());
+    }
+    // Unary operator
+    else if (ASTUnop *unop_exp = dynamic_cast<ASTUnop *>(node)) {
+        // Get operand types
+        ASTType *t = typecheck_exp(ctx, decl, def, unop_exp->getExp());
+
+        // Types must be appropriate for operation
+        switch(unop_exp->getOp()) {
+        case ASTUnop::NOT:
+            if (!t->equal(ASTBooleanType::get()))
+                throw new IllegalTypeException();
+            type = t;
+            break;
+        case ASTUnop::BNOT:
+        case ASTUnop::NEG:
+            if (!t->equal(ASTIntegerType::get()))
+                throw new IllegalTypeException();
+            type = t;
+            break;
+        }
     }
     // Binary operator
     else if (ASTBinop *binop_exp = dynamic_cast<ASTBinop *>(node)) {
         // Get operand types
-        Type *t1 = typecheck_exp(ctx, decl, def, binop_exp->getE1());
-        Type *t2 = typecheck_exp(ctx, decl, def, binop_exp->getE1());
+        ASTType *t1 = typecheck_exp(ctx, decl, def, binop_exp->getE1());
+        ASTType *t2 = typecheck_exp(ctx, decl, def, binop_exp->getE1());
 
         // Types must be appropriate for operation
         switch(binop_exp->getOp()) {
@@ -76,32 +96,29 @@ Type *typecheck_exp(TypeCtx *ctx, idset & decl, idset & def, ASTExpNode *node) {
         case ASTBinop::BAND:
         case ASTBinop::BOR:
         case ASTBinop::BXOR:
-            if (t1 != int32 || t2 != int32)
+            if (!t1->equal(ASTIntegerType::get()) || !t2->equal(ASTIntegerType::get()))
                 throw new IllegalTypeException();
-            type = int32;
+            type = t1;
             break;
         case ASTBinop::OR:
         case ASTBinop::AND:
-            throw new ASTMalformedException();
+            if (!t1->equal(ASTBooleanType::get()) || !t2->equal(ASTBooleanType::get()))
+                throw new IllegalTypeException();
+            type = t1;
+            break;
         }
     }
 
     // Store the type for code generation
-    ctx->setType(node, type);
+    ctx->setType(node, ctx->convert_type(type));
 
     return type;
-}
-
-Type *convert_type(TypeCtx *ctx, ASTType *type) {
-    if (ASTIntegerType *int_type = dynamic_cast<ASTIntegerType *>(type))
-        return Type::getInt32Ty(ctx->getContext());
-
-    throw new ASTMalformedException();
 }
 
 void typecheck_stmt(TypeCtx *ctx, idset & decl, idset & def, ASTStmtNode *node) {
     // Sequence node
     if (ASTSeqNode *seq_node = dynamic_cast<ASTSeqNode *>(node)) {
+        // We always have a head
         ASTStmtNode *head = seq_node->getHead();
 
         // If the first node is a variable declaration, we need to declare and
@@ -109,7 +126,7 @@ void typecheck_stmt(TypeCtx *ctx, idset & decl, idset & def, ASTStmtNode *node) 
         // before marking as declared, in case the definition tries to be
         // recursive.
         if (ASTVarDeclStmt *decl_stmt = dynamic_cast<ASTVarDeclStmt *>(head)) {
-            Type *decl_type = convert_type(ctx, decl_stmt->getType());
+            ASTType *decl_type = decl_stmt->getType();
 
             // Must not be declared yet
             if (decl.find(decl_stmt->getId()) != decl.end())
@@ -117,26 +134,19 @@ void typecheck_stmt(TypeCtx *ctx, idset & decl, idset & def, ASTStmtNode *node) 
 
             ASTExpNode *decl_exp = decl_stmt->getExp();
 
-            idset extdef = def;
-
             // If there is a definition, check the type and mark as defined
             if (decl_exp) {
-                Type *exp_type = typecheck_exp(ctx, decl, def, decl_exp);
+                ASTType *exp_type = typecheck_exp(ctx, decl, def, decl_exp);
 
-                if (exp_type != decl_type)
+                if (!exp_type->equal(decl_type))
                     throw new IllegalTypeException();
 
-                extdef.insert(decl_stmt->getId());
+                def.insert(decl_stmt->getId());
             }
 
             // Mark as declared, store the type
-            idset extdecl = decl;
-            extdecl.insert(decl_stmt->getId());
-            ctx->setSymbol(decl_stmt->getId(), decl_type); // TODO createSymbol
-
-            // Now check the rest of the function
-            if (seq_node->getTail())
-                typecheck_stmt(ctx, extdecl, extdef, seq_node->getTail());
+            decl.insert(decl_stmt->getId());
+            ctx->setSymbol(decl_stmt->getId(), decl_type); // TODO declareSymbol
         }
         // Variable assignment. Mark as defined and check the rest of the code
         else if (ASTVarDefnStmt *defn_stmt = dynamic_cast<ASTVarDefnStmt *>(head)) {
@@ -144,36 +154,35 @@ void typecheck_stmt(TypeCtx *ctx, idset & decl, idset & def, ASTStmtNode *node) 
             if (decl.find(defn_stmt->getId()) == decl.end())
                 throw new UndeclaredException();
 
-            Type *decl_type = ctx->getSymbol(defn_stmt->getId());
-            Type *exp_type = typecheck_exp(ctx, decl, def, defn_stmt->getExp());
+            ASTType *decl_type = ctx->getSymbolAST(defn_stmt->getId());
+            ASTType *exp_type = typecheck_exp(ctx, decl, def, defn_stmt->getExp());
 
-            if (exp_type != decl_type)
+            if (!exp_type->equal(decl_type))
                 throw new IllegalTypeException();
 
-            idset extdef = def;
-            extdef.insert(defn_stmt->getId());
-
-            // Now check the rest of the function
-            if (seq_node->getTail())
-                typecheck_stmt(ctx, decl, extdef, seq_node->getTail());
+            if (def.find(defn_stmt->getId()) == def.end())
+                def.insert(defn_stmt->getId());
         }
-        // Otherwise just typecheck each in turn
-        else {
-            typecheck_stmt(ctx, decl, def, seq_node->getHead());
+        // Return statement
+        else if (ASTReturnStmt *ret_node = dynamic_cast<ASTReturnStmt *>(head)) {
+            ASTType *expected = ASTIntegerType::get();
+            ASTType *exp_type = typecheck_exp(ctx, decl, def, ret_node->getExp());
 
-            if (seq_node->getTail())
-                typecheck_stmt(ctx, decl, def, seq_node->getTail());
+            if (!exp_type->equal(expected))
+                throw new IllegalTypeException();
+
+            // Return statements need to define any variables that have been
+            // declared. Every control flow path from a declaration of a
+            // variable to its use must contain a definition, and there is no
+            // control flow across a return statement.
+            def = decl;
         }
-    }
-    // Return statement
-    else if (ASTReturnStmt *ret_node = dynamic_cast<ASTReturnStmt *>(node)) {
-        Type *expected = Type::getInt32Ty(ctx->getContext());
-        Type *exp_type = typecheck_exp(ctx, decl, def, ret_node->getExp());
 
-        if (exp_type != expected)
-            throw new IllegalTypeException();
+        // Typecheck the rest of the list
+        if (seq_node->getTail())
+            typecheck_stmt(ctx, decl, def, seq_node->getTail());
     }
-    // Illegal
+    // Illegal. The AST is always a linked list of statements.
     else {
         throw new ASTMalformedException();
     }

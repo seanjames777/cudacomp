@@ -31,8 +31,6 @@ public:
         BXOR
     };
 
-    // TODO: Negative, Not, BitNot
-
 private:
 
     enum op op;

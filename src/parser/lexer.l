@@ -18,6 +18,11 @@
 
 "return"                { return RETURN; }
 "int"                   { return INT; }
+"bool"                  { return BOOL; }
+"if"                    { return IF; }
+"else"                  { return ELSE; }
+"true"                  { yylval.boolean = true; }
+"false"                 { yylval.boolean = false; }
 
 [0-9]+                  { yylval.number = atoi(yytext); return NUMBER; }
 [a-zA-Z][a-zA-Z0-9]*    { yylval.string = strdup(yytext); return IDENT; }
@@ -33,8 +38,14 @@
 "&"                     { return BAND; }
 "|"                     { return BOR; }
 "^"                     { return BXOR; }
+"~"                     { return BITNOT; }
+"!"                     { return NOT; }
 "="                     { return ASSIGN; }
 ";"                     { return SEMI; }
+"("                     { return LPAREN; }
+")"                     { return RPAREN; }
+"{"                     { return LBRACE; }
+"}"                     { return RBRACE; }
 
 [ \r\n\t]+              /* ignore whitespace */
 
