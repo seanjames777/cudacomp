@@ -33,6 +33,8 @@ public:
 
     ASTType *getType();
 
+    void print(std::ostream & ss) override;
+
 };
 
 #endif

@@ -18,3 +18,11 @@ ASTScope::~ASTScope() {
 ASTStmtNode *ASTScope::getBody() {
     return body;
 }
+
+void ASTScope::print(std::ostream & ss) {
+    ss << "scope(";
+    ss << std::endl;
+    body->print(ss);
+    ss << std::endl;
+    ss << ")";
+}

@@ -17,3 +17,7 @@ ASTInteger::~ASTInteger() {
 int ASTInteger::getValue() {
     return value;
 }
+
+void ASTInteger::print(std::ostream & ss) {
+    ss << "int(" << value << ")";
+}

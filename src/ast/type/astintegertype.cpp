@@ -21,3 +21,7 @@ ASTIntegerType *ASTIntegerType::get() {
 bool ASTIntegerType::equal(ASTType *other) {
     return (other != NULL) && (dynamic_cast<ASTIntegerType *>(other) != NULL);
 }
+
+void ASTIntegerType::print(std::ostream & ss) {
+    ss << "int";
+}

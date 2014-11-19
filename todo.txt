@@ -1,10 +1,12 @@
 TODO:
-    test if scope with/without braces
-    test if optional else
-    test if definitions
     statics for all control flow paths return if type not null
     consistent AST naming
     simp, asop
     AST headers into folders
     cleanup #includes
     comment functions
+    postop
+    functions
+    arrays
+    structs
+    pack kernels into executable

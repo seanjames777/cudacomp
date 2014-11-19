@@ -55,6 +55,8 @@ public:
 
     ASTExpNode *getE2();
 
+    void print(std::ostream & ss) override;
+
 };
 
 #endif

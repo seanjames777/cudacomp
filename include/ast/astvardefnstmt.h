@@ -28,6 +28,8 @@ public:
 
     ASTExpNode *getExp();
 
+    void print(std::ostream & ss) override;
+
 };
 
 #endif

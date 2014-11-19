@@ -26,6 +26,8 @@ public:
 
     bool getValue();
 
+    void print(std::ostream & ss) override;
+
 };
 
 #endif

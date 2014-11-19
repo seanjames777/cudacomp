@@ -23,6 +23,8 @@ public:
     static ASTBooleanType *get();
 
     bool equal(ASTType *other);
+
+    virtual void print(std::ostream & ss) override;
 };
 
 #endif

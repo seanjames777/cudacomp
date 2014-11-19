@@ -25,6 +25,8 @@ public:
 
     ASTStmtNode *getBody();
 
+    void print(std::ostream & ss) override;
+
 };
 
 #endif

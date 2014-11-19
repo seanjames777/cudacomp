@@ -48,6 +48,7 @@ add_executable(cc
     src/parser/parse.cpp
     src/statics/typecheck.cpp
     src/statics/typectx.cpp
+    src/statics/returncheck.cpp
     ${BISON_parser_OUTPUTS}
     ${FLEX_lexer_OUTPUTS}
 )

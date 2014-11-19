@@ -26,6 +26,8 @@ public:
 
     std::string getId();
 
+    void print(std::ostream & ss) override;
+
 };
 
 #endif

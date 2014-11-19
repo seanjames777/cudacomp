@@ -23,3 +23,23 @@ enum ASTUnop::op ASTUnop::getOp() {
 ASTExpNode *ASTUnop::getExp() {
     return exp;
 }
+
+void ASTUnop::print(std::ostream & ss) {
+    ss << "un(";
+    exp->print(ss);
+    ss << ", ";
+
+    switch(op) {
+    case NOT:
+        ss << "!";
+        break;
+    case BNOT:
+        ss << "~";
+        break;
+    case NEG:
+        ss << "-";
+        break;
+    }
+
+    ss << ")";
+}

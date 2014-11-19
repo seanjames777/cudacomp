@@ -17,3 +17,7 @@ ASTIdentifier::~ASTIdentifier() {
 std::string ASTIdentifier::getId() {
     return value;
 }
+
+void ASTIdentifier::print(std::ostream & ss) {
+    ss << "id(" << value << ")";
+}

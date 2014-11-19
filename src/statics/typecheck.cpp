@@ -232,7 +232,9 @@ void typecheck_stmt(TypeCtx *ctx, idset & decl, idset & def, ASTStmtNode *node) 
             idset scope_def_right = def;
 
             typecheck_stmt(ctx, scope_decl_left, scope_def_left, if_node->getTrueStmt());
-            typecheck_stmt(ctx, scope_decl_right, scope_def_right, if_node->getFalseStmt());
+
+            if (if_node->getFalseStmt())
+                typecheck_stmt(ctx, scope_decl_right, scope_def_right, if_node->getFalseStmt());
 
             // Definitions of variables that were declared outside the if statement
             // and defined by BOTH branches propogate out

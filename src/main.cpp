@@ -10,6 +10,7 @@
 #include <parser/parse.h>
 #include <statics/typecheck.h>
 #include <codegen/codegen.h>
+#include <statics/returncheck.h>
 
 struct CCArgs {
     bool  emit_device;
@@ -35,6 +36,8 @@ int main(int argc, char *argv[]) {
 
     ASTStmtNode *node = Parser::parse(args.in_file);
 
+    //node->print(std::cout);
+
     if (!node)
         return -1;
 
@@ -59,6 +62,11 @@ int main(int argc, char *argv[]) {
     }
     catch (Statics::IllegalTypeException *except) {
         std::cout << "illegaltype" << std::endl;
+        return -2;
+    }
+
+    if (!Statics::returncheck_stmt(node)) {
+        std::cout << "noreturn" << std::endl;
         return -2;
     }
 

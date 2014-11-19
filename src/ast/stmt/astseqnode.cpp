@@ -26,3 +26,16 @@ ASTStmtNode *ASTSeqNode::getHead() {
 ASTSeqNode *ASTSeqNode::getTail() {
     return tail;
 }
+
+void ASTSeqNode::print(std::ostream & ss) {
+    ss << "seq(";
+    head->print(ss);
+    ss << "," << std::endl;
+
+    if (tail)
+        tail->print(ss);
+    else
+        ss << "null";
+
+    ss << ")";
+}

@@ -23,6 +23,9 @@ public:
     static ASTIntegerType *get();
 
     bool equal(ASTType *other);
+
+    virtual void print(std::ostream & ss) override;
+
 };
 
 #endif

@@ -31,6 +31,8 @@ public:
 
     ASTStmtNode *getFalseStmt();
 
+    void print(std::ostream & ss) override;
+
 };
 
 #endif

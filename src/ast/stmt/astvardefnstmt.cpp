@@ -13,8 +13,7 @@ ASTVarDefnStmt::ASTVarDefnStmt(std::string id, ASTExpNode *exp)
 }
 
 ASTVarDefnStmt::~ASTVarDefnStmt() {
-    if (exp)
-        delete exp;
+    delete exp;
 }
 
 std::string ASTVarDefnStmt::getId() {
@@ -23,4 +22,10 @@ std::string ASTVarDefnStmt::getId() {
 
 ASTExpNode *ASTVarDefnStmt::getExp() {
     return exp;
+}
+
+void ASTVarDefnStmt::print(std::ostream & ss) {
+    ss << "defn(" << id << ", ";
+    exp->print(ss);
+    ss << ")";
 }

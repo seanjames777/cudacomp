@@ -23,6 +23,8 @@ public:
 
     virtual ~ASTNode();
 
+    virtual void print(std::ostream & ss) = 0;
+
 };
 
 #endif

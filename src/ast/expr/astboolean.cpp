@@ -17,3 +17,7 @@ ASTBoolean::~ASTBoolean() {
 bool ASTBoolean::getValue() {
     return value;
 }
+
+void ASTBoolean::print(std::ostream & ss) {
+    ss << "boolean(" << value << ")";
+}

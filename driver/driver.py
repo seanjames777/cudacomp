@@ -34,6 +34,12 @@ tests = [
     ("../tests/testIf4.cc", "undefined"),
     ("../tests/testIf5.cc", 10),
     ("../tests/testIf6.cc", 10),
+    ("../tests/testReturnCheck1.cc", "noreturn"),
+    ("../tests/testReturnCheck2.cc", 10),
+    ("../tests/testReturnCheck3.cc", 10),
+    ("../tests/testReturnCheck4.cc", 10),
+    ("../tests/testReturnCheck5.cc", "noreturn"),
+    ("../tests/testReturnCheck6.cc", 10),
 ]
 
 #############################

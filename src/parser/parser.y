@@ -128,10 +128,10 @@ stmt:
   | type IDENT ASSIGN exp SEMI        { $$ = new ASTVarDeclStmt($1, std::string($2), $4); free($2); }
   | IDENT ASSIGN exp SEMI             { $$ = new ASTVarDefnStmt(std::string($1), $3); free($1); } // TODO free
   | LBRACE stmt_list RBRACE           { $$ = new ASTScope($2); }
-  | IF LPAREN exp RPAREN stmt elseopt { $$ = new ASTIfStmt($3, new ASTSeqNode($5, NULL), new ASTSeqNode($6, NULL)); }
+  | IF LPAREN exp RPAREN stmt elseopt { $$ = new ASTIfStmt($3, new ASTSeqNode($5, NULL), $6); }
   ;
 
 elseopt:
-    /* empty */                       { $$ = new ASTNopStmt(); }
-  | ELSE stmt                         { $$ = $2; }
+    /* empty */                       { $$ = NULL; }
+  | ELSE stmt                         { $$ = new ASTSeqNode($2, NULL); }
   ;

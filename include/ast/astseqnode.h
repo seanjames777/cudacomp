@@ -28,6 +28,8 @@ public:
 
     ASTSeqNode *getTail();
 
+    void print(std::ostream & ss) override;
+
 };
 
 #endif

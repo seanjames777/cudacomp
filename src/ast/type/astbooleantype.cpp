@@ -21,3 +21,7 @@ ASTBooleanType *ASTBooleanType::get() {
 bool ASTBooleanType::equal(ASTType *other) {
     return (other != NULL) && (dynamic_cast<ASTBooleanType *>(other) != NULL);
 }
+
+void ASTBooleanType::print(std::ostream & ss) {
+    ss << "bool";
+}

@@ -143,7 +143,10 @@ void codegen_stmt(CodegenCtx *ctx, ASTStmtNode *node) {
 
             // Generate 'false' branch
             ctx->pushBlock(falseBlock);
-            codegen_stmt(ctx, if_node->getFalseStmt());
+
+            if (if_node->getFalseStmt())
+                codegen_stmt(ctx, if_node->getFalseStmt());
+
             ctx->getBuilder()->CreateBr(doneBlock);
 
             // 'doneBlock' remains on the stack

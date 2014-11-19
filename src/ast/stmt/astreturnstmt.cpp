@@ -19,3 +19,9 @@ ASTReturnStmt::~ASTReturnStmt() {
 ASTExpNode *ASTReturnStmt::getExp() {
     return exp;
 }
+
+void ASTReturnStmt::print(std::ostream & ss) {
+    ss << "return(";
+    exp->print(ss);
+    ss << ")";
+}

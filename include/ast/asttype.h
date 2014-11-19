@@ -18,6 +18,8 @@ public:
 
     virtual bool equal(ASTType *other) = 0;
 
+    virtual void print(std::ostream & ss) = 0;
+
 };
 
 #endif
