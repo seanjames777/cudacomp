@@ -41,6 +41,8 @@ namespace Statics {
 
     ASTType *typecheck_exp(TypeCtx *ctx, idset & decl, idset & def, ASTExpNode *node);
 
+    void typecheck_stmts(TypeCtx *ctx, idset & decl, idset & def, ASTStmtSeqNode *node);
+
     void typecheck_stmt(TypeCtx *ctx, idset & decl, idset & def, ASTStmtNode *node);
 
 };

@@ -17,7 +17,9 @@ namespace Codegen {
 
     Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node);
 
-    void codegen_stmt(CodegenCtx *ctx, ASTStmtNode *node);
+    void codegen_stmts(CodegenCtx *ctx, ASTStmtSeqNode *nodes);
+
+    bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *node);
 
 }
 

@@ -6,7 +6,7 @@
 #include <ast/expr/astinteger.h>
 #include <ast/expr/astidentifier.h>
 #include <ast/expr/astbinop.h>
-#include <ast/stmt/astseqnode.h>
+#include <ast/astseqnode.h>
 #include <ast/stmt/astreturnstmt.h>
 #include <ast/type/asttype.h>
 #include <ast/type/astintegertype.h>
@@ -26,17 +26,17 @@ int yylex(void);
         return 1;
     }
 
-    void yyerror(ASTStmtNode **root, const char *str) {
+    void yyerror(ASTStmtSeqNode **root, const char *str) {
         fprintf(stderr, "Error: %s\n", str);
     }
 
 %}
 
-%parse-param { ASTStmtNode **root }
+%parse-param { ASTStmtSeqNode **root }
 
 %union {
     ASTStmtNode *stmt;
-    ASTSeqNode *seq;
+    ASTStmtSeqNode *seq;
     ASTExpNode *exp;
     ASTType *type;
     int number;
@@ -58,7 +58,7 @@ int yylex(void);
 %type <stmt> stmt
 %type <seq> stmt_list
 %type <type> type
-%type <stmt> elseopt
+%type <seq> elseopt
 
 %right ASSIGN
 %left OR
@@ -84,7 +84,7 @@ top:
 
 stmt_list:
     /* empty */                       { $$ = NULL; }
-  | stmt stmt_list                    { $$ = new ASTSeqNode($1, $2); }
+  | stmt stmt_list                    { $$ = new ASTStmtSeqNode($1, $2); }
   ;
 
 exp:
@@ -127,10 +127,10 @@ stmt:
   | type IDENT ASSIGN exp SEMI        { $$ = new ASTVarDeclStmt($1, std::string($2), $4); free($2); }
   | IDENT ASSIGN exp SEMI             { $$ = new ASTVarDefnStmt(std::string($1), $3); free($1); } // TODO free
   | LBRACE stmt_list RBRACE           { $$ = new ASTScope($2); }
-  | IF LPAREN exp RPAREN stmt elseopt { $$ = new ASTIfStmt($3, new ASTSeqNode($5, NULL), $6); }
+  | IF LPAREN exp RPAREN stmt elseopt { $$ = new ASTIfStmt($3, new ASTStmtSeqNode($5, NULL), $6); }
   ;
 
 elseopt:
     /* empty */                       { $$ = NULL; }
-  | ELSE stmt                         { $$ = new ASTSeqNode($2, NULL); }
+  | ELSE stmt                         { $$ = new ASTStmtSeqNode($2, NULL); }
   ;

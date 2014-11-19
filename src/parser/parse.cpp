@@ -6,12 +6,12 @@
 
 #include <parser/parse.h>
 
-extern int yyparse(ASTStmtNode **root);
+extern int yyparse(ASTStmtSeqNode **root);
 extern FILE *yyin;
 
 namespace Parser {
 
-ASTStmtNode *parse(const char *file) {
+ASTStmtSeqNode *parse(const char *file) {
     FILE *fp = NULL;
 
     if (file) {
@@ -23,7 +23,7 @@ ASTStmtNode *parse(const char *file) {
         yyin = fp;
     }
 
-    ASTStmtNode *root = NULL;
+    ASTStmtSeqNode *root = NULL;
 
     if (yyparse(&root)) {
         if (file)

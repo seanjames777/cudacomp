@@ -16,6 +16,8 @@
 
 namespace Statics {
 
+    bool returncheck_stmts(ASTStmtSeqNode *nodes);
+
     bool returncheck_stmt(ASTStmtNode *node);
 
 };

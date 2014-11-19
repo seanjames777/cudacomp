@@ -8,7 +8,7 @@
 #include <ast/expr/astidentifier.h>
 #include <ast/expr/astinteger.h>
 #include <ast/expr/astbinop.h>
-#include <ast/stmt/astseqnode.h>
+#include <ast/astseqnode.h>
 #include <ast/stmt/astreturnstmt.h>
 #include <ast/stmt/astvardeclstmt.h>
 #include <ast/stmt/astvardefnstmt.h>
@@ -70,98 +70,96 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
     return NULL;
 }
 
-void codegen_stmt(CodegenCtx *ctx, ASTStmtNode *node) {
+void codegen_stmts(CodegenCtx *ctx, ASTStmtSeqNode *seq_node) {
+    while (seq_node != NULL) {
+        if (!codegen_stmt(ctx, seq_node->getHead()))
+            break;
+        seq_node = seq_node->getTail();
+    }
+}
+
+bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *head) {
     IRBuilder<> *builder = ctx->getBuilder();
 
-    // Sequence node
-    if (ASTSeqNode *seq_node = dynamic_cast<ASTSeqNode *>(node)) {
-        // We always have a head
-        ASTStmtNode *head = seq_node->getHead();
+    // Return instruction
+    if (ASTReturnStmt *ret_node = dynamic_cast<ASTReturnStmt *>(head)) {
+        ASTExpNode *ret_exp = ret_node->getExp();
 
-        // Return instruction
-        if (ASTReturnStmt *ret_node = dynamic_cast<ASTReturnStmt *>(head)) {
-            ASTExpNode *ret_exp = ret_node->getExp();
+        // Need to return a value
+        if (ret_exp) {
+            Value *ret_val = codegen_exp(ctx, ret_exp);
 
-            // Need to return a value
-            if (ret_exp) {
-                Value *ret_val = codegen_exp(ctx, ret_exp);
+            // In device mode, have to move into return value argument because kernels
+            // must return void
+            if (ctx->getEmitDevice()) {
+                Value *out_arg = ctx->getFunction()->arg_begin();
 
-                // In device mode, have to move into return value argument because kernels
-                // must return void
-                if (ctx->getEmitDevice()) {
-                    Value *out_arg = ctx->getFunction()->arg_begin();
-
-                    builder->CreateStore(ret_val, out_arg);
-                    builder->CreateRet(NULL);
-                }
-                else
-                    builder->CreateRet(ret_val);
+                builder->CreateStore(ret_val, out_arg);
+                builder->CreateRet(NULL);
             }
             else
-                builder->CreateRet(NULL);
-
-            // Don't keep generating code because we've returned and we can't add a basic block
-            // after the return anyway.
-            return;
+                builder->CreateRet(ret_val);
         }
-        // Variable declaration
-        else if (ASTVarDeclStmt *decl_stmt = dynamic_cast<ASTVarDeclStmt *>(head)) {
-            // Creates an alloca. TODO maybe getOrCreateId()
-            Value *mem = ctx->getSymbol(decl_stmt->getId());
+        else
+            builder->CreateRet(NULL);
 
-            if (decl_stmt->getExp()) {
-                Value *exp_val = codegen_exp(ctx, decl_stmt->getExp());
-                builder->CreateStore(exp_val, mem);
-            }
-        }
-        // Variable definution
-        else if (ASTVarDefnStmt *decl_stmt = dynamic_cast<ASTVarDefnStmt *>(head)) {
-            Value *mem = ctx->getSymbol(decl_stmt->getId());
+        // Don't keep generating code because we've returned and we can't add a basic block
+        // after the return anyway.
+        return false;
+    }
+    // Variable declaration
+    else if (ASTVarDeclStmt *decl_stmt = dynamic_cast<ASTVarDeclStmt *>(head)) {
+        // Creates an alloca. TODO maybe getOrCreateId()
+        Value *mem = ctx->getSymbol(decl_stmt->getId());
+
+        if (decl_stmt->getExp()) {
             Value *exp_val = codegen_exp(ctx, decl_stmt->getExp());
             builder->CreateStore(exp_val, mem);
         }
-        // Scope
-        else if (ASTScope *scope_stmt = dynamic_cast<ASTScope *>(head)) {
-            if (scope_stmt->getBody())
-                codegen_stmt(ctx, scope_stmt->getBody());
-        }
-        else if (ASTIfStmt *if_node = dynamic_cast<ASTIfStmt *>(head)) {
-            Value *cond = codegen_exp(ctx, if_node->getCond());
-
-            BasicBlock *trueBlock = ctx->createBlock();
-            BasicBlock *falseBlock = ctx->createBlock();
-            BasicBlock *doneBlock = ctx->createBlock();
-
-            // Generate conditional jump
-            ctx->getBuilder()->CreateCondBr(cond, trueBlock, falseBlock);
-
-            // Generate 'true' branch
-            ctx->pushBlock(trueBlock);
-            codegen_stmt(ctx, if_node->getTrueStmt());
-            ctx->getBuilder()->CreateBr(doneBlock);
-
-            // Generate 'false' branch
-            ctx->pushBlock(falseBlock);
-
-            if (if_node->getFalseStmt())
-                codegen_stmt(ctx, if_node->getFalseStmt());
-
-            ctx->getBuilder()->CreateBr(doneBlock);
-
-            // 'doneBlock' remains on the stack
-            ctx->pushBlock(doneBlock);
-
-            // TODO: check if this is making phi nodes
-        }
-        else
-            throw new ASTMalformedException();
-
-        if (seq_node->getTail())
-            codegen_stmt(ctx, seq_node->getTail());
     }
-    // Should always be a null terminated linked list
+    // Variable definution
+    else if (ASTVarDefnStmt *decl_stmt = dynamic_cast<ASTVarDefnStmt *>(head)) {
+        Value *mem = ctx->getSymbol(decl_stmt->getId());
+        Value *exp_val = codegen_exp(ctx, decl_stmt->getExp());
+        builder->CreateStore(exp_val, mem);
+    }
+    // Scope
+    else if (ASTScope *scope_stmt = dynamic_cast<ASTScope *>(head)) {
+        if (scope_stmt->getBody())
+            codegen_stmts(ctx, scope_stmt->getBody());
+    }
+    else if (ASTIfStmt *if_node = dynamic_cast<ASTIfStmt *>(head)) {
+        Value *cond = codegen_exp(ctx, if_node->getCond());
+
+        BasicBlock *trueBlock = ctx->createBlock();
+        BasicBlock *falseBlock = ctx->createBlock();
+        BasicBlock *doneBlock = ctx->createBlock();
+
+        // Generate conditional jump
+        ctx->getBuilder()->CreateCondBr(cond, trueBlock, falseBlock);
+
+        // Generate 'true' branch
+        ctx->pushBlock(trueBlock);
+        codegen_stmts(ctx, if_node->getTrueStmt());
+        ctx->getBuilder()->CreateBr(doneBlock);
+
+        // Generate 'false' branch
+        ctx->pushBlock(falseBlock);
+
+        if (if_node->getFalseStmt())
+            codegen_stmts(ctx, if_node->getFalseStmt());
+
+        ctx->getBuilder()->CreateBr(doneBlock);
+
+        // 'doneBlock' remains on the stack
+        ctx->pushBlock(doneBlock);
+
+        // TODO: check if this is making phi nodes
+    }
     else
         throw new ASTMalformedException();
+
+    return true;
 }
 
 }

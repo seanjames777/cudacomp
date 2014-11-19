@@ -6,7 +6,7 @@
 
 #include <ast/stmt/astifstmt.h>
 
-ASTIfStmt::ASTIfStmt(ASTExpNode *cond, ASTStmtNode *trueStmt, ASTStmtNode *falseStmt)
+ASTIfStmt::ASTIfStmt(ASTExpNode *cond, ASTStmtSeqNode *trueStmt, ASTStmtSeqNode *falseStmt)
     : cond(cond),
       trueStmt(trueStmt),
       falseStmt(falseStmt)
@@ -25,11 +25,11 @@ ASTExpNode *ASTIfStmt::getCond() {
     return cond;
 }
 
-ASTStmtNode *ASTIfStmt::getTrueStmt() {
+ASTStmtSeqNode *ASTIfStmt::getTrueStmt() {
     return trueStmt;
 }
 
-ASTStmtNode *ASTIfStmt::getFalseStmt() {
+ASTStmtSeqNode *ASTIfStmt::getFalseStmt() {
     return falseStmt;
 }
 

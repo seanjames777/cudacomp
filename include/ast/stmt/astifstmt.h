@@ -16,20 +16,20 @@ class ASTIfStmt : public ASTStmtNode {
 private:
 
     ASTExpNode *cond;
-    ASTStmtNode *trueStmt;
-    ASTStmtNode *falseStmt;
+    ASTStmtSeqNode *trueStmt;
+    ASTStmtSeqNode *falseStmt;
 
 public:
 
-    ASTIfStmt(ASTExpNode *cond, ASTStmtNode *trueStmt, ASTStmtNode *falseStmt);
+    ASTIfStmt(ASTExpNode *cond, ASTStmtSeqNode *trueStmt, ASTStmtSeqNode *falseStmt);
 
     ~ASTIfStmt();
 
     ASTExpNode *getCond();
 
-    ASTStmtNode *getTrueStmt();
+    ASTStmtSeqNode *getTrueStmt();
 
-    ASTStmtNode *getFalseStmt();
+    ASTStmtSeqNode *getFalseStmt();
 
     void print(std::ostream & ss) override;
 

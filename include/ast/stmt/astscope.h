@@ -15,15 +15,15 @@
 class ASTScope : public ASTStmtNode {
 private:
 
-    ASTStmtNode *body;
+    ASTStmtSeqNode *body;
 
 public:
 
-    ASTScope(ASTStmtNode *body);
+    ASTScope(ASTStmtSeqNode *body);
 
     ~ASTScope();
 
-    ASTStmtNode *getBody();
+    ASTStmtSeqNode *getBody();
 
     void print(std::ostream & ss) override;
 

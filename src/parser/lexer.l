@@ -4,7 +4,7 @@
 #include <ast/expr/astinteger.h>
 #include <ast/expr/astidentifier.h>
 #include <ast/expr/astbinop.h>
-#include <ast/stmt/astseqnode.h>
+#include <ast/astseqnode.h>
 #include <ast/stmt/astreturnstmt.h>
 #include <ast/type/asttype.h>
 #include <ast/type/astintegertype.h>

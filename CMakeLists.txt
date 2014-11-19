@@ -25,6 +25,7 @@ include_directories("/Developer/NVIDIA/CUDA-6.5/include/")
 
 add_executable(cc
     src/ast/astnode.cpp
+    src/ast/astseqnode.cpp
     src/ast/expr/astbinop.cpp
     src/ast/expr/astboolean.cpp
     src/ast/expr/astexpnode.cpp
@@ -34,7 +35,6 @@ add_executable(cc
     src/ast/stmt/astifstmt.cpp
     src/ast/stmt/astreturnstmt.cpp
     src/ast/stmt/astscope.cpp
-    src/ast/stmt/astseqnode.cpp
     src/ast/stmt/aststmtnode.cpp
     src/ast/stmt/astvardeclstmt.cpp
     src/ast/stmt/astvardefnstmt.cpp

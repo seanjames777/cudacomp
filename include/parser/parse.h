@@ -14,7 +14,7 @@
 
 namespace Parser {
 
-ASTStmtNode *parse(const char *file);
+ASTStmtSeqNode *parse(const char *file);
 
 };
 

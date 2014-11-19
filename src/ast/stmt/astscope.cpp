@@ -6,7 +6,7 @@
 
 #include <ast/stmt/astscope.h>
 
-ASTScope::ASTScope(ASTStmtNode *body)
+ASTScope::ASTScope(ASTStmtSeqNode *body)
     : body(body)
 {
 }
@@ -15,7 +15,7 @@ ASTScope::~ASTScope() {
     delete body;
 }
 
-ASTStmtNode *ASTScope::getBody() {
+ASTStmtSeqNode *ASTScope::getBody() {
     return body;
 }
 

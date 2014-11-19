@@ -34,7 +34,7 @@ void parseArgs(int argc, char *argv[]) {
 int main(int argc, char *argv[]) {
     parseArgs(argc, argv);
 
-    ASTStmtNode *node = Parser::parse(args.in_file);
+    ASTStmtSeqNode *node = Parser::parse(args.in_file);
 
     //node->print(std::cout);
 
@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
     try {
         Statics::idset decl;
         Statics::idset def;
-        Statics::typecheck_stmt(&typeCtx, decl, def, node);
+        Statics::typecheck_stmts(&typeCtx, decl, def, node);
     }
     catch (Statics::UndefinedException *except) {
         std::cout << "undefined" << std::endl;
@@ -65,13 +65,13 @@ int main(int argc, char *argv[]) {
         return -2;
     }
 
-    if (!Statics::returncheck_stmt(node)) {
+    if (!Statics::returncheck_stmts(node)) {
         std::cout << "noreturn" << std::endl;
         return -2;
     }
 
     CodegenCtx cgCtx(args.emit_device, &typeCtx);
-    Codegen::codegen_stmt(&cgCtx, node);
+    Codegen::codegen_stmts(&cgCtx, node);
 
     cgCtx.emit(args.out_file);
 

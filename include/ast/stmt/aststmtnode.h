@@ -11,8 +11,11 @@
 #define __ASTSTMTNODE_H
 
 #include <ast/astnode.h>
+#include <ast/astseqnode.h>
 
 class ASTStmtNode : public ASTNode {
 };
+
+typedef ASTSeqNode<ASTStmtNode> ASTStmtSeqNode;
 
 #endif
