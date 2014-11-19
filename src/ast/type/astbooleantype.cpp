@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <ast/astbooleantype.h>
+#include <ast/type/astbooleantype.h>
 
 ASTBooleanType *ASTBooleanType::instance = NULL;
 

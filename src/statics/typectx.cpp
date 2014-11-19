@@ -5,8 +5,8 @@
  */
 
 #include <statics/typectx.h>
-#include <ast/astintegertype.h>
-#include <ast/astbooleantype.h>
+#include <ast/type/astintegertype.h>
+#include <ast/type/astbooleantype.h>
 
 TypeCtx::TypeCtx()
     : context(getGlobalContext())

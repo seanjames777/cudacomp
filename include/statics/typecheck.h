@@ -10,9 +10,9 @@
 #define __TYPECHECK_H
 
 #include <statics/typectx.h>
-#include <ast/aststmtnode.h>
-#include <ast/astexpnode.h>
-#include <ast/asttype.h>
+#include <ast/stmt/aststmtnode.h>
+#include <ast/expr/astexpnode.h>
+#include <ast/type/asttype.h>
 #include <stdexcept>
 
 namespace Statics {

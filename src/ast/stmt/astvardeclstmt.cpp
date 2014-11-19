@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <ast/astvardeclstmt.h>
+#include <ast/stmt/astvardeclstmt.h>
 
 ASTVarDeclStmt::ASTVarDeclStmt(ASTType *type, std::string id, ASTExpNode *exp)
     : type(type),

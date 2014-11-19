@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <ast/astreturnstmt.h>
+#include <ast/stmt/astreturnstmt.h>
 
 ASTReturnStmt::ASTReturnStmt(ASTExpNode *exp)
     : exp(exp)

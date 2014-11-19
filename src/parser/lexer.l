@@ -1,15 +1,15 @@
 %{
-#include <ast/astexpnode.h>
-#include <ast/aststmtnode.h>
-#include <ast/astinteger.h>
-#include <ast/astidentifier.h>
-#include <ast/astbinop.h>
-#include <ast/astseqnode.h>
-#include <ast/astreturnstmt.h>
-#include <ast/asttype.h>
-#include <ast/astintegertype.h>
-#include <ast/astvardeclstmt.h>
-#include <ast/astvardefnstmt.h>
+#include <ast/expr/astexpnode.h>
+#include <ast/stmt/aststmtnode.h>
+#include <ast/expr/astinteger.h>
+#include <ast/expr/astidentifier.h>
+#include <ast/expr/astbinop.h>
+#include <ast/stmt/astseqnode.h>
+#include <ast/stmt/astreturnstmt.h>
+#include <ast/type/asttype.h>
+#include <ast/type/astintegertype.h>
+#include <ast/stmt/astvardeclstmt.h>
+#include <ast/stmt/astvardefnstmt.h>
 
 #include "parser.hpp"
 %}

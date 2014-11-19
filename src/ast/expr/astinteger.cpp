@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <ast/astinteger.h>
+#include <ast/expr/astinteger.h>
 
 ASTInteger::ASTInteger(int value)
     : value(value)

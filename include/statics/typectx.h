@@ -10,8 +10,8 @@
 #define __TYPECTX_H
 
 #include <defs.h>
-#include <ast/astexpnode.h>
-#include <ast/asttype.h>
+#include <ast/expr/astexpnode.h>
+#include <ast/type/asttype.h>
 
 class TypeCtx {
 private:

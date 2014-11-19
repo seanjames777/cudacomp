@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <ast/astintegertype.h>
+#include <ast/type/astintegertype.h>
 
 ASTIntegerType *ASTIntegerType::instance = NULL;
 

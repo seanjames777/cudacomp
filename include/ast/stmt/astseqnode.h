@@ -10,7 +10,7 @@
 #ifndef __ASTSEQNODE_H
 #define __ASTSEQNODE_H
 
-#include <ast/aststmtnode.h>
+#include <ast/stmt/aststmtnode.h>
 
 class ASTSeqNode : public ASTStmtNode {
 private:

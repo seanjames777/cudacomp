@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <ast/astbinop.h>
+#include <ast/expr/astbinop.h>
 
 ASTBinop::ASTBinop(enum op op, ASTExpNode *e1, ASTExpNode *e2)
     : op(op),

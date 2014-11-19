@@ -9,8 +9,8 @@
 #ifndef __ASTVARDEFNSTMT_H
 #define __ASTVARDEFNSTMT_H
 
-#include <ast/aststmtnode.h>
-#include <ast/astexpnode.h>
+#include <ast/stmt/aststmtnode.h>
+#include <ast/expr/astexpnode.h>
 
 class ASTVarDefnStmt : public ASTStmtNode {
 private:

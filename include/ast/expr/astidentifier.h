@@ -10,7 +10,7 @@
 #define __ASTIDENTIFIER_H
 
 #include <defs.h>
-#include <ast/astexpnode.h>
+#include <ast/expr/astexpnode.h>
 #include <codegen/codegenctx.h>
 
 class ASTIdentifier : public ASTExpNode {

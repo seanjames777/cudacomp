@@ -40,6 +40,7 @@ tests = [
     ("../tests/testReturnCheck4.cc", 10),
     ("../tests/testReturnCheck5.cc", "noreturn"),
     ("../tests/testReturnCheck6.cc", 10),
+    ("../tests/testFib1.cc", 34),
 ]
 
 #############################

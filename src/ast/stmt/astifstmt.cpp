@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <ast/astifstmt.h>
+#include <ast/stmt/astifstmt.h>
 
 ASTIfStmt::ASTIfStmt(ASTExpNode *cond, ASTStmtNode *trueStmt, ASTStmtNode *falseStmt)
     : cond(cond),

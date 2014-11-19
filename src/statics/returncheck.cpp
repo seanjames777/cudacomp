@@ -5,20 +5,19 @@
  */
 
 #include <statics/returncheck.h>
-#include <ast/astinteger.h>
-#include <ast/astbinop.h>
-#include <ast/astseqnode.h>
-#include <ast/astreturnstmt.h>
-#include <ast/astidentifier.h>
-#include <ast/astvardeclstmt.h>
-#include <ast/astvardefnstmt.h>
-#include <ast/astintegertype.h>
-#include <ast/astunop.h>
-#include <ast/astbooleantype.h>
-#include <ast/astscope.h>
-#include <ast/astifstmt.h>
-#include <ast/astboolean.h>
-#include <ast/astnopstmt.h>
+#include <ast/expr/astinteger.h>
+#include <ast/expr/astbinop.h>
+#include <ast/stmt/astseqnode.h>
+#include <ast/stmt/astreturnstmt.h>
+#include <ast/expr/astidentifier.h>
+#include <ast/stmt/astvardeclstmt.h>
+#include <ast/stmt/astvardefnstmt.h>
+#include <ast/type/astintegertype.h>
+#include <ast/expr/astunop.h>
+#include <ast/type/astbooleantype.h>
+#include <ast/stmt/astscope.h>
+#include <ast/stmt/astifstmt.h>
+#include <ast/expr/astboolean.h>
 
 namespace Statics {
 

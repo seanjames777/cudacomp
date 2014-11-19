@@ -11,7 +11,7 @@
 #define __RETURNCHECK_H
 
 #include <statics/typectx.h>
-#include <ast/aststmtnode.h>
+#include <ast/stmt/aststmtnode.h>
 #include <stdexcept>
 
 namespace Statics {

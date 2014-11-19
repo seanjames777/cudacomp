@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <ast/astunop.h>
+#include <ast/expr/astunop.h>
 
 ASTUnop::ASTUnop(enum op op, ASTExpNode *exp)
     : op(op),

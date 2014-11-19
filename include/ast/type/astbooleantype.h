@@ -9,7 +9,7 @@
 #ifndef __ASTBOOLEANTYPE_H
 #define __ASTBOOLEANTYPE_H
 
-#include <ast/asttype.h>
+#include <ast/type/asttype.h>
 
 class ASTBooleanType : public ASTType {
 private:

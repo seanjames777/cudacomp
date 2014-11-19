@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <ast/astvardefnstmt.h>
+#include <ast/stmt/astvardefnstmt.h>
 
 ASTVarDefnStmt::ASTVarDefnStmt(std::string id, ASTExpNode *exp)
     : id(id),

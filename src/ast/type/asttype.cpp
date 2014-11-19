@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <ast/asttype.h>
+#include <ast/type/asttype.h>
 
 ASTType::~ASTType() {
 }

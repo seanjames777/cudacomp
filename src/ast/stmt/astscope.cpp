@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <ast/astscope.h>
+#include <ast/stmt/astscope.h>
 
 ASTScope::ASTScope(ASTStmtNode *body)
     : body(body)

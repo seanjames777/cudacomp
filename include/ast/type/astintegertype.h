@@ -9,7 +9,7 @@
 #ifndef __ASTINTEGERTYPE_H
 #define __ASTINTEGERTYPE_H
 
-#include <ast/asttype.h>
+#include <ast/type/asttype.h>
 
 class ASTIntegerType : public ASTType {
 private:

@@ -10,7 +10,7 @@
 #define __ASTBOOLEAN_H
 
 #include <defs.h>
-#include <ast/astexpnode.h>
+#include <ast/expr/astexpnode.h>
 #include <codegen/codegenctx.h>
 
 class ASTBoolean : public ASTExpNode {

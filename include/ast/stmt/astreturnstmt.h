@@ -10,8 +10,8 @@
 #ifndef __ASTRETURNSTMT_H
 #define __ASTRETURNSTMT_H
 
-#include <ast/aststmtnode.h>
-#include <ast/astexpnode.h>
+#include <ast/stmt/aststmtnode.h>
+#include <ast/expr/astexpnode.h>
 
 class ASTReturnStmt : public ASTStmtNode {
 private:

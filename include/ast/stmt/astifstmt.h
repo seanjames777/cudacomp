@@ -9,8 +9,8 @@
 #ifndef __ASTIFSTMTNODE_H
 #define __ASTIFSTMTNODE_H
 
-#include <ast/aststmtnode.h>
-#include <ast/astexpnode.h>
+#include <ast/stmt/aststmtnode.h>
+#include <ast/expr/astexpnode.h>
 
 class ASTIfStmt : public ASTStmtNode {
 private:

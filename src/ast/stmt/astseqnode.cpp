@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <ast/astseqnode.h>
+#include <ast/stmt/astseqnode.h>
 
 ASTSeqNode::ASTSeqNode(ASTStmtNode *head, ASTSeqNode *tail)
     : head(head),

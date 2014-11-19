@@ -10,7 +10,7 @@
 #ifndef __ASTSCOPE_H
 #define __ASTSCOPE_H
 
-#include <ast/aststmtnode.h>
+#include <ast/stmt/aststmtnode.h>
 
 class ASTScope : public ASTStmtNode {
 private:

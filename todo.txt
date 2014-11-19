@@ -1,11 +1,9 @@
 TODO:
-    statics for all control flow paths return if type not null
     consistent AST naming
-    simp, asop
+    simp, asop, postop
     AST headers into folders
     cleanup #includes
     comment functions
-    postop
     functions
     arrays
     structs

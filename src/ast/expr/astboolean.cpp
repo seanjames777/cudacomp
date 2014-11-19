@@ -4,7 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <ast/astboolean.h>
+#include <ast/expr/astboolean.h>
 
 ASTBoolean::ASTBoolean(bool value)
     : value(value)

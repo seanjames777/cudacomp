@@ -10,8 +10,8 @@
 #define __CODEGEN_H
 
 #include <codegen/codegenctx.h>
-#include <ast/astexpnode.h>
-#include <ast/aststmtnode.h>
+#include <ast/expr/astexpnode.h>
+#include <ast/stmt/aststmtnode.h>
 
 namespace Codegen {
 
