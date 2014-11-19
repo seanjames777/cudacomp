@@ -41,7 +41,7 @@ Type *TypeCtx::convert_type(ASTType *type) {
     if (ASTIntegerType *int_type = dynamic_cast<ASTIntegerType *>(type))
         return Type::getInt32Ty(context);
     else if (ASTBooleanType *bool_type = dynamic_cast<ASTBooleanType *>(type))
-        return Type::getInt8Ty(context);
+        return Type::getInt1Ty(context);
 
     throw new ASTMalformedException();
 }

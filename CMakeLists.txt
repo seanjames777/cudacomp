@@ -31,6 +31,8 @@ add_executable(cc
     src/ast/expr/astidentifier.cpp
     src/ast/expr/astinteger.cpp
     src/ast/expr/astunop.cpp
+    src/ast/stmt/astifstmt.cpp
+    src/ast/stmt/astnopstmt.cpp
     src/ast/stmt/astreturnstmt.cpp
     src/ast/stmt/astscope.cpp
     src/ast/stmt/astseqnode.cpp

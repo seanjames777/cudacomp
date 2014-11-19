@@ -21,8 +21,8 @@
 "bool"                  { return BOOL; }
 "if"                    { return IF; }
 "else"                  { return ELSE; }
-"true"                  { yylval.boolean = true; }
-"false"                 { yylval.boolean = false; }
+"true"                  { yylval.boolean = true; return TRUE; } // TODO: don't need the boolean
+"false"                 { yylval.boolean = false; return FALSE; }
 
 [0-9]+                  { yylval.number = atoi(yytext); return NUMBER; }
 [a-zA-Z][a-zA-Z0-9]*    { yylval.string = strdup(yytext); return IDENT; }

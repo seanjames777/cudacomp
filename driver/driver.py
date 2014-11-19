@@ -24,7 +24,14 @@ tests = [
     ("../tests/testUnOps3.cc", 2),
     ("../tests/testScope1.cc", 10),
     ("../tests/testScope2.cc", "undeclared"),
-    ("../tests/testScope1.cc", 10),
+    ("../tests/testScope3.cc", 10),
+    ("../tests/testScope4.cc", 10),
+    ("../tests/testIf1.cc", 10),
+    ("../tests/testIf2.cc", 20),
+    ("../tests/testIf3.cc", 10),
+    ("../tests/testIf4.cc", "undefined"),
+    ("../tests/testIf5.cc", 10),
+    ("../tests/testIf6.cc", 10),
 ]
 
 #############################

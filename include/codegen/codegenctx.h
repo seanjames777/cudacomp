@@ -17,7 +17,7 @@ class CodegenCtx {
 private:
 
     Module *module;
-    BasicBlock *def_bblock, *body_bblock;
+    BasicBlock *def_bblock, *first_bblock;
     LLVMContext & context;
     Function *cc_main;
     bool emit_device;
@@ -38,8 +38,6 @@ public:
 
     LLVMContext & getContext();
 
-    BasicBlock *getBBlock();
-
     Function *getFunction();
 
     bool getEmitDevice();
@@ -50,9 +48,11 @@ public:
 
     Value *getSymbol(std::string symbol);
 
-    BasicBlock *push_block();
+    BasicBlock *createBlock();
 
-    void pop_block();
+    void pushBlock(BasicBlock *block);
+
+    void popBlock();
 
 };
 

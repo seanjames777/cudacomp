@@ -16,6 +16,9 @@
 #include <ast/astunop.h>
 #include <ast/astbooleantype.h>
 #include <ast/astscope.h>
+#include <ast/astifstmt.h>
+#include <ast/astboolean.h>
+#include <ast/astnopstmt.h>
 
 namespace Statics {
 
@@ -43,9 +46,10 @@ ASTType *typecheck_exp(TypeCtx *ctx, idset & decl, idset & def, ASTExpNode *node
     ASTType *type;
 
     // Integer constant
-    if (ASTInteger *int_exp = dynamic_cast<ASTInteger *>(node)) {
+    if (ASTInteger *int_exp = dynamic_cast<ASTInteger *>(node))
         type = ASTIntegerType::get();
-    }
+    else if (ASTBoolean *bool_exp = dynamic_cast<ASTBoolean *>(node))
+        type = ASTBooleanType::get();
     // Variable reference
     else if (ASTIdentifier *id_exp = dynamic_cast<ASTIdentifier *>(node)) {
         // Must be declared
@@ -182,21 +186,58 @@ void typecheck_stmt(TypeCtx *ctx, idset & decl, idset & def, ASTStmtNode *node) 
         }
         // Scope statement
         else if (ASTScope *scope_node = dynamic_cast<ASTScope *>(head)) {
-            // Scope inherits outside definitions/declarations
-            idset scope_decl = decl;
-            idset scope_def = def;
+            if (scope_node->getBody()) {
+                // Scope inherits outside definitions/declarations
+                idset scope_decl = decl;
+                idset scope_def = def;
 
-            typecheck_stmt(ctx, scope_decl, scope_def, scope_node->getBody());
+                typecheck_stmt(ctx, scope_decl, scope_def, scope_node->getBody());
 
+                // Definitions of variables that were declared outside the scope
+                // propogate out
+                idset new_def;
+
+                std::set_intersection(scope_def.begin(), scope_def.end(),
+                    decl.begin(), decl.end(),
+                    std::inserter(new_def, new_def.end()));
+
+                def = new_def;
+            }
+        }
+        else if (ASTIfStmt *if_node = dynamic_cast<ASTIfStmt *>(head)) {
+            // Condition must be a boolean
+            ASTType *cond_type = typecheck_exp(ctx, decl, def, if_node->getCond());
+
+            if (!cond_type->equal(ASTBooleanType::get()))
+                throw new IllegalTypeException();
+
+            // Treat branches as scopes
+            idset scope_decl_left = decl;
+            idset scope_def_left = def;
+            idset scope_decl_right = decl;
+            idset scope_def_right = def;
+
+            typecheck_stmt(ctx, scope_decl_left, scope_def_left, if_node->getTrueStmt());
+            typecheck_stmt(ctx, scope_decl_right, scope_def_right, if_node->getFalseStmt());
+
+            // Definitions of variables that were declared outside the if statement
+            // and defined by BOTH branches propogate out
+            idset both_def;
             idset new_def;
 
-            // Definitions of variables that were declared outside the scope
-            // propogate out
-            std::set_intersection(scope_def.begin(), scope_def.end(),
+            std::set_intersection(
+                scope_def_left.begin(), scope_def_left.end(),
+                scope_def_right.begin(), scope_def_right.end(),
+                std::inserter(both_def, both_def.end()));
+
+            std::set_intersection(both_def.begin(), both_def.end(),
                 decl.begin(), decl.end(),
                 std::inserter(new_def, new_def.end()));
 
             def = new_def;
+        }
+        else if (ASTNopStmt *nop_node = dynamic_cast<ASTNopStmt *>(head)) {
+            // Nothing to do
         }
         else
             throw new ASTMalformedException();

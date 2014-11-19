@@ -26,10 +26,26 @@ CodegenCtx::CodegenCtx(bool emit_device, TypeCtx *types)
     cc_main = Function::Create(ftype, GlobalValue::ExternalLinkage, "_cc_main", module);
 
     def_bblock = BasicBlock::Create(context, "defs", cc_main, NULL);
-    body_bblock = BasicBlock::Create(context, "body", cc_main, NULL);
 
     def_builder = new IRBuilder<>(def_bblock);
-    body_builder = new IRBuilder<>(body_bblock);
+
+    first_bblock = createBlock();
+    pushBlock(first_bblock);
+}
+
+BasicBlock *CodegenCtx::createBlock() {
+    return BasicBlock::Create(context, "", cc_main, NULL);
+}
+
+void CodegenCtx::pushBlock(BasicBlock *block) {
+    blocks.push_back(block);
+    this->body_builder = new IRBuilder<>(block);
+}
+
+void CodegenCtx::popBlock() {
+    blocks.pop_back();
+    BasicBlock *block = blocks.back();
+    this->body_builder = new IRBuilder<>(block);
 }
 
 void CodegenCtx::markKernel(Function *kernel) {
@@ -44,7 +60,7 @@ void CodegenCtx::markKernel(Function *kernel) {
 }
 
 void CodegenCtx::emit(char *out_file) {
-    def_builder->CreateBr(body_bblock);
+    def_builder->CreateBr(first_bblock);
 
     if (emit_device) {
         markKernel(cc_main);
@@ -84,10 +100,6 @@ Module *CodegenCtx::getModule() {
 
 LLVMContext & CodegenCtx::getContext() {
     return context;
-}
-
-BasicBlock *CodegenCtx::getBBlock() {
-    return body_bblock;
 }
 
 Function *CodegenCtx::getFunction() {
