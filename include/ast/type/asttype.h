@@ -9,16 +9,14 @@
 #ifndef __ASTTYPE_H
 #define __ASTTYPE_H
 
-#include <defs.h>
+#include <ast/astnode.h>
 
-class ASTType {
+class ASTType : public ASTNode {
 public:
 
     virtual ~ASTType() = 0;
 
     virtual bool equal(ASTType *other) = 0;
-
-    virtual void print(std::ostream & ss) = 0;
 
 };
 

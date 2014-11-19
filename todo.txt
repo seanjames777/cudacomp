@@ -8,3 +8,4 @@ TODO:
     arrays
     structs
     pack kernels into executable
+    test else if

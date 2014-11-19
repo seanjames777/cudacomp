@@ -39,6 +39,8 @@ add_executable(cc
     src/ast/stmt/astvardeclstmt.cpp
     src/ast/stmt/astvardefnstmt.cpp
     src/ast/type/astbooleantype.cpp
+    src/ast/type/astarg.cpp
+    src/ast/type/astfuntype.cpp
     src/ast/type/astintegertype.cpp
     src/ast/type/asttype.cpp
     src/codegen/codegen.cpp
