@@ -8,7 +8,7 @@ import subprocess
 target = "host"
 
 tests = [
-    ("../tests/testBinOps.cc", 10),
+    ("../tests/testBinOps1.cc", 14),
     ("../tests/testUndeclared.cc", "undeclared"),
     ("../tests/testUndefined.cc", "undefined"),
     ("../tests/testRedeclared.cc", "redeclared"),
@@ -19,7 +19,9 @@ tests = [
     ("../tests/testId5.cc", "undeclared"),
     ("../tests/testId6.cc", 100),
     ("../tests/testReturnDeclDef.cc", 5),
-    ("../tests/testUnOps.cc", -1),
+    ("../tests/testUnOps1.cc", -1),
+    ("../tests/testUnOps2.cc", -1),
+    ("../tests/testUnOps3.cc", 2),
     ("../tests/testScope1.cc", 10),
     ("../tests/testScope2.cc", "undeclared"),
     ("../tests/testScope1.cc", 10),

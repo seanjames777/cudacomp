@@ -46,7 +46,7 @@ int yylex(void);
 %token <number> NUMBER
 %token <string> IDENT
 %token <boolean> TRUE FALSE
-%token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR NOT BITNOT
+%token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR NOT BNOT
 %token ASSIGN SEMI
 %token INT BOOL
 %token RETURN IF ELSE
@@ -56,6 +56,18 @@ int yylex(void);
 %type <stmt> stmt
 %type <seq> stmt_list
 %type <type> type
+
+%right ASSIGN
+%left OR
+%left AND
+%left BOR
+%left BXOR
+%left BAND
+%left SHL SHR
+%left PLUS MINUS
+%left TIMES DIV MOD
+%right NOT BNOT UMINUS
+%nonassoc LPAREN RPAREN
 
 %start top
 
@@ -88,8 +100,8 @@ exp:
   | exp BOR exp                { $$ = new ASTBinop(ASTBinop::BOR, $1, $3); }
   | exp BXOR exp               { $$ = new ASTBinop(ASTBinop::BXOR, $1, $3); }
   | NOT exp                    { $$ = new ASTUnop(ASTUnop::NOT, $2); }
-  | BITNOT exp                 { $$ = new ASTUnop(ASTUnop::BNOT, $2); }
-  | MINUS exp                  { $$ = new ASTUnop(ASTUnop::NEG, $2); }
+  | BNOT exp                   { $$ = new ASTUnop(ASTUnop::BNOT, $2); }
+  | MINUS exp %prec UMINUS     { $$ = new ASTUnop(ASTUnop::NEG, $2); }
   | LPAREN exp RPAREN          { $$ = $2; }
   ;
 
@@ -103,5 +115,5 @@ stmt:
   | type IDENT SEMI            { $$ = new ASTVarDeclStmt($1, std::string($2), NULL); free($2); }
   | type IDENT ASSIGN exp SEMI { $$ = new ASTVarDeclStmt($1, std::string($2), $4); free($2); }
   | IDENT ASSIGN exp SEMI      { $$ = new ASTVarDefnStmt(std::string($1), $3); free($1); } // TODO free
-  | LBRACE stmt_list  RBRACE   { $$ = new ASTScope($2); }
+  | LBRACE stmt_list RBRACE    { $$ = new ASTScope($2); }
   ;

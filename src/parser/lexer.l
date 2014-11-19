@@ -38,7 +38,7 @@
 "&"                     { return BAND; }
 "|"                     { return BOR; }
 "^"                     { return BXOR; }
-"~"                     { return BITNOT; }
+"~"                     { return BNOT; }
 "!"                     { return NOT; }
 "="                     { return ASSIGN; }
 ";"                     { return SEMI; }
