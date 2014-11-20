@@ -2,11 +2,13 @@
 
 #include "cuda.h"
 
-void checkCudaErrors(CUresult err) {
-    if (err != CUDA_SUCCESS) {
-        printf("Error: CUDA Error\n");
-        exit(-1);
-    }
+#define checkCudaErrors(expr) {        \
+    CUresult err = (expr);             \
+    if (err != CUDA_SUCCESS) {         \
+        printf("CUDA Error (line %d)", \
+            __LINE__);                 \
+        exit(-1);                      \
+    }                                  \
 }
 
 int main(int argc, char *argv[]) {

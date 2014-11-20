@@ -19,10 +19,15 @@ private:
 
     ASTFunType *signature;
     SymbolTable<ASTType *> locals; // including arguments
+    std::string name;
 
 public:
 
-    FunctionInfo(ASTFunType *signature);
+    FunctionInfo(std::string name, ASTFunType *signature);
+
+    ASTFunType *getSignature();
+
+    std::string getName();
 
     ASTType *getLocalType(std::string id);
 

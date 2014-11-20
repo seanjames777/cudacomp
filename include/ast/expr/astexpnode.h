@@ -10,8 +10,11 @@
 #define __ASTEXPNODE_H
 
 #include <ast/astnode.h>
+#include <ast/astseqnode.h>
 
 class ASTExpNode : public ASTNode {
 };
+
+typedef ASTSeqNode<ASTExpNode> ASTExpSeqNode;
 
 #endif

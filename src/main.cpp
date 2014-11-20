@@ -45,22 +45,27 @@ int main(int argc, char *argv[]) {
     }
     catch (Statics::UndefinedException *except) {
         std::cout << "undefined" << std::endl;
+        std::cout << except->what() << std::endl;
         return -2;
     }
     catch (Statics::UndeclaredException *except) {
         std::cout << "undeclared" << std::endl;
+        std::cout << except->what() << std::endl;
         return -2;
     }
     catch (Statics::RedeclaredException *except) {
         std::cout << "redeclared" << std::endl;
+        std::cout << except->what() << std::endl;
         return -2;
     }
     catch (Statics::IllegalTypeException *except) {
         std::cout << "illegaltype" << std::endl;
+        std::cout << except->what() << std::endl;
         return -2;
     }
     catch (Statics::NoReturnException *except) {
         std::cout << "noreturn" << std::endl;
+        std::cout << except->what() << std::endl;
         return -2;
     }
 

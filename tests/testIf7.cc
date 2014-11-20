@@ -1,4 +1,4 @@
-int main() {
+int _cc_main() {
     if (true)
         if (false)
             return 10;

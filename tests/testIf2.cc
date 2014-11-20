@@ -1,4 +1,4 @@
-int main() {
+int _cc_main() {
     bool b = false;
 
     if (b) {

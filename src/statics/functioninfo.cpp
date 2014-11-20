@@ -6,9 +6,18 @@
 
 #include <statics/functioninfo.h>
 
-FunctionInfo::FunctionInfo(ASTFunType *signature)
-    : signature(signature)
+FunctionInfo::FunctionInfo(std::string name, ASTFunType *signature)
+    : name(name),
+      signature(signature)
 {
+}
+
+std::string FunctionInfo::getName() {
+    return name;
+}
+
+ASTFunType *FunctionInfo::getSignature() {
+    return signature;
 }
 
 ASTType *FunctionInfo::getLocalType(std::string id) {

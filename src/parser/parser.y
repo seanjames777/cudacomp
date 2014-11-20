@@ -21,6 +21,7 @@
 #include <ast/top/astfundefn.h>
 #include <ast/type/astfuntype.h>
 #include <ast/type/astarg.h>
+#include <ast/expr/astcall.h>
 
 #define YYERROR_VERBOSE
 
@@ -44,6 +45,7 @@ void yyerror(ASTTopSeqNode **root, const char *str) {
     ASTStmtNode *stmt;
     ASTStmtSeqNode *stmt_seq;
     ASTExpNode *exp;
+    ASTExpSeqNode *exp_seq;
     ASTType *type;
     ASTArg *arg;
     ASTArgSeqNode *arg_seq;
@@ -72,6 +74,7 @@ void yyerror(ASTTopSeqNode **root, const char *str) {
 %type <top> top
 %type <top_seq> top_list
 %type <top> fundefn
+%type <exp_seq> arg_list arg_list_follow
 
 %right ASSIGN
 %left OR
@@ -137,6 +140,7 @@ exp:
   | BNOT exp                          { $$ = new ASTUnop(ASTUnop::BNOT, $2); }
   | MINUS exp %prec UMINUS            { $$ = new ASTUnop(ASTUnop::NEG, $2); }
   | LPAREN exp RPAREN                 { $$ = $2; }
+  | IDENT LPAREN arg_list RPAREN      { $$ = new ASTCall($1, $3); }
   ;
 
 type:
@@ -175,4 +179,14 @@ param_list:
 fundefn:
     type IDENT LPAREN param_list RPAREN LBRACE stmt_list RBRACE
     { $$ = new ASTFunDefn($2, new ASTFunType($1, $4), $7); }
+  ;
+
+arg_list_follow:
+    /* empty */                       { $$ = NULL; }
+  | COMMA exp arg_list_follow         { $$ = new ASTExpSeqNode($2, $3); }
+  ;
+
+arg_list:
+    /* empty */                       { $$ = NULL; }
+  | exp arg_list_follow               { $$ = new ASTExpSeqNode($1, $2); }
   ;

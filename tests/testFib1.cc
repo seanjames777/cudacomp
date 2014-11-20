@@ -1,4 +1,4 @@
-int main() {
+int _cc_main() {
     int f0 = 0;
     int f1 = 1;
     int f2 = f0 + f1;

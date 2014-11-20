@@ -39,6 +39,10 @@ public:
         return table.find(symbol) != table.end();
     }
 
+    void clear() {
+        table.clear();
+    }
+
 };
 
 #endif

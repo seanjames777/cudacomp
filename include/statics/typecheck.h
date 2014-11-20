@@ -19,24 +19,36 @@
 
 namespace Statics {
 
-    class UndefinedException : public std::runtime_error {
+    class UndefinedException : public std::exception {
+    private:
+        std::string msg;
     public:
-        UndefinedException();
+        UndefinedException(std::string id);
+        virtual const char *what() const _NOEXCEPT override { return msg.c_str(); }
     };
 
-    class UndeclaredException : public std::runtime_error {
+    class UndeclaredException : public std::exception {
+    private:
+        std::string msg;
     public:
-        UndeclaredException();
+        UndeclaredException(std::string id);
+        virtual const char *what() const _NOEXCEPT override { return msg.c_str(); }
     };
 
-    class RedeclaredException : public std::runtime_error {
+    class RedeclaredException : public std::exception {
+    private:
+        std::string msg;
     public:
-        RedeclaredException();
+        RedeclaredException(std::string id);
+        virtual const char *what() const _NOEXCEPT override { return msg.c_str(); }
     };
 
-    class IllegalTypeException : public std::runtime_error {
+    class IllegalTypeException : public std::exception {
+    private:
+        std::string msg;
     public:
         IllegalTypeException();
+        virtual const char *what() const _NOEXCEPT override { return msg.c_str(); }
     };
 
     typedef std::unordered_set<std::string> idset;

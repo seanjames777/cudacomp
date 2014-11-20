@@ -7,6 +7,7 @@ import time
 ####### CONFIGURATION #######
 
 target = "host"
+run_list = []
 
 tests = [
     ("../tests/testBinOps1.cc", 14),
@@ -42,6 +43,7 @@ tests = [
     ("../tests/testReturnCheck5.cc", "noreturn"),
     ("../tests/testReturnCheck6.cc", 10),
     ("../tests/testFib1.cc", 34),
+    ("../tests/testCall1.cc", 5)
 ]
 
 #############################
@@ -54,6 +56,8 @@ def parse_args():
             target = "host"
         elif arg == "--device":
             target = "device"
+        elif arg != sys.argv[0]:
+            run_list.append(arg)
 
 def run_shell(command):
     proc = subprocess.Popen (command, stdout=subprocess.PIPE)
@@ -90,6 +94,9 @@ run = 0
 passed = 0
 
 for (name, expected) in tests:
+    if len(run_list) > 0 and not(name in run_list):
+        continue
+
     print "\033[37;1mTest '", name, "'\033[0m"
 
     stat = -7
@@ -113,7 +120,7 @@ for (name, expected) in tests:
         else:
             (stat, output) = (cc_stat, cc_out)
         run_shell([ "rm", "-f", "device.ll", "device.ptx", "device" ])
-        time.sleep(1)
+        time.sleep(0.1)
 
     run = run + 1
 

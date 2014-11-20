@@ -11,7 +11,6 @@
 
 #include <defs.h>
 #include <ast/expr/astexpnode.h>
-#include <codegen/codegenctx.h>
 
 class ASTInteger : public ASTExpNode {
 private:

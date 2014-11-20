@@ -36,7 +36,7 @@
 "false"                 { yylval.boolean = false; return FALSE; }
 
 [0-9]+                  { yylval.number = atoi(yytext); return NUMBER; }
-[a-zA-Z][a-zA-Z0-9]*    { yylval.string = strdup(yytext); return IDENT; }
+[_a-zA-Z][_a-zA-Z0-9]*  { yylval.string = strdup(yytext); return IDENT; }
 ","                     { return COMMA; }
 "+"                     { return PLUS; }
 "*"                     { return TIMES; }

@@ -19,49 +19,50 @@
 #include <ast/stmt/astifstmt.h>
 #include <ast/expr/astboolean.h>
 #include <ast/top/astfundefn.h>
+#include <ast/expr/astcall.h>
 
 namespace Statics {
 
-UndefinedException::UndefinedException()
-    : runtime_error("Undefined variable")
-{
+UndefinedException::UndefinedException(std::string id) {
+    std::stringstream ss;
+    ss << "Undefined symbol '" << id << "'";
+    msg = ss.str();
 }
 
-UndeclaredException::UndeclaredException()
-    : runtime_error("Undeclared variable")
-{
+UndeclaredException::UndeclaredException(std::string id) {
+    std::stringstream ss;
+    ss << "Undeclared symbol '" << id << "'";
+    msg = ss.str();
 }
 
-RedeclaredException::RedeclaredException()
-    : runtime_error("Redeclared variable")
-{
+RedeclaredException::RedeclaredException(std::string id) {
+    std::stringstream ss;
+    ss << "Variable '" << id << "' already declared";
+    msg = ss.str();
 }
 
-IllegalTypeException::IllegalTypeException()
-    : runtime_error("Illegal type")
-{
+IllegalTypeException::IllegalTypeException() {
+    msg = "Illegal type";
 }
 
 ASTType *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & def, ASTExpNode *node) {
-    ASTType *type;
-
     // Integer constant
     if (ASTInteger *int_exp = dynamic_cast<ASTInteger *>(node))
-        type = ASTIntegerType::get();
+        return ASTIntegerType::get();
     else if (ASTBoolean *bool_exp = dynamic_cast<ASTBoolean *>(node))
-        type = ASTBooleanType::get();
+        return ASTBooleanType::get();
     // Variable reference
     else if (ASTIdentifier *id_exp = dynamic_cast<ASTIdentifier *>(node)) {
         // Must be declared
         if (decl.find(id_exp->getId()) == decl.end())
-            throw new UndeclaredException();
+            throw new UndeclaredException(id_exp->getId());
 
         // Must be defined
         if (def.find(id_exp->getId()) == def.end())
-            throw new UndefinedException();
+            throw new UndefinedException(id_exp->getId());
 
         // Just look up type
-        type = func->getLocalType(id_exp->getId());
+        return func->getLocalType(id_exp->getId());
     }
     // Unary operator
     else if (ASTUnop *unop_exp = dynamic_cast<ASTUnop *>(node)) {
@@ -73,13 +74,13 @@ ASTType *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset 
         case ASTUnop::NOT:
             if (!t->equal(ASTBooleanType::get()))
                 throw new IllegalTypeException();
-            type = t;
+            return t;
             break;
         case ASTUnop::BNOT:
         case ASTUnop::NEG:
             if (!t->equal(ASTIntegerType::get()))
                 throw new IllegalTypeException();
-            type = t;
+            return t;
             break;
         }
     }
@@ -103,34 +104,41 @@ ASTType *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset 
         case ASTBinop::BXOR:
             if (!t1->equal(ASTIntegerType::get()) || !t2->equal(ASTIntegerType::get()))
                 throw new IllegalTypeException();
-            type = ASTIntegerType::get();
-            break;
+            return ASTIntegerType::get();
         case ASTBinop::OR:
         case ASTBinop::AND:
             if (!t1->equal(ASTBooleanType::get()) || !t2->equal(ASTBooleanType::get()))
                 throw new IllegalTypeException();
-            type = ASTBooleanType::get();
-            break;
+            return ASTBooleanType::get();
         case ASTBinop::LEQ:
         case ASTBinop::GEQ:
         case ASTBinop::LT:
         case ASTBinop::GT:
             if (!t1->equal(ASTIntegerType::get()) || !t2->equal(ASTIntegerType::get()))
                 throw new IllegalTypeException();
-            type = ASTBooleanType::get();
-            break;
+            return ASTBooleanType::get();
         case ASTBinop::EQ:
         case ASTBinop::NEQ:
             if (!t1->equal(t2) || (!t1->equal(ASTIntegerType::get()) && !t1->equal(ASTBooleanType::get())))
                 throw new IllegalTypeException();
-            type = ASTBooleanType::get();
-            break;
+            return ASTBooleanType::get();
         }
+    }
+    else if (ASTCall *call_exp = dynamic_cast<ASTCall *>(node)) {
+        FunctionInfo *func = mod->getFunction(call_exp->getId());
+
+        if (!func)
+            throw new UndeclaredException(call_exp->getId());
+
+        ASTFunType *sig = func->getSignature();
+
+        // TODO: test argument length mismatch, type mismatch, return type mismatch
+        // TODO: actually check that stuff here
+
+        return sig->getReturnType();
     }
     else
         throw new ASTMalformedException();
-
-    return type;
 }
 
 void typecheck_stmts(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & def, ASTStmtSeqNode *seq_node) {
@@ -150,7 +158,7 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
 
         // Must not be declared yet
         if (decl.find(decl_stmt->getId()) != decl.end())
-            throw new RedeclaredException();
+            throw new RedeclaredException(decl_stmt->getId());
 
         ASTExpNode *decl_exp = decl_stmt->getExp();
 
@@ -172,7 +180,7 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
     else if (ASTVarDefnStmt *defn_stmt = dynamic_cast<ASTVarDefnStmt *>(head)) {
         // Must be declared
         if (decl.find(defn_stmt->getId()) == decl.end())
-            throw new UndeclaredException();
+            throw new UndeclaredException(defn_stmt->getId());
 
         ASTType *decl_type = func->getLocalType(defn_stmt->getId());
         ASTType *exp_type = typecheck_exp(mod, func, decl, def, defn_stmt->getExp());
@@ -265,19 +273,23 @@ void typecheck_tops(ModuleInfo *mod, ASTTopSeqNode *seq_node) {
 void typecheck_top(ModuleInfo *mod, ASTTopNode *node) {
     if (ASTFunDefn *funDefn = dynamic_cast<ASTFunDefn *>(node)) {
         // Allocate space for information about this function
-        FunctionInfo *funInfo = new FunctionInfo(funDefn->getSignature());
+        FunctionInfo *funInfo = new FunctionInfo(funDefn->getName(), funDefn->getSignature());
         mod->addFunction(funDefn->getName(), funInfo);
 
-        // Add all arguments to the local symbol table
+        idset decl, def;
+
+        // Add all arguments to the local symbol table and mark them as declared
+        // and defined.
         ASTArgSeqNode *args = funDefn->getSignature()->getArgs();
 
         while (args != NULL) {
             ASTArg *arg = args->getHead();
             funInfo->addLocal(arg->getName(), arg->getType());
             args = args->getTail();
-        }
 
-        idset decl, def;
+            decl.insert(arg->getName());
+            def.insert(arg->getName());
+        }
 
         // Check the function body, building the local symbol table in the process
         typecheck_stmts(mod, funInfo, decl, def, funDefn->getBody());

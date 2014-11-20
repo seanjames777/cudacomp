@@ -19,16 +19,20 @@
 #include <ast/type/astintegertype.h>
 #include <ast/type/astbooleantype.h>
 #include <codegen/converttype.h>
+#include <ast/expr/astcall.h>
 
 namespace Codegen {
 
 Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
     IRBuilder<> *builder = ctx->getBuilder();
 
+    // Integer constant
     if (ASTInteger *int_exp = dynamic_cast<ASTInteger *>(node))
         return ConstantInt::get(convertType(ASTIntegerType::get()), int_exp->getValue());
+    // Boolean constant
     else if (ASTBoolean *bool_exp = dynamic_cast<ASTBoolean *>(node))
         return ConstantInt::get(convertType(ASTBooleanType::get()), (int)bool_exp->getValue());
+    // Unary operator
     else if (ASTUnop *unop_exp = dynamic_cast<ASTUnop *>(node)) {
         Value *v = codegen_exp(ctx, unop_exp->getExp());
 
@@ -38,6 +42,7 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
         case ASTUnop::NEG:  return builder->CreateNeg(v);
         }
     }
+    // Binary operator
     else if (ASTBinop *binop_exp = dynamic_cast<ASTBinop *>(node)) {
         Value *v1 = codegen_exp(ctx, binop_exp->getE1());
         Value *v2 = codegen_exp(ctx, binop_exp->getE2());
@@ -63,9 +68,44 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
         case ASTBinop::GT:   return builder->CreateICmpSGT(v1, v2);
         }
     }
+    // Identifier reference
     else if (ASTIdentifier *id_exp = dynamic_cast<ASTIdentifier *>(node)) {
-        Value *id_ptr = ctx->getSymbol(id_exp->getId());
+        Value *id_ptr = ctx->getOrCreateSymbol(id_exp->getId());
         return builder->CreateLoad(id_ptr);
+    }
+    // Function call
+    else if (ASTCall *call_exp = dynamic_cast<ASTCall *>(node)) {
+        std::vector<Value *> args;
+
+        Value *ret_val = NULL;
+
+        ASTFunType *funDefn = ctx->getModuleInfo()->getFunction(call_exp->getId())->getSignature();
+
+        // In device mode, add a pointer to a new temp to get the return value
+        if (ctx->getEmitDevice()) {
+            // TODO use an address of instead maybe
+            ret_val = builder->CreateAlloca(convertType(funDefn->getReturnType()));
+            args.push_back(ret_val);
+        }
+
+        ASTExpSeqNode *exp_args = call_exp->getArgs();
+
+        // Codegen each argument
+        while (exp_args != NULL) {
+            ASTExpNode *arg = exp_args->getHead();
+            args.push_back(codegen_exp(ctx, arg));
+            exp_args = exp_args->getTail();
+        }
+
+        Value *call = builder->CreateCall(ctx->getFunction(call_exp->getId()), args);
+
+        if (!ctx->getEmitDevice())
+            ret_val = call;
+        else {
+            ret_val = builder->CreateLoad(ret_val);
+        }
+
+        return ret_val;
     }
     else
         throw new ASTMalformedException();
@@ -95,7 +135,7 @@ bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *head) {
             // In device mode, have to move into return value argument because kernels
             // must return void
             if (ctx->getEmitDevice()) {
-                Value *out_arg = ctx->getFunction()->arg_begin();
+                Value *out_arg = ctx->getCurrentFunction()->arg_begin();
 
                 builder->CreateStore(ret_val, out_arg);
                 builder->CreateRet(NULL);
@@ -113,7 +153,7 @@ bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *head) {
     // Variable declaration
     else if (ASTVarDeclStmt *decl_stmt = dynamic_cast<ASTVarDeclStmt *>(head)) {
         // Creates an alloca. TODO maybe getOrCreateId()
-        Value *mem = ctx->getSymbol(decl_stmt->getId());
+        Value *mem = ctx->getOrCreateSymbol(decl_stmt->getId());
 
         if (decl_stmt->getExp()) {
             Value *exp_val = codegen_exp(ctx, decl_stmt->getExp());
@@ -122,7 +162,7 @@ bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *head) {
     }
     // Variable definution
     else if (ASTVarDefnStmt *decl_stmt = dynamic_cast<ASTVarDefnStmt *>(head)) {
-        Value *mem = ctx->getSymbol(decl_stmt->getId());
+        Value *mem = ctx->getOrCreateSymbol(decl_stmt->getId());
         Value *exp_val = codegen_exp(ctx, decl_stmt->getExp());
         builder->CreateStore(exp_val, mem);
     }
@@ -131,6 +171,7 @@ bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *head) {
         if (scope_stmt->getBody())
             codegen_stmts(ctx, scope_stmt->getBody());
     }
+    // If statement
     else if (ASTIfStmt *if_node = dynamic_cast<ASTIfStmt *>(head)) {
         Value *cond = codegen_exp(ctx, if_node->getCond());
 
@@ -166,25 +207,49 @@ bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *head) {
 }
 
 void codegen_tops(ModuleInfo *module, ASTTopSeqNode *nodes, bool emitDevice, std::ostream & out) {
+    CodegenCtx ctx(emitDevice, module);
+
     ASTTopSeqNode *node = nodes;
 
     while (node != NULL) {
-        codegen_top(module, node->getHead(), emitDevice, out);
+        ASTTopNode *top_node = node->getHead();
+
+        // Create LLVM functions for each function
+        if (ASTFunDefn *funDefn = dynamic_cast<ASTFunDefn *>(top_node)) {
+            FunctionInfo *funInfo = module->getFunction(funDefn->getName());
+            ctx.createFunction(funInfo);
+        }
+
         node = node->getTail();
     }
+
+    node = nodes;
+
+    while (node != NULL) {
+        codegen_top(&ctx, node->getHead());
+        node = node->getTail();
+    }
+
+    ctx.emit(out);
 }
 
-void codegen_top(ModuleInfo *module, ASTTopNode *node, bool emitDevice, std::ostream & out) {
+void codegen_top(CodegenCtx *ctx, ASTTopNode *node) {
     if (ASTFunDefn *funDefn = dynamic_cast<ASTFunDefn *>(node)) {
-        FunctionInfo *func = module->getFunction(funDefn->getName());
+        FunctionInfo *func = ctx->getModuleInfo()->getFunction(funDefn->getName());
 
-        CodegenCtx ctx(emitDevice, func);
-        codegen_stmts(&ctx, funDefn->getBody());
+        ctx->startFunction(func->getName());
+        codegen_stmts(ctx, funDefn->getBody());
 
-        ctx.emit(out);
+        if (ctx->getEmitDevice() && func->getName() == "_cc_main") // TODO require this function
+            ctx->markKernel(ctx->getFunction(func->getName()));
+
+        ctx->finishFunction();
     }
     else
         throw new ASTMalformedException();
 }
 
 }
+
+// TODO: make the codegen context over the whole module and add code to push functions
+// TODO: do something similar for type checking and other analyses

@@ -25,9 +25,9 @@ namespace Codegen {
 
     bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *node);
 
-    void codegen_tops(ModuleInfo *module, ASTTopSeqNode *nodes, bool emitDevice, std::ostream & out);
+    void codegen_top(CodegenCtx *ctx, ASTTopNode *node);
 
-    void codegen_top(ModuleInfo *module, ASTTopNode *node, bool emitDevice, std::ostream & out);
+    void codegen_tops(ModuleInfo *module, ASTTopSeqNode *nodes, bool emitDevice, std::ostream & out);
 
 }
 

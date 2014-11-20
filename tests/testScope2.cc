@@ -1,4 +1,4 @@
-int main() {
+int _cc_main() {
     {
         int y = 10;
     }

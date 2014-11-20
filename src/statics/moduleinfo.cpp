@@ -14,5 +14,8 @@ void ModuleInfo::addFunction(std::string id, FunctionInfo *function) {
 }
 
 FunctionInfo *ModuleInfo::getFunction(std::string id) {
+    if (!functions.hasSymbol(id))
+        return NULL;
+
     return functions.get(id);
 }
