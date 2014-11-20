@@ -25,7 +25,7 @@ std::string ASTFunDefn::getName() {
     return name;
 }
 
-ASTFunType *ASTFunDefn::getSig() {
+ASTFunType *ASTFunDefn::getSignature() {
     return sig;
 }
 

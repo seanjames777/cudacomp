@@ -29,7 +29,7 @@ public:
 
     std::string getName();
 
-    ASTFunType *getSig();
+    ASTFunType *getSignature();
 
     ASTStmtSeqNode *getBody();
 

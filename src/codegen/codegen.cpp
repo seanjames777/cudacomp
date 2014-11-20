@@ -18,6 +18,7 @@
 #include <ast/expr/astboolean.h>
 #include <ast/type/astintegertype.h>
 #include <ast/type/astbooleantype.h>
+#include <codegen/converttype.h>
 
 namespace Codegen {
 

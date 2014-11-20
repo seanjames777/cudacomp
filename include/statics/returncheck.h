@@ -10,9 +10,7 @@
 #ifndef __RETURNCHECK_H
 #define __RETURNCHECK_H
 
-#include <statics/typectx.h>
 #include <ast/stmt/aststmtnode.h>
-#include <stdexcept>
 
 namespace Statics {
 

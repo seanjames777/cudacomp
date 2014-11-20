@@ -5,13 +5,14 @@
  */
 
 #include <codegen/codegenctx.h>
+#include <codegen/converttype.h>
 
 namespace Codegen {
 
-CodegenCtx::CodegenCtx(bool emit_device, TypeCtx *types)
+CodegenCtx::CodegenCtx(bool emit_device, FunctionInfo *func)
     : context(getGlobalContext()),
       emit_device(emit_device),
-      types(types)
+      func(func)
 {
     module = new Module("", context);
 
@@ -116,18 +117,14 @@ IRBuilder<> *CodegenCtx::getBuilder() {
     return body_builder;
 }
 
-TypeCtx *CodegenCtx::getTypes() {
-    return types;
-}
-
 Value *CodegenCtx::getSymbol(std::string id) {
-    if (symbols.find(id) == symbols.end()) {
-        Value *instr = def_builder->CreateAlloca(convertType(types->getSymbol(id)));
-        symbols[id] = instr;
+    if (!symbols.hasSymbol(id)) {
+        Value *instr = def_builder->CreateAlloca(convertType(func->getLocalType(id)));
+        symbols.set(id, instr);
         return instr;
     }
 
-    return symbols[id];
+    return symbols.get(id);
 }
 
 }

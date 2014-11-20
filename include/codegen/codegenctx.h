@@ -10,9 +10,8 @@
 #define __CODEGENCTX_H
 
 #include <defs.h>
-#include <statics/typectx.h>
-#include <statics/typecheck.h>
-#include <codegen/converttype.h>
+#include <statics/symboltable.h>
+#include <statics/functioninfo.h>
 
 namespace Codegen {
 
@@ -25,13 +24,13 @@ private:
     Function *cc_main;
     bool emit_device;
     IRBuilder<> *def_builder, *body_builder;
-    TypeCtx *types;
-    std::unordered_map<std::string, Value *> symbols;
+    SymbolTable<Value *> symbols;
     std::vector<BasicBlock *> blocks;
+    FunctionInfo *func;
 
 public:
 
-    CodegenCtx(bool emit_device, TypeCtx *types);
+    CodegenCtx(bool emit_device, FunctionInfo *func);
 
     void markKernel(Function *kernel);
 
@@ -54,8 +53,6 @@ public:
     void pushBlock(BasicBlock *block);
 
     void popBlock();
-
-    TypeCtx *getTypes();
 
 };
 

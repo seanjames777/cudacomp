@@ -86,6 +86,9 @@ print "\033[34;1m***************************************************\033[0m"
 print "\033[34;1m* Running Tests...                                *\033[0m"
 print "\033[34;1m***************************************************\033[0m"
 
+run = 0
+passed = 0
+
 for (name, expected) in tests:
     print "\033[37;1mTest '", name, "'\033[0m"
 
@@ -112,11 +115,14 @@ for (name, expected) in tests:
         run_shell([ "rm", "-f", "device.ll", "device.ptx", "device" ])
         time.sleep(1)
 
+    run = run + 1
+
     if stat == -1 or len(output) == 0:
         print "\033[31;1m    FAILED: unknown error", "\033[0m"
     elif type(expected) is str:
         if output[0] == expected:
             print "\033[32;1m    PASS:", expected, "\033[0m"
+            passed = passed + 1
         else:
             print "\033[31;1m    FAILED: expected", expected, "\033[0m"
     elif type(expected) is int:
@@ -124,3 +130,15 @@ for (name, expected) in tests:
             print "\033[31;1m    FAILED: expected", expected, "- returned", output[0], "\033[0m"
         else:
             print "\033[32;1m    PASS:", expected, "\033[0m"
+            passed = passed + 1
+
+print "\033[34;1m***************************************************\033[0m"
+print "\033[34;1m* Summary                                         *\033[0m"
+print "\033[34;1m***************************************************\033[0m"
+print "\033[37;1mRan:   ", run, "tests\033[0m"
+if passed == run:
+    print "\033[32;1mPassed:", passed, "tests\033[0m"
+    print "\033[32;1mFailed:", (run - passed), "tests\033[0m"
+else:
+    print "\033[31;1mPassed:", passed, "tests\033[0m"
+    print "\033[31;1mFailed:", (run - passed), "tests\033[0m"

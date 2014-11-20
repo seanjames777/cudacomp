@@ -41,7 +41,7 @@ IllegalTypeException::IllegalTypeException()
 {
 }
 
-ASTType *typecheck_exp(TypeCtx *ctx, idset & decl, idset & def, ASTExpNode *node) {
+ASTType *typecheck_exp(FunctionInfo *func, idset & decl, idset & def, ASTExpNode *node) {
     ASTType *type;
 
     // Integer constant
@@ -60,12 +60,12 @@ ASTType *typecheck_exp(TypeCtx *ctx, idset & decl, idset & def, ASTExpNode *node
             throw new UndefinedException();
 
         // Just look up type
-        type = ctx->getSymbol(id_exp->getId());
+        type = func->getLocalType(id_exp->getId());
     }
     // Unary operator
     else if (ASTUnop *unop_exp = dynamic_cast<ASTUnop *>(node)) {
         // Get operand types
-        ASTType *t = typecheck_exp(ctx, decl, def, unop_exp->getExp());
+        ASTType *t = typecheck_exp(func, decl, def, unop_exp->getExp());
 
         // Types must be appropriate for operation
         switch(unop_exp->getOp()) {
@@ -85,8 +85,8 @@ ASTType *typecheck_exp(TypeCtx *ctx, idset & decl, idset & def, ASTExpNode *node
     // Binary operator
     else if (ASTBinop *binop_exp = dynamic_cast<ASTBinop *>(node)) {
         // Get operand types
-        ASTType *t1 = typecheck_exp(ctx, decl, def, binop_exp->getE1());
-        ASTType *t2 = typecheck_exp(ctx, decl, def, binop_exp->getE1());
+        ASTType *t1 = typecheck_exp(func, decl, def, binop_exp->getE1());
+        ASTType *t2 = typecheck_exp(func, decl, def, binop_exp->getE1());
 
         // Types must be appropriate for operation
         switch(binop_exp->getOp()) {
@@ -132,14 +132,14 @@ ASTType *typecheck_exp(TypeCtx *ctx, idset & decl, idset & def, ASTExpNode *node
     return type;
 }
 
-void typecheck_stmts(TypeCtx *ctx, idset & decl, idset & def, ASTStmtSeqNode *seq_node) {
+void typecheck_stmts(FunctionInfo *func, idset & decl, idset & def, ASTStmtSeqNode *seq_node) {
     while (seq_node != NULL) {
-        typecheck_stmt(ctx, decl, def, seq_node->getHead());
+        typecheck_stmt(func, decl, def, seq_node->getHead());
         seq_node = seq_node->getTail();
     }
 }
 
-void typecheck_stmt(TypeCtx *ctx, idset & decl, idset & def, ASTStmtNode *head) {
+void typecheck_stmt(FunctionInfo *func, idset & decl, idset & def, ASTStmtNode *head) {
     // If the first node is a variable declaration, we need to declare and
     // possibly define it in the rest of the code. Need to check the type
     // before marking as declared, in case the definition tries to be
@@ -155,7 +155,7 @@ void typecheck_stmt(TypeCtx *ctx, idset & decl, idset & def, ASTStmtNode *head) 
 
         // If there is a definition, check the type and mark as defined
         if (decl_exp) {
-            ASTType *exp_type = typecheck_exp(ctx, decl, def, decl_exp);
+            ASTType *exp_type = typecheck_exp(func, decl, def, decl_exp);
 
             if (!exp_type->equal(decl_type))
                 throw new IllegalTypeException();
@@ -165,7 +165,7 @@ void typecheck_stmt(TypeCtx *ctx, idset & decl, idset & def, ASTStmtNode *head) 
 
         // Mark as declared, store the type
         decl.insert(decl_stmt->getId());
-        ctx->setSymbol(decl_stmt->getId(), decl_type); // TODO declareSymbol
+        func->setLocalType(decl_stmt->getId(), decl_type); // TODO declareSymbol
     }
     // Variable assignment. Mark as defined and check the rest of the code
     else if (ASTVarDefnStmt *defn_stmt = dynamic_cast<ASTVarDefnStmt *>(head)) {
@@ -173,8 +173,8 @@ void typecheck_stmt(TypeCtx *ctx, idset & decl, idset & def, ASTStmtNode *head) 
         if (decl.find(defn_stmt->getId()) == decl.end())
             throw new UndeclaredException();
 
-        ASTType *decl_type = ctx->getSymbol(defn_stmt->getId());
-        ASTType *exp_type = typecheck_exp(ctx, decl, def, defn_stmt->getExp());
+        ASTType *decl_type = func->getLocalType(defn_stmt->getId());
+        ASTType *exp_type = typecheck_exp(func, decl, def, defn_stmt->getExp());
 
         if (!exp_type->equal(decl_type))
             throw new IllegalTypeException();
@@ -185,7 +185,7 @@ void typecheck_stmt(TypeCtx *ctx, idset & decl, idset & def, ASTStmtNode *head) 
     // Return statement
     else if (ASTReturnStmt *ret_node = dynamic_cast<ASTReturnStmt *>(head)) {
         ASTType *expected = ASTIntegerType::get();
-        ASTType *exp_type = typecheck_exp(ctx, decl, def, ret_node->getExp());
+        ASTType *exp_type = typecheck_exp(func, decl, def, ret_node->getExp());
 
         if (!exp_type->equal(expected))
             throw new IllegalTypeException();
@@ -203,7 +203,7 @@ void typecheck_stmt(TypeCtx *ctx, idset & decl, idset & def, ASTStmtNode *head) 
             idset scope_decl = decl;
             idset scope_def = def;
 
-            typecheck_stmts(ctx, scope_decl, scope_def, scope_node->getBody());
+            typecheck_stmts(func, scope_decl, scope_def, scope_node->getBody());
 
             // Definitions of variables that were declared outside the scope
             // propogate out
@@ -218,7 +218,7 @@ void typecheck_stmt(TypeCtx *ctx, idset & decl, idset & def, ASTStmtNode *head) 
     }
     else if (ASTIfStmt *if_node = dynamic_cast<ASTIfStmt *>(head)) {
         // Condition must be a boolean
-        ASTType *cond_type = typecheck_exp(ctx, decl, def, if_node->getCond());
+        ASTType *cond_type = typecheck_exp(func, decl, def, if_node->getCond());
 
         if (!cond_type->equal(ASTBooleanType::get()))
             throw new IllegalTypeException();
@@ -229,10 +229,10 @@ void typecheck_stmt(TypeCtx *ctx, idset & decl, idset & def, ASTStmtNode *head) 
         idset scope_decl_right = decl;
         idset scope_def_right = def;
 
-        typecheck_stmts(ctx, scope_decl_left, scope_def_left, if_node->getTrueStmt());
+        typecheck_stmts(func, scope_decl_left, scope_def_left, if_node->getTrueStmt());
 
         if (if_node->getFalseStmt())
-            typecheck_stmts(ctx, scope_decl_right, scope_def_right, if_node->getFalseStmt());
+            typecheck_stmts(func, scope_decl_right, scope_def_right, if_node->getFalseStmt());
 
         // Definitions of variables that were declared outside the if statement
         // and defined by BOTH branches propogate out

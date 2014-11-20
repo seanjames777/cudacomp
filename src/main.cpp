@@ -43,12 +43,12 @@ int main(int argc, char *argv[]) {
     if (ASTFunDefn *fun = dynamic_cast<ASTFunDefn *>(node->getHead())) {
         ASTStmtSeqNode *stmts = fun->getBody();
 
-        TypeCtx typeCtx;
+        FunctionInfo funInfo(fun->getSignature());
 
         try {
             Statics::idset decl;
             Statics::idset def;
-            Statics::typecheck_stmts(&typeCtx, decl, def, stmts);
+            Statics::typecheck_stmts(&funInfo, decl, def, stmts);
         }
         catch (Statics::UndefinedException *except) {
             std::cout << "undefined" << std::endl;
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
             return -2;
         }
 
-        Codegen::CodegenCtx cgCtx(args.emit_device, &typeCtx);
+        Codegen::CodegenCtx cgCtx(args.emit_device, &funInfo);
         Codegen::codegen_stmts(&cgCtx, stmts);
 
         cgCtx.emit(args.out_file);
