@@ -106,6 +106,12 @@ public:
     Value *getOrCreateSymbol(std::string symbol);
 
     /**
+     * @brief Create a new temporary value which will be alloca'd in the
+     * definition block for mem2reg to find.
+     */
+    Value *createTemp(Type *type);
+
+    /**
      * @brief Mark a function as a GPU kernel
      */
     void markKernel(Function *kernel);

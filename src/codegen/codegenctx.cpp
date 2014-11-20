@@ -178,4 +178,8 @@ Value *CodegenCtx::getOrCreateSymbol(std::string id) {
     return symbols.get(id);
 }
 
+Value *CodegenCtx::createTemp(Type *type) {
+    return def_builder->CreateAlloca(type);
+}
+
 }

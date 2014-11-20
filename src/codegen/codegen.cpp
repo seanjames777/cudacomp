@@ -84,7 +84,7 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
         // In device mode, add a pointer to a new temp to get the return value
         if (ctx->getEmitDevice()) {
             // TODO use an address of instead maybe
-            ret_val = builder->CreateAlloca(convertType(funDefn->getReturnType()));
+            ret_val = ctx->createTemp(convertType(funDefn->getReturnType()));
             args.push_back(ret_val);
         }
 
