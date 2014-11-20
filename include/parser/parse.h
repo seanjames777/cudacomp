@@ -10,11 +10,11 @@
 #define __PARSE_H
 
 #include <defs.h>
-#include <ast/stmt/aststmtnode.h>
+#include <ast/top/asttopnode.h>
 
 namespace Parser {
 
-ASTStmtSeqNode *parse(const char *file);
+ASTTopSeqNode *parse(const char *file);
 
 };
 

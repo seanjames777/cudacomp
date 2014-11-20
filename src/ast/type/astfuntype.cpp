@@ -49,4 +49,20 @@ bool ASTFunType::equal(ASTType *other_type) {
 }
 
 void ASTFunType::print(std::ostream & ss) {
+    returnType->print(ss);
+
+    ss << "(";
+
+    ASTArgSeqNode *arg = args;
+
+    while (arg != NULL) {
+        arg->print(ss);
+
+        arg = arg->getTail();
+
+        if (arg != NULL)
+            ss << ", ";
+    }
+
+    ss << ")";
 }

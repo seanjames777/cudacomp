@@ -31,6 +31,8 @@ public:
 
     std::string getName();
 
+    void print(std::ostream & ss) override;
+
 };
 
 typedef ASTSeqNode<ASTArg> ASTArgSeqNode;

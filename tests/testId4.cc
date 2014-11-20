@@ -1,3 +1,5 @@
-int x;
-x = 10;
-return x * 2;
+int main() {
+    int x;
+    x = 10;
+    return x * 2;
+}

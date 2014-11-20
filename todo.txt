@@ -9,3 +9,6 @@ TODO:
     structs
     pack kernels into executable
     test else if
+    decide how to print ASTs
+    maybe an AST visitor
+    maybe use switches to match against types because the compiler will warn

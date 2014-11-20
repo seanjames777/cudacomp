@@ -17,28 +17,36 @@
 #include <ast/stmt/astscope.h>
 #include <ast/expr/astunop.h>
 #include <ast/stmt/astifstmt.h>
+#include <ast/top/asttopnode.h>
+#include <ast/top/astfundefn.h>
+#include <ast/type/astfuntype.h>
+#include <ast/type/astarg.h>
 
 #define YYERROR_VERBOSE
 
 int yylex(void);
 
-    int yywrap() {
-        return 1;
-    }
+int yywrap() {
+    return 1;
+}
 
-    void yyerror(ASTStmtSeqNode **root, const char *str) {
-        fprintf(stderr, "Error: %s\n", str);
-    }
+void yyerror(ASTTopSeqNode **root, const char *str) {
+    fprintf(stderr, "Error: %s\n", str);
+}
 
 %}
 
-%parse-param { ASTStmtSeqNode **root }
+%parse-param { ASTTopSeqNode **root }
 
 %union {
+    ASTTopNode *top;
+    ASTTopSeqNode *top_seq;
     ASTStmtNode *stmt;
-    ASTStmtSeqNode *seq;
+    ASTStmtSeqNode *stmt_seq;
     ASTExpNode *exp;
     ASTType *type;
+    ASTArg *arg;
+    ASTArgSeqNode *arg_seq;
     int number;
     char *string;
     bool boolean;
@@ -48,17 +56,22 @@ int yylex(void);
 %token <string> IDENT
 %token <boolean> TRUE FALSE
 %token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR NOT BNOT
-%token ASSIGN SEMI
+%token ASSIGN SEMI COMMA
 %token INT BOOL
 %token RETURN IF ELSE
 %token LPAREN RPAREN LBRACE RBRACE
 %token EQ NEQ LEQ GEQ LT GT
 
 %type <exp> exp
-%type <stmt> stmt
-%type <seq> stmt_list
 %type <type> type
-%type <seq> elseopt
+%type <stmt> stmt
+%type <stmt_seq> stmt_list
+%type <stmt_seq> elseopt
+%type <arg> param
+%type <arg_seq> param_list param_list_follow
+%type <top> top
+%type <top_seq> top_list
+%type <top> fundefn
 
 %right ASSIGN
 %left OR
@@ -74,13 +87,23 @@ int yylex(void);
 %right NOT BNOT UMINUS
 %nonassoc LPAREN RPAREN
 
-%start top
+%start program
 
 %%
 
 top:
-    stmt_list                         { *root = $1; }
+    fundefn                           { $$ = $1; }
   ;
+
+top_list:
+    /* empty */                       { $$ = NULL; }
+  | top top_list                      { $$ = new ASTTopSeqNode($1, $2); }
+  ;
+
+program:
+    top_list                          { *root = $1; }
+  ;
+
 
 stmt_list:
     /* empty */                       { $$ = NULL; }
@@ -133,4 +156,23 @@ stmt:
 elseopt:
     /* empty */                       { $$ = NULL; }
   | ELSE stmt                         { $$ = new ASTStmtSeqNode($2, NULL); }
+  ;
+
+param:
+    type IDENT                        { $$ = new ASTArg($1, std::string($2)); free($2); }
+  ;
+
+param_list_follow:
+    /* empty */                       { $$ = NULL; }
+  | COMMA param param_list_follow     { $$ = new ASTArgSeqNode($2, $3); }
+  ;
+
+param_list:
+    /* empty */                       { $$ = NULL; }
+  | param param_list_follow           { $$ = new ASTArgSeqNode($1, $2); }
+  ;
+
+fundefn:
+    type IDENT LPAREN param_list RPAREN LBRACE stmt_list RBRACE
+    { $$ = new ASTFunDefn($2, new ASTFunType($1, $4), $7); }
   ;

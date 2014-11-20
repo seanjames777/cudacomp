@@ -1,8 +1,10 @@
-bool c = true;
+int main() {
+    bool c = true;
 
-if (c) {
-    return 10;
-}
-else {
-    return 20;
+    if (c) {
+        return 10;
+    }
+    else {
+        return 20;
+    }
 }

@@ -11,6 +11,7 @@
 #include <statics/typecheck.h>
 #include <codegen/codegen.h>
 #include <statics/returncheck.h>
+#include <ast/top/astfundefn.h> // TODO
 
 struct CCArgs {
     bool  emit_device;
@@ -34,46 +35,52 @@ void parseArgs(int argc, char *argv[]) {
 int main(int argc, char *argv[]) {
     parseArgs(argc, argv);
 
-    ASTStmtSeqNode *node = Parser::parse(args.in_file);
-
-    //node->print(std::cout);
+    ASTTopSeqNode *node = Parser::parse(args.in_file);
 
     if (!node)
         return -1;
 
-    TypeCtx typeCtx;
+    if (ASTFunDefn *fun = dynamic_cast<ASTFunDefn *>(node->getHead())) {
+        ASTStmtSeqNode *stmts = fun->getBody();
 
-    try {
-        Statics::idset decl;
-        Statics::idset def;
-        Statics::typecheck_stmts(&typeCtx, decl, def, node);
-    }
-    catch (Statics::UndefinedException *except) {
-        std::cout << "undefined" << std::endl;
-        return -2;
-    }
-    catch (Statics::UndeclaredException *except) {
-        std::cout << "undeclared" << std::endl;
-        return -2;
-    }
-    catch (Statics::RedeclaredException *except) {
-        std::cout << "redeclared" << std::endl;
-        return -2;
-    }
-    catch (Statics::IllegalTypeException *except) {
-        std::cout << "illegaltype" << std::endl;
-        return -2;
-    }
+        TypeCtx typeCtx;
 
-    if (!Statics::returncheck_stmts(node)) {
-        std::cout << "noreturn" << std::endl;
+        try {
+            Statics::idset decl;
+            Statics::idset def;
+            Statics::typecheck_stmts(&typeCtx, decl, def, stmts);
+        }
+        catch (Statics::UndefinedException *except) {
+            std::cout << "undefined" << std::endl;
+            return -2;
+        }
+        catch (Statics::UndeclaredException *except) {
+            std::cout << "undeclared" << std::endl;
+            return -2;
+        }
+        catch (Statics::RedeclaredException *except) {
+            std::cout << "redeclared" << std::endl;
+            return -2;
+        }
+        catch (Statics::IllegalTypeException *except) {
+            std::cout << "illegaltype" << std::endl;
+            return -2;
+        }
+
+        if (!Statics::returncheck_stmts(stmts)) {
+            std::cout << "noreturn" << std::endl;
+            return -2;
+        }
+
+        CodegenCtx cgCtx(args.emit_device, &typeCtx);
+        Codegen::codegen_stmts(&cgCtx, stmts);
+
+        cgCtx.emit(args.out_file);
+    }
+    else {
+        std::cout << "nomain" << std::endl;
         return -2;
     }
-
-    CodegenCtx cgCtx(args.emit_device, &typeCtx);
-    Codegen::codegen_stmts(&cgCtx, node);
-
-    cgCtx.emit(args.out_file);
 
     delete node;
 

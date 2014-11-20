@@ -1,3 +1,5 @@
-int x;
-int x;
-return x;
+int main() {
+    int x;
+    int x;
+    return x;
+}

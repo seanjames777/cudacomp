@@ -1,5 +1,7 @@
-{
-    int y = 10;
+int main() {
+    {
+        int y = 10;
 
-    return y;
+        return y;
+    }
 }

@@ -1,6 +1,8 @@
-bool b = true;
+int main() {
+    bool b = true;
 
-if (b)
-    return 10;
-else
-    return 20;
+    if (b)
+        return 10;
+    else
+        return 20;
+}

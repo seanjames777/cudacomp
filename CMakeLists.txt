@@ -38,6 +38,8 @@ add_executable(cc
     src/ast/stmt/aststmtnode.cpp
     src/ast/stmt/astvardeclstmt.cpp
     src/ast/stmt/astvardefnstmt.cpp
+    src/ast/top/asttopnode.cpp
+    src/ast/top/astfundefn.cpp
     src/ast/type/astbooleantype.cpp
     src/ast/type/astarg.cpp
     src/ast/type/astfuntype.cpp

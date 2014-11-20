@@ -1,1 +1,3 @@
-return x;
+int main() {
+    return x;
+}

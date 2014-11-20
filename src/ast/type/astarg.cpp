@@ -19,3 +19,9 @@ ASTType *ASTArg::getType() {
 std::string ASTArg::getName() {
     return name;
 }
+
+void ASTArg::print(std::ostream & ss) {
+    ss << "param(";
+    type->print(ss);
+    ss << ", " << name << ")";
+}

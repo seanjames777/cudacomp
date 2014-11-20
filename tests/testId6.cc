@@ -1,4 +1,6 @@
-int x = 10;
-int y = x * x;
+int main() {
+    int x = 10;
+    int y = x * x;
 
-return y;
+    return y;
+}

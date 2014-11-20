@@ -1,4 +1,6 @@
-if (true)
-    return 10;
+int main() {
+    if (true)
+        return 10;
 
-return 20;
+    return 20;
+}

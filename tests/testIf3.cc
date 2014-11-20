@@ -1,12 +1,14 @@
-bool b = true;
+int main() {
+    bool b = true;
 
-int x;
+    int x;
 
-if (b) {
-    x = 10;
+    if (b) {
+        x = 10;
+    }
+    else {
+        x = 20;
+    }
+
+    return x;
 }
-else {
-    x = 20;
-}
-
-return x;

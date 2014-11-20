@@ -1,12 +1,14 @@
-int f0 = 0;
-int f1 = 1;
-int f2 = f0 + f1;
-int f3 = f1 + f2;
-int f4 = f2 + f3;
-int f5 = f3 + f4;
-int f6 = f4 + f5;
-int f7 = f5 + f6;
-int f8 = f6 + f7;
-int f9 = f7 + f8;
+int main() {
+    int f0 = 0;
+    int f1 = 1;
+    int f2 = f0 + f1;
+    int f3 = f1 + f2;
+    int f4 = f2 + f3;
+    int f5 = f3 + f4;
+    int f6 = f4 + f5;
+    int f7 = f5 + f6;
+    int f8 = f6 + f7;
+    int f9 = f7 + f8;
 
-return f9;
+    return f9;
+}

@@ -1,7 +1,9 @@
-bool b = true;
+int main() {
+    bool b = true;
 
-if (b) {
-    return 10;
+    if (b) {
+        return 10;
+    }
+
+    return 20;
 }
-
-return 20;

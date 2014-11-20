@@ -1,4 +1,6 @@
 %{
+#include <iostream>
+#include <string>
 #include <ast/expr/astexpnode.h>
 #include <ast/stmt/aststmtnode.h>
 #include <ast/expr/astinteger.h>
@@ -10,6 +12,15 @@
 #include <ast/type/astintegertype.h>
 #include <ast/stmt/astvardeclstmt.h>
 #include <ast/stmt/astvardefnstmt.h>
+#include <ast/type/astbooleantype.h>
+#include <ast/expr/astboolean.h>
+#include <ast/stmt/astscope.h>
+#include <ast/expr/astunop.h>
+#include <ast/stmt/astifstmt.h>
+#include <ast/top/asttopnode.h>
+#include <ast/top/astfundefn.h>
+#include <ast/type/astfuntype.h>
+#include <ast/type/astarg.h>
 
 #include "parser.hpp"
 %}
@@ -26,6 +37,7 @@
 
 [0-9]+                  { yylval.number = atoi(yytext); return NUMBER; }
 [a-zA-Z][a-zA-Z0-9]*    { yylval.string = strdup(yytext); return IDENT; }
+","                     { return COMMA; }
 "+"                     { return PLUS; }
 "*"                     { return TIMES; }
 "-"                     { return MINUS; }
