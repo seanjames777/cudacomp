@@ -8,10 +8,8 @@
 
 #include <defs.h>
 #include <parser/parse.h>
-#include <statics/typecheck.h>
 #include <codegen/codegen.h>
-#include <statics/returncheck.h>
-#include <ast/top/astfundefn.h> // TODO
+#include <statics/statics.h>
 
 struct CCArgs {
     bool  emit_device;
@@ -40,47 +38,46 @@ int main(int argc, char *argv[]) {
     if (!node)
         return -1;
 
-    if (ASTFunDefn *fun = dynamic_cast<ASTFunDefn *>(node->getHead())) {
-        ASTStmtSeqNode *stmts = fun->getBody();
+    ModuleInfo moduleInfo;
 
-        FunctionInfo funInfo(fun->getSignature());
-
-        try {
-            Statics::idset decl;
-            Statics::idset def;
-            Statics::typecheck_stmts(&funInfo, decl, def, stmts);
-        }
-        catch (Statics::UndefinedException *except) {
-            std::cout << "undefined" << std::endl;
-            return -2;
-        }
-        catch (Statics::UndeclaredException *except) {
-            std::cout << "undeclared" << std::endl;
-            return -2;
-        }
-        catch (Statics::RedeclaredException *except) {
-            std::cout << "redeclared" << std::endl;
-            return -2;
-        }
-        catch (Statics::IllegalTypeException *except) {
-            std::cout << "illegaltype" << std::endl;
-            return -2;
-        }
-
-        if (!Statics::returncheck_stmts(stmts)) {
-            std::cout << "noreturn" << std::endl;
-            return -2;
-        }
-
-        Codegen::CodegenCtx cgCtx(args.emit_device, &funInfo);
-        Codegen::codegen_stmts(&cgCtx, stmts);
-
-        cgCtx.emit(args.out_file);
+    try {
+        Statics::run(node, &moduleInfo);
     }
-    else {
-        std::cout << "nomain" << std::endl;
+    catch (Statics::UndefinedException *except) {
+        std::cout << "undefined" << std::endl;
         return -2;
     }
+    catch (Statics::UndeclaredException *except) {
+        std::cout << "undeclared" << std::endl;
+        return -2;
+    }
+    catch (Statics::RedeclaredException *except) {
+        std::cout << "redeclared" << std::endl;
+        return -2;
+    }
+    catch (Statics::IllegalTypeException *except) {
+        std::cout << "illegaltype" << std::endl;
+        return -2;
+    }
+    catch (Statics::NoReturnException *except) {
+        std::cout << "noreturn" << std::endl;
+        return -2;
+    }
+
+    if (args.out_file) {
+        std::ofstream out(args.out_file, std::ios::out);
+
+        if (!out) {
+            std::cout << "Error opening " << args.out_file << std::endl;
+            return -1;
+        }
+
+        Codegen::codegen_tops(&moduleInfo, node, args.emit_device, out);
+
+        out.close();
+    }
+    else
+        Codegen::codegen_tops(&moduleInfo, node, args.emit_device, std::cout);
 
     delete node;
 

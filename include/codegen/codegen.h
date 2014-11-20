@@ -12,6 +12,10 @@
 #include <codegen/codegenctx.h>
 #include <ast/expr/astexpnode.h>
 #include <ast/stmt/aststmtnode.h>
+#include <statics/moduleinfo.h>
+#include <statics/functioninfo.h>
+#include <ast/top/asttopnode.h>
+#include <ast/top/astfundefn.h>
 
 namespace Codegen {
 
@@ -20,6 +24,10 @@ namespace Codegen {
     void codegen_stmts(CodegenCtx *ctx, ASTStmtSeqNode *nodes);
 
     bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *node);
+
+    void codegen_tops(ModuleInfo *module, ASTTopSeqNode *nodes, bool emitDevice, std::ostream & out);
+
+    void codegen_top(ModuleInfo *module, ASTTopNode *node, bool emitDevice, std::ostream & out);
 
 }
 

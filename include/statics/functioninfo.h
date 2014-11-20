@@ -18,7 +18,7 @@ class FunctionInfo {
 private:
 
     ASTFunType *signature;
-    SymbolTable<ASTType *> locals;
+    SymbolTable<ASTType *> locals; // including arguments
 
 public:
 
@@ -26,7 +26,7 @@ public:
 
     ASTType *getLocalType(std::string id);
 
-    void setLocalType(std::string id, ASTType *type);
+    void addLocal(std::string id, ASTType *type);
 
 };
 

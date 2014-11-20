@@ -50,6 +50,7 @@ add_executable(cc
     src/codegen/converttype.cpp
     src/main.cpp
     src/parser/parse.cpp
+    src/statics/statics.cpp
     src/statics/typecheck.cpp
     src/statics/functioninfo.cpp
     src/statics/moduleinfo.cpp

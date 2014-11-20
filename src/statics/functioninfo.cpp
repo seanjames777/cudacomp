@@ -15,6 +15,6 @@ ASTType *FunctionInfo::getLocalType(std::string id) {
     return locals.get(id);
 }
 
-void FunctionInfo::setLocalType(std::string id, ASTType *type) {
+void FunctionInfo::addLocal(std::string id, ASTType *type) {
     locals.set(id, type);
 }

@@ -18,6 +18,7 @@
 #include <ast/stmt/astscope.h>
 #include <ast/stmt/astifstmt.h>
 #include <ast/expr/astboolean.h>
+#include <ast/top/astfundefn.h>
 
 namespace Statics {
 
@@ -41,7 +42,7 @@ IllegalTypeException::IllegalTypeException()
 {
 }
 
-ASTType *typecheck_exp(FunctionInfo *func, idset & decl, idset & def, ASTExpNode *node) {
+ASTType *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & def, ASTExpNode *node) {
     ASTType *type;
 
     // Integer constant
@@ -65,7 +66,7 @@ ASTType *typecheck_exp(FunctionInfo *func, idset & decl, idset & def, ASTExpNode
     // Unary operator
     else if (ASTUnop *unop_exp = dynamic_cast<ASTUnop *>(node)) {
         // Get operand types
-        ASTType *t = typecheck_exp(func, decl, def, unop_exp->getExp());
+        ASTType *t = typecheck_exp(mod, func, decl, def, unop_exp->getExp());
 
         // Types must be appropriate for operation
         switch(unop_exp->getOp()) {
@@ -85,8 +86,8 @@ ASTType *typecheck_exp(FunctionInfo *func, idset & decl, idset & def, ASTExpNode
     // Binary operator
     else if (ASTBinop *binop_exp = dynamic_cast<ASTBinop *>(node)) {
         // Get operand types
-        ASTType *t1 = typecheck_exp(func, decl, def, binop_exp->getE1());
-        ASTType *t2 = typecheck_exp(func, decl, def, binop_exp->getE1());
+        ASTType *t1 = typecheck_exp(mod, func, decl, def, binop_exp->getE1());
+        ASTType *t2 = typecheck_exp(mod, func, decl, def, binop_exp->getE1());
 
         // Types must be appropriate for operation
         switch(binop_exp->getOp()) {
@@ -132,14 +133,14 @@ ASTType *typecheck_exp(FunctionInfo *func, idset & decl, idset & def, ASTExpNode
     return type;
 }
 
-void typecheck_stmts(FunctionInfo *func, idset & decl, idset & def, ASTStmtSeqNode *seq_node) {
+void typecheck_stmts(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & def, ASTStmtSeqNode *seq_node) {
     while (seq_node != NULL) {
-        typecheck_stmt(func, decl, def, seq_node->getHead());
+        typecheck_stmt(mod, func, decl, def, seq_node->getHead());
         seq_node = seq_node->getTail();
     }
 }
 
-void typecheck_stmt(FunctionInfo *func, idset & decl, idset & def, ASTStmtNode *head) {
+void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & def, ASTStmtNode *head) {
     // If the first node is a variable declaration, we need to declare and
     // possibly define it in the rest of the code. Need to check the type
     // before marking as declared, in case the definition tries to be
@@ -155,7 +156,7 @@ void typecheck_stmt(FunctionInfo *func, idset & decl, idset & def, ASTStmtNode *
 
         // If there is a definition, check the type and mark as defined
         if (decl_exp) {
-            ASTType *exp_type = typecheck_exp(func, decl, def, decl_exp);
+            ASTType *exp_type = typecheck_exp(mod, func, decl, def, decl_exp);
 
             if (!exp_type->equal(decl_type))
                 throw new IllegalTypeException();
@@ -165,7 +166,7 @@ void typecheck_stmt(FunctionInfo *func, idset & decl, idset & def, ASTStmtNode *
 
         // Mark as declared, store the type
         decl.insert(decl_stmt->getId());
-        func->setLocalType(decl_stmt->getId(), decl_type); // TODO declareSymbol
+        func->addLocal(decl_stmt->getId(), decl_type); // TODO declareSymbol
     }
     // Variable assignment. Mark as defined and check the rest of the code
     else if (ASTVarDefnStmt *defn_stmt = dynamic_cast<ASTVarDefnStmt *>(head)) {
@@ -174,7 +175,7 @@ void typecheck_stmt(FunctionInfo *func, idset & decl, idset & def, ASTStmtNode *
             throw new UndeclaredException();
 
         ASTType *decl_type = func->getLocalType(defn_stmt->getId());
-        ASTType *exp_type = typecheck_exp(func, decl, def, defn_stmt->getExp());
+        ASTType *exp_type = typecheck_exp(mod, func, decl, def, defn_stmt->getExp());
 
         if (!exp_type->equal(decl_type))
             throw new IllegalTypeException();
@@ -185,7 +186,7 @@ void typecheck_stmt(FunctionInfo *func, idset & decl, idset & def, ASTStmtNode *
     // Return statement
     else if (ASTReturnStmt *ret_node = dynamic_cast<ASTReturnStmt *>(head)) {
         ASTType *expected = ASTIntegerType::get();
-        ASTType *exp_type = typecheck_exp(func, decl, def, ret_node->getExp());
+        ASTType *exp_type = typecheck_exp(mod, func, decl, def, ret_node->getExp());
 
         if (!exp_type->equal(expected))
             throw new IllegalTypeException();
@@ -203,7 +204,7 @@ void typecheck_stmt(FunctionInfo *func, idset & decl, idset & def, ASTStmtNode *
             idset scope_decl = decl;
             idset scope_def = def;
 
-            typecheck_stmts(func, scope_decl, scope_def, scope_node->getBody());
+            typecheck_stmts(mod, func, scope_decl, scope_def, scope_node->getBody());
 
             // Definitions of variables that were declared outside the scope
             // propogate out
@@ -218,7 +219,7 @@ void typecheck_stmt(FunctionInfo *func, idset & decl, idset & def, ASTStmtNode *
     }
     else if (ASTIfStmt *if_node = dynamic_cast<ASTIfStmt *>(head)) {
         // Condition must be a boolean
-        ASTType *cond_type = typecheck_exp(func, decl, def, if_node->getCond());
+        ASTType *cond_type = typecheck_exp(mod, func, decl, def, if_node->getCond());
 
         if (!cond_type->equal(ASTBooleanType::get()))
             throw new IllegalTypeException();
@@ -229,10 +230,10 @@ void typecheck_stmt(FunctionInfo *func, idset & decl, idset & def, ASTStmtNode *
         idset scope_decl_right = decl;
         idset scope_def_right = def;
 
-        typecheck_stmts(func, scope_decl_left, scope_def_left, if_node->getTrueStmt());
+        typecheck_stmts(mod, func, scope_decl_left, scope_def_left, if_node->getTrueStmt());
 
         if (if_node->getFalseStmt())
-            typecheck_stmts(func, scope_decl_right, scope_def_right, if_node->getFalseStmt());
+            typecheck_stmts(mod, func, scope_decl_right, scope_def_right, if_node->getFalseStmt());
 
         // Definitions of variables that were declared outside the if statement
         // and defined by BOTH branches propogate out
@@ -249,6 +250,37 @@ void typecheck_stmt(FunctionInfo *func, idset & decl, idset & def, ASTStmtNode *
             std::inserter(new_def, new_def.end()));
 
         def = new_def;
+    }
+    else
+        throw new ASTMalformedException();
+}
+
+void typecheck_tops(ModuleInfo *mod, ASTTopSeqNode *seq_node) {
+    while (seq_node != NULL) {
+        typecheck_top(mod, seq_node->getHead());
+        seq_node = seq_node->getTail();
+    }
+}
+
+void typecheck_top(ModuleInfo *mod, ASTTopNode *node) {
+    if (ASTFunDefn *funDefn = dynamic_cast<ASTFunDefn *>(node)) {
+        // Allocate space for information about this function
+        FunctionInfo *funInfo = new FunctionInfo(funDefn->getSignature());
+        mod->addFunction(funDefn->getName(), funInfo);
+
+        // Add all arguments to the local symbol table
+        ASTArgSeqNode *args = funDefn->getSignature()->getArgs();
+
+        while (args != NULL) {
+            ASTArg *arg = args->getHead();
+            funInfo->addLocal(arg->getName(), arg->getType());
+            args = args->getTail();
+        }
+
+        idset decl, def;
+
+        // Check the function body, building the local symbol table in the process
+        typecheck_stmts(mod, funInfo, decl, def, funDefn->getBody());
     }
     else
         throw new ASTMalformedException();

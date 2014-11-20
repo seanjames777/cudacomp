@@ -9,9 +9,11 @@
 #ifndef __TYPECHECK_H
 #define __TYPECHECK_H
 
+#include <statics/moduleinfo.h>
 #include <statics/functioninfo.h>
 #include <ast/stmt/aststmtnode.h>
 #include <ast/expr/astexpnode.h>
+#include <ast/top/asttopnode.h>
 #include <ast/type/asttype.h>
 #include <stdexcept>
 
@@ -39,11 +41,15 @@ namespace Statics {
 
     typedef std::unordered_set<std::string> idset;
 
-    ASTType *typecheck_exp(FunctionInfo *func, idset & decl, idset & def, ASTExpNode *node);
+    ASTType *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & def, ASTExpNode *node);
 
-    void typecheck_stmts(FunctionInfo *func, idset & decl, idset & def, ASTStmtSeqNode *node);
+    void typecheck_stmts(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & def, ASTStmtSeqNode *node);
 
-    void typecheck_stmt(FunctionInfo *func, idset & decl, idset & def, ASTStmtNode *node);
+    void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & def, ASTStmtNode *node);
+
+    void typecheck_tops(ModuleInfo *mod, ASTTopSeqNode *node);
+
+    void typecheck_top(ModuleInfo *mod, ASTTopNode *node);
 
 };
 

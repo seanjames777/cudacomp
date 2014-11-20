@@ -62,7 +62,7 @@ void CodegenCtx::markKernel(Function *kernel) {
     cat->addOperand(node);
 }
 
-void CodegenCtx::emit(char *out_file) {
+void CodegenCtx::emit(std::ostream & out) {
     def_builder->CreateBr(first_bblock);
 
     if (emit_device) {
@@ -75,26 +75,10 @@ void CodegenCtx::emit(char *out_file) {
 
     PassManager pm;
 
-    if (!out_file) {
-        pm.add(createPrintModulePass(outs()));
-        pm.run(*module);
-    }
-    else {
-        std::ofstream out(out_file, std::ios::out);
+    raw_os_ostream outs(out);
+    pm.add(createPrintModulePass(outs));
 
-        if (!out) {
-            // TODO explode
-            return;
-        }
-
-        raw_os_ostream outs(out);
-
-        pm.add(createPrintModulePass(outs));
-
-        pm.run(*module);
-
-        out.close();
-    }
+    pm.run(*module);
 }
 
 Module *CodegenCtx::getModule() {

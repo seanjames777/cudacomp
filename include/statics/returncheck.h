@@ -11,12 +11,32 @@
 #define __RETURNCHECK_H
 
 #include <ast/stmt/aststmtnode.h>
+#include <ast/top/asttopnode.h>
+#include <statics/moduleinfo.h>
+#include <statics/functioninfo.h>
+
+// TODO: Void functions don't require returns
+// TODO: Returns must match function declaration
 
 namespace Statics {
 
-    bool returncheck_stmts(ASTStmtSeqNode *nodes);
+    class NoReturnException : public std::runtime_error {
+    public:
+        NoReturnException();
+    };
 
-    bool returncheck_stmt(ASTStmtNode *node);
+    class IllegalReturnTypeException : public std::runtime_error {
+    public:
+        IllegalReturnTypeException();
+    };
+
+    bool returncheck_stmts(FunctionInfo *func, ASTStmtSeqNode *nodes);
+
+    bool returncheck_stmt(FunctionInfo *func, ASTStmtNode *node);
+
+    void returncheck_tops(ModuleInfo *module, ASTTopSeqNode *nodes);
+
+    void returncheck_top(ModuleInfo *module, ASTTopNode *node);
 
 };
 

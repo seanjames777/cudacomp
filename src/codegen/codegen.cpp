@@ -165,4 +165,26 @@ bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *head) {
     return true;
 }
 
+void codegen_tops(ModuleInfo *module, ASTTopSeqNode *nodes, bool emitDevice, std::ostream & out) {
+    ASTTopSeqNode *node = nodes;
+
+    while (node != NULL) {
+        codegen_top(module, node->getHead(), emitDevice, out);
+        node = node->getTail();
+    }
+}
+
+void codegen_top(ModuleInfo *module, ASTTopNode *node, bool emitDevice, std::ostream & out) {
+    if (ASTFunDefn *funDefn = dynamic_cast<ASTFunDefn *>(node)) {
+        FunctionInfo *func = module->getFunction(funDefn->getName());
+
+        CodegenCtx ctx(emitDevice, func);
+        codegen_stmts(&ctx, funDefn->getBody());
+
+        ctx.emit(out);
+    }
+    else
+        throw new ASTMalformedException();
+}
+
 }

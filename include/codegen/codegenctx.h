@@ -34,7 +34,7 @@ public:
 
     void markKernel(Function *kernel);
 
-    void emit(char *out_file);
+    void emit(std::ostream & out);
 
     Module *getModule();
 
