@@ -129,8 +129,31 @@ ASTType *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset 
 
         if (!func)
             throw new UndeclaredException(call_exp->getId());
+        // TODO: make sure it is eventually defined
+        // TODO: make sure any other declarations/definitions match
 
         ASTFunType *sig = func->getSignature();
+
+        // Check the expressions against the signature
+        ASTExpSeqNode *exprs = call_exp->getArgs();
+        ASTArgSeqNode *args = sig->getArgs();
+
+        while (true) {
+            // Make sure the argument counts match
+            if ((args == NULL || exprs == NULL) && (args != NULL || exprs != NULL))
+                throw new IllegalTypeException(); // TODO maybe a different exception
+            else if (args == NULL && exprs == NULL)
+                break;
+
+            ASTType *exp_type = typecheck_exp(mod, func, decl, def, exprs->getHead());
+            ASTType *arg_type = args->getHead()->getType();
+
+            if (!exp_type->equal(arg_type))
+                throw new IllegalTypeException();
+
+            args = args->getTail();
+            exprs = exprs->getTail();
+        }
 
         // TODO: test argument length mismatch, type mismatch, return type mismatch
         // TODO: actually check that stuff here
@@ -193,7 +216,7 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
     }
     // Return statement
     else if (ASTReturnStmt *ret_node = dynamic_cast<ASTReturnStmt *>(head)) {
-        ASTType *expected = ASTIntegerType::get();
+        ASTType *expected = func->getSignature()->getReturnType();
         ASTType *exp_type = typecheck_exp(mod, func, decl, def, ret_node->getExp());
 
         if (!exp_type->equal(expected))

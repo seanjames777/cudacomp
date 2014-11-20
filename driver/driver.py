@@ -43,8 +43,17 @@ tests = [
     ("../tests/testReturnCheck5.cc", "noreturn"),
     ("../tests/testReturnCheck6.cc", 10),
     ("../tests/testFib1.cc", 34),
-    ("../tests/testCall1.cc", 5)
+    ("../tests/testCall1.cc", 5),
+    ("../tests/testCall2.cc", "illegaltype"),
+    ("../tests/testCall3.cc", "illegaltype"),
+    ("../tests/testCall4.cc", "illegaltype"),
+    ("../tests/testCall5.cc", 5),
+    ("../tests/testCall6.cc", "illegaltype"),
+    ("../tests/testCall7.cc", "illegaltype"),
+    ("../tests/testCall8.cc", 20),
 ]
+
+# TODO: actually test type checking...
 
 #############################
 
