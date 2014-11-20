@@ -2,6 +2,7 @@
 
 import sys
 import subprocess
+import time
 
 ####### CONFIGURATION #######
 
@@ -109,6 +110,7 @@ for (name, expected) in tests:
         else:
             (stat, output) = (cc_stat, cc_out)
         run_shell([ "rm", "-f", "device.ll", "device.ptx", "device" ])
+        time.sleep(1)
 
     if stat == -1 or len(output) == 0:
         print "\033[31;1m    FAILED: unknown error", "\033[0m"
