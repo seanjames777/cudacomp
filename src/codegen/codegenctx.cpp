@@ -49,6 +49,14 @@ void CodegenCtx::emit(std::ostream & out) {
     PassManager pm;
 
     raw_os_ostream outs(out);
+
+    // Replace memory operands with registers where possible
+    pm.add(createPromoteMemoryToRegisterPass());
+
+    // Perform some simple optimizations just to clean up the output IR
+    // TODO
+
+    // Finally, print the result to the output stream
     pm.add(createPrintModulePass(outs));
 
     pm.run(*module);
