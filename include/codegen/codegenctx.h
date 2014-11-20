@@ -12,6 +12,9 @@
 #include <defs.h>
 #include <statics/typectx.h>
 #include <statics/typecheck.h>
+#include <codegen/converttype.h>
+
+namespace Codegen {
 
 class CodegenCtx {
 private:
@@ -44,8 +47,6 @@ public:
 
     IRBuilder<> *getBuilder();
 
-    Type *getType(ASTExpNode *exp);
-
     Value *getSymbol(std::string symbol);
 
     BasicBlock *createBlock();
@@ -54,6 +55,10 @@ public:
 
     void popBlock();
 
+    TypeCtx *getTypes();
+
 };
+
+}
 
 #endif

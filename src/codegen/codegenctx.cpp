@@ -6,6 +6,8 @@
 
 #include <codegen/codegenctx.h>
 
+namespace Codegen {
+
 CodegenCtx::CodegenCtx(bool emit_device, TypeCtx *types)
     : context(getGlobalContext()),
       emit_device(emit_device),
@@ -114,16 +116,18 @@ IRBuilder<> *CodegenCtx::getBuilder() {
     return body_builder;
 }
 
-Type *CodegenCtx::getType(ASTExpNode *exp) {
-    return types->getType(exp);
+TypeCtx *CodegenCtx::getTypes() {
+    return types;
 }
 
 Value *CodegenCtx::getSymbol(std::string id) {
     if (symbols.find(id) == symbols.end()) {
-        Value *instr = def_builder->CreateAlloca(types->getSymbol(id));
+        Value *instr = def_builder->CreateAlloca(convertType(types->getSymbol(id)));
         symbols[id] = instr;
         return instr;
     }
 
     return symbols[id];
+}
+
 }

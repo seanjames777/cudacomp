@@ -5,43 +5,14 @@
  */
 
 #include <statics/typectx.h>
-#include <ast/type/astintegertype.h>
-#include <ast/type/astbooleantype.h>
 
-TypeCtx::TypeCtx()
-    : context(getGlobalContext())
-{
-}
-
-LLVMContext & TypeCtx::getContext() {
-    return context;
-}
-
-void TypeCtx::setType(ASTExpNode *exp, Type *type) {
-    types[exp] = type;
-}
-
-Type *TypeCtx::getType(ASTExpNode *exp) {
-    return types[exp];
+TypeCtx::TypeCtx() {
 }
 
 void TypeCtx::setSymbol(std::string id, ASTType *type) {
     symbols[id] = type;
 }
 
-Type *TypeCtx::getSymbol(std::string id) {
-    return convert_type(symbols[id]);
-}
-
-ASTType *TypeCtx::getSymbolAST(std::string id) {
+ASTType *TypeCtx::getSymbol(std::string id) {
     return symbols[id];
-}
-
-Type *TypeCtx::convert_type(ASTType *type) {
-    if (ASTIntegerType *int_type = dynamic_cast<ASTIntegerType *>(type))
-        return Type::getInt32Ty(context);
-    else if (ASTBooleanType *bool_type = dynamic_cast<ASTBooleanType *>(type))
-        return Type::getInt1Ty(context);
-
-    throw new ASTMalformedException();
 }

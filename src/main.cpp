@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
             return -2;
         }
 
-        CodegenCtx cgCtx(args.emit_device, &typeCtx);
+        Codegen::CodegenCtx cgCtx(args.emit_device, &typeCtx);
         Codegen::codegen_stmts(&cgCtx, stmts);
 
         cgCtx.emit(args.out_file);

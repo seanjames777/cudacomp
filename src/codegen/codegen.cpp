@@ -16,6 +16,8 @@
 #include <ast/stmt/astscope.h>
 #include <ast/stmt/astifstmt.h>
 #include <ast/expr/astboolean.h>
+#include <ast/type/astintegertype.h>
+#include <ast/type/astbooleantype.h>
 
 namespace Codegen {
 
@@ -23,9 +25,9 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
     IRBuilder<> *builder = ctx->getBuilder();
 
     if (ASTInteger *int_exp = dynamic_cast<ASTInteger *>(node))
-        return ConstantInt::get(Type::getInt32Ty(ctx->getContext()), int_exp->getValue());
+        return ConstantInt::get(convertType(ASTIntegerType::get()), int_exp->getValue());
     else if (ASTBoolean *bool_exp = dynamic_cast<ASTBoolean *>(node))
-        return ConstantInt::get(Type::getInt1Ty(ctx->getContext()), (int)bool_exp->getValue());
+        return ConstantInt::get(convertType(ASTBooleanType::get()), (int)bool_exp->getValue());
     else if (ASTUnop *unop_exp = dynamic_cast<ASTUnop *>(node)) {
         Value *v = codegen_exp(ctx, unop_exp->getExp());
 

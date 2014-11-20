@@ -47,6 +47,7 @@ add_executable(cc
     src/ast/type/asttype.cpp
     src/codegen/codegen.cpp
     src/codegen/codegenctx.cpp
+    src/codegen/converttype.cpp
     src/main.cpp
     src/parser/parse.cpp
     src/statics/typecheck.cpp

@@ -60,7 +60,7 @@ ASTType *typecheck_exp(TypeCtx *ctx, idset & decl, idset & def, ASTExpNode *node
             throw new UndefinedException();
 
         // Just look up type
-        type = ctx->getSymbolAST(id_exp->getId());
+        type = ctx->getSymbol(id_exp->getId());
     }
     // Unary operator
     else if (ASTUnop *unop_exp = dynamic_cast<ASTUnop *>(node)) {
@@ -129,9 +129,6 @@ ASTType *typecheck_exp(TypeCtx *ctx, idset & decl, idset & def, ASTExpNode *node
     else
         throw new ASTMalformedException();
 
-    // Store the type for code generation
-    ctx->setType(node, ctx->convert_type(type));
-
     return type;
 }
 
@@ -176,7 +173,7 @@ void typecheck_stmt(TypeCtx *ctx, idset & decl, idset & def, ASTStmtNode *head) 
         if (decl.find(defn_stmt->getId()) == decl.end())
             throw new UndeclaredException();
 
-        ASTType *decl_type = ctx->getSymbolAST(defn_stmt->getId());
+        ASTType *decl_type = ctx->getSymbol(defn_stmt->getId());
         ASTType *exp_type = typecheck_exp(ctx, decl, def, defn_stmt->getExp());
 
         if (!exp_type->equal(decl_type))
