@@ -13,6 +13,9 @@
 #include <string.h>
 #include "device_errors.h"
 
+//#define DEBUG
+
+#ifdef DEBUG
 #define checkCudaErrors(expr) {              \
     CUresult err = (expr);                   \
     if (err != CUDA_SUCCESS) {               \
@@ -21,6 +24,9 @@
         exit(-1);                            \
     }                                        \
 }
+#else
+#define checkCudaErrors(expr) (expr);
+#endif
 
 int main(int argc, char *argv[]) {
     CUdevice device;
@@ -30,19 +36,28 @@ int main(int argc, char *argv[]) {
 
     checkCudaErrors(cuInit(0));
 
+#ifdef DEBUG
     int devCount;
     checkCudaErrors(cuDeviceGetCount(&devCount));
 
+    if (devCount == 0) {
+        printf("No CUDA devices available\n");
+        exit(-1);
+    }
+#endif
+
     checkCudaErrors(cuDeviceGet(&device, 0));
 
+#ifdef DEBUG
     char name[128];
     int devMajor, devMinor;
 
-    if (argc > 1 && strcmp(argv[1], "--debug") == 0) {
+    if (argc > 1 && strcmp(argv[1], "--verbose") == 0) {
         checkCudaErrors(cuDeviceGetName(name, 128, device));
         checkCudaErrors(cuDeviceComputeCapability(&devMajor, &devMinor, device));
         printf("Device: %s (Compute %d.%d)\n", name, devMajor, devMinor);
     }
+#endif
 
     checkCudaErrors(cuCtxCreate(&context, 0, device));
 
