@@ -12,6 +12,11 @@ endif (NOT (DEFINED LLVM_SUFFIX))
 set(LLVM_LLC     "llc${LLVM_SUFFIX}")
 set(LLVM_CONFIG  "llvm-config${LLVM_SUFFIX}")
 
+if (("${PTX_BACKEND}" MATCHES "TRUE") AND (NOT (DEFINED CUDA_PATH)))
+message("Support PTX")
+set(CUDA_PATH    "/Developer/NVIDIA/CUDA-6.5/")
+endif (("${PTX_BACKEND}" MATCHES "TRUE") AND (NOT (DEFINED CUDA_PATH)))
+
 ##############################################
 # END CONFIGURATION                          #
 ##############################################
@@ -36,7 +41,9 @@ ADD_FLEX_BISON_DEPENDENCY(lexer parser)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-include_directories("/Developer/NVIDIA/CUDA-6.5/include/")
+if ("${PTX_BACKEND}" MATCHES "TRUE")
+include_directories("${CUDA_PATH}/include/")
+endif ("${PTX_BACKEND}" MATCHES "TRUE")
 
 # Configure main compiler executable
 
@@ -81,7 +88,7 @@ add_executable(cc
     ${FLEX_lexer_OUTPUTS}
 )
 
-# TODO: -fexceptions hack might break exceptions
+# TODO: -fexceptions hack might break LLVM exceptions
 set_target_properties(cc PROPERTIES COMPILE_FLAGS "-std=c++11 -Wno-deprecated-register ${LLVM_CXX_FLAGS} -fexceptions")
 
 target_link_libraries(cc
@@ -98,9 +105,11 @@ add_library(host_rt
     driver/host_rt.c
 )
 
+if ("${PTX_BACKEND}" MATCHES "TRUE")
 add_library(device_rt
     driver/device_rt.c
 )
+endif ("${PTX_BACKEND}" MATCHES "TRUE")
 
 # Configure documentation
 
@@ -126,4 +135,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/driver/driver.py
 
 install(TARGETS cc DESTINATION bin/)
 install(TARGETS host_rt DESTINATION lib/)
+
+if ("${PTX_BACKEND}" MATCHES "TRUE")
 install(TARGETS device_rt DESTINATION lib/)
+endif ("${PTX_BACKEND}" MATCHES "TRUE")
