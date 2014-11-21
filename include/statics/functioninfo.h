@@ -1,8 +1,7 @@
 /**
  * @file functioninfo.h
  *
- * @brief Information about a function, including its signature and local
- * variable type information.
+ * @brief Information about a function
  *
  * @author Sean James <seanjames777@gmail.com>
  */

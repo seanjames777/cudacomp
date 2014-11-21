@@ -1,8 +1,7 @@
 /**
  * @file moduleinfo.h
  *
- * @brief Information about a module, including function signatures, type
- * definitions, etc.
+ * @brief Information about a module
  *
  * @author Sean James <seanjames777@gmail.com>
  */
