@@ -27,3 +27,7 @@ ASTType *FunctionInfo::getLocalType(std::string id) {
 void FunctionInfo::addLocal(std::string id, ASTType *type) {
     locals.set(id, type);
 }
+
+bool FunctionInfo::hasLocal(std::string id) {
+    return locals.hasSymbol(id);
+}

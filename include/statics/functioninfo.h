@@ -33,6 +33,8 @@ public:
 
     void addLocal(std::string id, ASTType *type);
 
+    bool hasLocal(std::string id);
+
 };
 
 #endif

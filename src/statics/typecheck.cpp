@@ -128,14 +128,21 @@ ASTType *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset 
         }
     }
     else if (ASTCall *call_exp = dynamic_cast<ASTCall *>(node)) {
-        FunctionInfo *func = mod->getFunction(call_exp->getId());
+        FunctionInfo *call_func = mod->getFunction(call_exp->getId());
 
-        if (!func)
+        // Function must have been declared
+        if (!call_func)
             throw new UndeclaredException(call_exp->getId());
+
+        // Function must not have been shadowed by a variable. This leaves room for function
+        // pointers.
+        if (func->hasLocal(call_exp->getId()))
+            throw new IllegalTypeException(); // TODO
+
         // TODO: make sure it is eventually defined
         // TODO: make sure any other declarations/definitions match
 
-        ASTFunType *sig = func->getSignature();
+        ASTFunType *sig = call_func->getSignature();
 
         // Check the expressions against the signature
         ASTExpSeqNode *exprs = call_exp->getArgs();
@@ -148,7 +155,7 @@ ASTType *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset 
             else if (args == NULL && exprs == NULL)
                 break;
 
-            ASTType *exp_type = typecheck_exp(mod, func, decl, def, exprs->getHead());
+            ASTType *exp_type = typecheck_exp(mod, call_func, decl, def, exprs->getHead());
             ASTType *arg_type = args->getHead()->getType();
 
             // TODO: test for void argument
