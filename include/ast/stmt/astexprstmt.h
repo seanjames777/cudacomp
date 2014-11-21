@@ -1,8 +1,7 @@
 /**
  * @file astexprstmt.h
  *
- * @brief Abstract syntax tree expression statement node. Simply a wrapper that
- * execute an expression for its side effects without storing the value.
+ * @brief Abstract syntax tree expression statement node
  *
  * @author Sean James <seanjames777@gmail.com>
  */
@@ -13,6 +12,11 @@
 #include <ast/stmt/aststmtnode.h>
 #include <ast/expr/astexpnode.h>
 
+/**
+ * @brief Expression statement AST node. This is a statement that wraps an
+ * expression, which is evaluated for its effects without assigning the result
+ * to a variable. For example, void function calls use this node.
+ */
 class ASTExprStmt : public ASTStmtNode {
 private:
 
@@ -20,12 +24,26 @@ private:
 
 public:
 
+    /**
+     * @brief Constructor
+     *
+     * @param[in] exp Expression to evaluate
+     */
     ASTExprStmt(ASTExpNode *exp);
 
+    /**
+     * @brief Destructor
+     */
     ~ASTExprStmt();
 
+    /**
+     * @brief Get expression to evaluate
+     */
     ASTExpNode *getExp();
 
+    /**
+     * @copydoc ASTNode::print()
+     */
     void print(std::ostream & ss) override;
 
 };
