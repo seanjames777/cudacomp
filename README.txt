@@ -18,7 +18,8 @@ BUILD:
 
       mkdir build
       cd build
-      cmake -DCMAKE_INSTALL_PREFIX="../out/" -DLLVM_SUFFIX="-mp-3.5" -DPTX_BACKEND="TRUE" -DCUDA_PATH="/Developer/NVIDIA/CUDA-6.5/" ../
+      cmake -DCMAKE_INSTALL_PREFIX="../out/" -DLLVM_SUFFIX="-mp-3.5" \
+          -DPTX_BACKEND="TRUE" -DCUDA_PATH="/Developer/NVIDIA/CUDA-6.5/" ../
       make && make install
 
 TEST:
