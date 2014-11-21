@@ -13,6 +13,10 @@
 #include <statics/symboltable.h>
 #include <statics/functioninfo.h>
 
+/**
+ * @brief Packages all of the information known about a module. A module contains
+ * global variables, functions, struct declarations, type definitions, etc.
+ */
 class ModuleInfo {
 private:
 
@@ -20,10 +24,23 @@ private:
 
 public:
 
+    /**
+     * @brief Constructor
+     */
     ModuleInfo();
 
-    void addFunction(std::string id, FunctionInfo *function);
+    /**
+     * @brief Add a function to the module
+     *
+     * @param[in] function Function information
+     */
+    void addFunction(FunctionInfo *function);
 
+    /**
+     * @brief Get information about a function
+     *
+     * @param[in] id Function name
+     */
     FunctionInfo *getFunction(std::string id);
 
 };

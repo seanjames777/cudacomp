@@ -329,7 +329,7 @@ void typecheck_top(ModuleInfo *mod, ASTTopNode *node) {
     if (ASTFunDefnTop *funDefn = dynamic_cast<ASTFunDefnTop *>(node)) {
         // Allocate space for information about this function
         FunctionInfo *funInfo = new FunctionInfo(funDefn->getName(), funDefn->getSignature());
-        mod->addFunction(funDefn->getName(), funInfo);
+        mod->addFunction(funInfo);
 
         idset decl, def;
 

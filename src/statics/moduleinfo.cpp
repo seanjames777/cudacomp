@@ -9,8 +9,8 @@
 ModuleInfo::ModuleInfo() {
 }
 
-void ModuleInfo::addFunction(std::string id, FunctionInfo *function) {
-    functions.set(id, function);
+void ModuleInfo::addFunction(FunctionInfo *function) {
+    functions.set(function->getName(), function);
 }
 
 FunctionInfo *ModuleInfo::getFunction(std::string id) {
