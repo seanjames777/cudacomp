@@ -6,7 +6,7 @@
 
 #include <ast/stmt/astvardeclstmt.h>
 
-ASTVarDeclStmt::ASTVarDeclStmt(ASTType *type, std::string id, ASTExpNode *exp)
+ASTVarDeclStmt::ASTVarDeclStmt(ASTTypeNode *type, std::string id, ASTExpNode *exp)
     : type(type),
       id(id),
       exp(exp)
@@ -28,7 +28,7 @@ ASTExpNode *ASTVarDeclStmt::getExp() {
     return exp;
 }
 
-ASTType *ASTVarDeclStmt::getType() {
+ASTTypeNode *ASTVarDeclStmt::getType() {
     return type;
 }
 

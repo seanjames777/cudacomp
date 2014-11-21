@@ -9,21 +9,37 @@
 #ifndef __ASTVOIDTYPE_H
 #define __ASTVOIDTYPE_H
 
-#include <ast/type/asttype.h>
+#include <ast/type/asttypenode.h>
 
-class ASTVoidType : public ASTType {
+/**
+ * @brief Void type AST type node.
+ */
+class ASTVoidType : public ASTTypeNode {
 private:
 
     static ASTVoidType *instance;
 
 public:
 
+    /**
+     * @brief Constructor. This is a private constructor: use the singleton
+     * get() function.
+     */
     ASTVoidType();
 
+    /**
+     * @brief Get the singleton instance of this class
+     */
     static ASTVoidType *get();
 
-    bool equal(ASTType *other);
+    /**
+     * @copydoc ASTTypeNode::equal()
+     */
+    virtual bool equal(ASTTypeNode *other) override;
 
+    /**
+     * @copydoc ASTNode::print()
+     */
     virtual void print(std::ostream & ss) override;
 
 };

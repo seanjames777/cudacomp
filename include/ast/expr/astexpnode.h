@@ -12,9 +12,15 @@
 #include <ast/astnode.h>
 #include <ast/astseqnode.h>
 
+/**
+ * @brief Base class for all expression AST nodes
+ */
 class ASTExpNode : public ASTNode {
 };
 
+/**
+ * @brief Sequence of expression nodes
+ */
 typedef ASTSeqNode<ASTExpNode> ASTExpSeqNode;
 
 #endif

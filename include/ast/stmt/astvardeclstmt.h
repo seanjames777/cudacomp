@@ -1,8 +1,7 @@
 /**
  * @file astvardeclstmt.h
  *
- * @brief Abstract syntax tree variable declaration statement node. Declares
- * and optionally defines a new variable.
+ * @brief Abstract syntax tree variable declaration statement node.
  *
  * @author Sean James <seanjames777@gmail.com>
  */
@@ -12,27 +11,53 @@
 
 #include <ast/stmt/aststmtnode.h>
 #include <ast/expr/astexpnode.h>
-#include <ast/type/asttype.h>
+#include <ast/type/asttypenode.h>
 
+/**
+ * @brief Variable declaration statement AST node. Declares and optionally
+ * defines a new local variable in a function body.
+ */
 class ASTVarDeclStmt : public ASTStmtNode {
 private:
 
     std::string id;
     ASTExpNode *exp;
-    ASTType *type;
+    ASTTypeNode *type;
 
 public:
 
-    ASTVarDeclStmt(ASTType *type, std::string id, ASTExpNode *exp);
+    /**
+     * @brief Constructor
+     *
+     * @param[in] type Variable type
+     * @param[in] id   Variable name
+     * @param[in] exp  Initial definition, or null
+     */
+    ASTVarDeclStmt(ASTTypeNode *type, std::string id, ASTExpNode *exp);
 
+    /**
+     * @brief Destructor
+     */
     ~ASTVarDeclStmt();
 
+    /**
+     * @brief Get variable name
+     */
     std::string getId();
 
+    /**
+     * @brief Get initial variable definition. May be null.
+     */
     ASTExpNode *getExp();
 
-    ASTType *getType();
+    /**
+     * @brief Get variable type
+     */
+    ASTTypeNode *getType();
 
+    /**
+     * @copydoc ASTNode::print()
+     */
     void print(std::ostream & ss) override;
 
 };

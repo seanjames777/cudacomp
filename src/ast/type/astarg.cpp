@@ -6,13 +6,13 @@
 
 #include <ast/type/astarg.h>
 
-ASTArg::ASTArg(ASTType *type, std::string name)
+ASTArg::ASTArg(ASTTypeNode *type, std::string name)
     : type(type),
       name(name)
 {
 }
 
-ASTType *ASTArg::getType() {
+ASTTypeNode *ASTArg::getType() {
     return type;
 }
 

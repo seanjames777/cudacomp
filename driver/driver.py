@@ -71,7 +71,10 @@ tests = [
     (SOURCE_DIR + "tests/testFib2.cc", 34),
     (SOURCE_DIR + "tests/testFib3.cc", 34),
     (SOURCE_DIR + "tests/testWhile1.cc", 1),
-    (SOURCE_DIR + "tests/testWhile2.cc", 55)
+    (SOURCE_DIR + "tests/testWhile2.cc", 55),
+    (SOURCE_DIR + "tests/testWhile3.cc", 1000),
+    (SOURCE_DIR + "tests/testWhile4.cc", "illegaltype"),
+    (SOURCE_DIR + "tests/testWhile5.cc", "noreturn") 
 ]
 
 # TODO: actually test type checking...

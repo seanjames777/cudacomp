@@ -6,6 +6,7 @@ BUILD:
 
     Build using CMake. You will need to install some dependencies first:
 
+    - Install CMake
     - Insatll Flex and Bison. These can be installed via, for example, MacPorts.
     - Install LLVM, and tell the build system which LLVM to use. For example,
       if the 'llc' command is available on your path as "llc-mp-3.5", then you
@@ -18,7 +19,8 @@ BUILD:
 
       mkdir build
       cd build
-      cmake -DCMAKE_INSTALL_PREFIX="../out/" -DLLVM_SUFFIX="-mp-3.5" -DPTX_BACKEND="TRUE" -DCUDA_PATH="/Developer/NVIDIA/CUDA-6.5/" ../
+      cmake -DCMAKE_INSTALL_PREFIX="../out/" -DLLVM_SUFFIX="-mp-3.5" \
+          -DPTX_BACKEND="TRUE" -DCUDA_PATH="/Developer/NVIDIA/CUDA-6.5/" ../
       make && make install
 
 TEST:

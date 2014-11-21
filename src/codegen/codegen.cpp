@@ -5,21 +5,21 @@
  */
 
 #include <codegen/codegen.h>
-#include <ast/expr/astidentifier.h>
-#include <ast/expr/astinteger.h>
-#include <ast/expr/astbinop.h>
+#include <ast/expr/astidentifierexp.h>
+#include <ast/expr/astintegerexp.h>
+#include <ast/expr/astbinopexp.h>
 #include <ast/astseqnode.h>
 #include <ast/stmt/astreturnstmt.h>
 #include <ast/stmt/astvardeclstmt.h>
 #include <ast/stmt/astvardefnstmt.h>
-#include <ast/expr/astunop.h>
-#include <ast/stmt/astscope.h>
+#include <ast/expr/astunopexp.h>
+#include <ast/stmt/astscopestmt.h>
 #include <ast/stmt/astifstmt.h>
-#include <ast/expr/astboolean.h>
+#include <ast/expr/astbooleanexp.h>
 #include <ast/type/astintegertype.h>
 #include <ast/type/astbooleantype.h>
 #include <codegen/converttype.h>
-#include <ast/expr/astcall.h>
+#include <ast/expr/astcallexp.h>
 #include <ast/type/astvoidtype.h>
 #include <ast/stmt/astexprstmt.h>
 #include <ast/stmt/astwhilestmt.h>
@@ -30,54 +30,54 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
     IRBuilder<> *builder = ctx->getBuilder();
 
     // Integer constant
-    if (ASTInteger *int_exp = dynamic_cast<ASTInteger *>(node))
+    if (ASTIntegerExp *int_exp = dynamic_cast<ASTIntegerExp *>(node))
         return ConstantInt::get(convertType(ASTIntegerType::get()), int_exp->getValue());
     // Boolean constant
-    else if (ASTBoolean *bool_exp = dynamic_cast<ASTBoolean *>(node))
+    else if (ASTBooleanExp *bool_exp = dynamic_cast<ASTBooleanExp *>(node))
         return ConstantInt::get(convertType(ASTBooleanType::get()), (int)bool_exp->getValue());
     // Unary operator
-    else if (ASTUnop *unop_exp = dynamic_cast<ASTUnop *>(node)) {
+    else if (ASTUnopExp *unop_exp = dynamic_cast<ASTUnopExp *>(node)) {
         Value *v = codegen_exp(ctx, unop_exp->getExp());
 
         switch(unop_exp->getOp()) {
-        case ASTUnop::NOT:  return builder->CreateBinOp(Instruction::Xor, v, v);
-        case ASTUnop::BNOT: return builder->CreateNot(v);
-        case ASTUnop::NEG:  return builder->CreateNeg(v);
+        case ASTUnopExp::NOT:  return builder->CreateBinOp(Instruction::Xor, v, v);
+        case ASTUnopExp::BNOT: return builder->CreateNot(v);
+        case ASTUnopExp::NEG:  return builder->CreateNeg(v); // TODO investigate x86
         }
     }
     // Binary operator
-    else if (ASTBinop *binop_exp = dynamic_cast<ASTBinop *>(node)) {
+    else if (ASTBinopExp *binop_exp = dynamic_cast<ASTBinopExp *>(node)) {
         Value *v1 = codegen_exp(ctx, binop_exp->getE1());
         Value *v2 = codegen_exp(ctx, binop_exp->getE2());
 
         switch(binop_exp->getOp()) {
-        case ASTBinop::ADD:  return builder->CreateBinOp(Instruction::Add, v1, v2);
-        case ASTBinop::SUB:  return builder->CreateBinOp(Instruction::Sub, v1, v2);
-        case ASTBinop::MUL:  return builder->CreateBinOp(Instruction::Mul, v1, v2);
-        case ASTBinop::DIV:  return builder->CreateBinOp(Instruction::SDiv, v1, v2);
-        case ASTBinop::MOD:  return builder->CreateBinOp(Instruction::SRem, v1, v2);
-        case ASTBinop::SHL:  return builder->CreateBinOp(Instruction::Shl, v1, v2);
-        case ASTBinop::SHR:  return builder->CreateBinOp(Instruction::AShr, v1, v2);
-        case ASTBinop::AND:  return builder->CreateBinOp(Instruction::And, v1, v2);
-        case ASTBinop::OR:   return builder->CreateBinOp(Instruction::Or, v1, v2);
-        case ASTBinop::BAND: return builder->CreateBinOp(Instruction::And, v1, v2);
-        case ASTBinop::BOR:  return builder->CreateBinOp(Instruction::Or, v1, v2);
-        case ASTBinop::BXOR: return builder->CreateBinOp(Instruction::Xor, v1, v2);
-        case ASTBinop::EQ:   return builder->CreateICmpEQ(v1, v2);
-        case ASTBinop::NEQ:  return builder->CreateICmpNE(v1, v2);
-        case ASTBinop::LEQ:  return builder->CreateICmpSLE(v1, v2);
-        case ASTBinop::GEQ:  return builder->CreateICmpSGE(v1, v2);
-        case ASTBinop::LT:   return builder->CreateICmpSLT(v1, v2);
-        case ASTBinop::GT:   return builder->CreateICmpSGT(v1, v2);
+        case ASTBinopExp::ADD:  return builder->CreateBinOp(Instruction::Add, v1, v2);
+        case ASTBinopExp::SUB:  return builder->CreateBinOp(Instruction::Sub, v1, v2);
+        case ASTBinopExp::MUL:  return builder->CreateBinOp(Instruction::Mul, v1, v2);
+        case ASTBinopExp::DIV:  return builder->CreateBinOp(Instruction::SDiv, v1, v2);
+        case ASTBinopExp::MOD:  return builder->CreateBinOp(Instruction::SRem, v1, v2);
+        case ASTBinopExp::SHL:  return builder->CreateBinOp(Instruction::Shl, v1, v2);
+        case ASTBinopExp::SHR:  return builder->CreateBinOp(Instruction::AShr, v1, v2);
+        case ASTBinopExp::AND:  return builder->CreateBinOp(Instruction::And, v1, v2);
+        case ASTBinopExp::OR:   return builder->CreateBinOp(Instruction::Or, v1, v2);
+        case ASTBinopExp::BAND: return builder->CreateBinOp(Instruction::And, v1, v2);
+        case ASTBinopExp::BOR:  return builder->CreateBinOp(Instruction::Or, v1, v2);
+        case ASTBinopExp::BXOR: return builder->CreateBinOp(Instruction::Xor, v1, v2);
+        case ASTBinopExp::EQ:   return builder->CreateICmpEQ(v1, v2);
+        case ASTBinopExp::NEQ:  return builder->CreateICmpNE(v1, v2);
+        case ASTBinopExp::LEQ:  return builder->CreateICmpSLE(v1, v2);
+        case ASTBinopExp::GEQ:  return builder->CreateICmpSGE(v1, v2);
+        case ASTBinopExp::LT:   return builder->CreateICmpSLT(v1, v2);
+        case ASTBinopExp::GT:   return builder->CreateICmpSGT(v1, v2);
         }
     }
     // Identifier reference
-    else if (ASTIdentifier *id_exp = dynamic_cast<ASTIdentifier *>(node)) {
+    else if (ASTIdentifierExp *id_exp = dynamic_cast<ASTIdentifierExp *>(node)) {
         Value *id_ptr = ctx->getOrCreateSymbol(id_exp->getId());
         return builder->CreateLoad(id_ptr);
     }
     // Function call
-    else if (ASTCall *call_exp = dynamic_cast<ASTCall *>(node)) {
+    else if (ASTCallExp *call_exp = dynamic_cast<ASTCallExp *>(node)) {
         std::vector<Value *> args;
 
         Value *ret_val = NULL;
@@ -176,7 +176,7 @@ bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *head) {
         builder->CreateStore(exp_val, mem);
     }
     // Scope
-    else if (ASTScope *scope_stmt = dynamic_cast<ASTScope *>(head)) {
+    else if (ASTScopeStmt *scope_stmt = dynamic_cast<ASTScopeStmt *>(head)) {
         if (scope_stmt->getBody())
             return codegen_stmts(ctx, scope_stmt->getBody());
     }
@@ -268,7 +268,7 @@ void codegen_tops(ModuleInfo *module, ASTTopSeqNode *nodes, bool emitDevice, std
         ASTTopNode *top_node = node->getHead();
 
         // Create LLVM functions for each function
-        if (ASTFunDefn *funDefn = dynamic_cast<ASTFunDefn *>(top_node)) {
+        if (ASTFunDefnTop *funDefn = dynamic_cast<ASTFunDefnTop *>(top_node)) {
             FunctionInfo *funInfo = module->getFunction(funDefn->getName());
             ctx.createFunction(funInfo);
         }
@@ -287,7 +287,7 @@ void codegen_tops(ModuleInfo *module, ASTTopSeqNode *nodes, bool emitDevice, std
 }
 
 void codegen_top(CodegenCtx *ctx, ASTTopNode *node) {
-    if (ASTFunDefn *funDefn = dynamic_cast<ASTFunDefn *>(node)) {
+    if (ASTFunDefnTop *funDefn = dynamic_cast<ASTFunDefnTop *>(node)) {
         FunctionInfo *func = ctx->getModuleInfo()->getFunction(funDefn->getName());
 
         ctx->startFunction(func->getName());

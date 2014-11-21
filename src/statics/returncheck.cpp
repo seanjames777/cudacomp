@@ -5,20 +5,20 @@
  */
 
 #include <statics/returncheck.h>
-#include <ast/expr/astinteger.h>
-#include <ast/expr/astbinop.h>
+#include <ast/expr/astintegerexp.h>
+#include <ast/expr/astbinopexp.h>
 #include <ast/astseqnode.h>
 #include <ast/stmt/astreturnstmt.h>
-#include <ast/expr/astidentifier.h>
+#include <ast/expr/astidentifierexp.h>
 #include <ast/stmt/astvardeclstmt.h>
 #include <ast/stmt/astvardefnstmt.h>
 #include <ast/type/astintegertype.h>
-#include <ast/expr/astunop.h>
+#include <ast/expr/astunopexp.h>
 #include <ast/type/astbooleantype.h>
-#include <ast/stmt/astscope.h>
+#include <ast/stmt/astscopestmt.h>
 #include <ast/stmt/astifstmt.h>
-#include <ast/expr/astboolean.h>
-#include <ast/top/astfundefn.h>
+#include <ast/expr/astbooleanexp.h>
+#include <ast/top/astfundefntop.h>
 #include <ast/type/astvoidtype.h>
 
 namespace Statics {
@@ -48,7 +48,7 @@ bool returncheck_stmt(FunctionInfo *func, ASTStmtNode *head) {
     if (ASTReturnStmt *ret_node = dynamic_cast<ASTReturnStmt *>(head))
         return true;
     // Scope statement
-    else if (ASTScope *scope_node = dynamic_cast<ASTScope *>(head)) {
+    else if (ASTScopeStmt *scope_node = dynamic_cast<ASTScopeStmt *>(head)) {
         // May be in the body. Otherwise, keep going.
         if (scope_node->getBody() && returncheck_stmts(func, scope_node->getBody()))
             return true;
@@ -77,7 +77,7 @@ void returncheck_tops(ModuleInfo *module, ASTTopSeqNode *nodes) {
 }
 
 void returncheck_top(ModuleInfo *module, ASTTopNode *node) {
-    if (ASTFunDefn *funDefn = dynamic_cast<ASTFunDefn *>(node)) {
+    if (ASTFunDefnTop *funDefn = dynamic_cast<ASTFunDefnTop *>(node)) {
         bool isVoid = funDefn->getSignature()->getReturnType()->equal(ASTVoidType::get());
 
         FunctionInfo *func = module->getFunction(funDefn->getName());

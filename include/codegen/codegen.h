@@ -15,7 +15,7 @@
 #include <statics/moduleinfo.h>
 #include <statics/functioninfo.h>
 #include <ast/top/asttopnode.h>
-#include <ast/top/astfundefn.h>
+#include <ast/top/astfundefntop.h>
 
 namespace Codegen {
 

@@ -3,25 +3,25 @@
 #include <string>
 #include <ast/expr/astexpnode.h>
 #include <ast/stmt/aststmtnode.h>
-#include <ast/expr/astinteger.h>
-#include <ast/expr/astidentifier.h>
-#include <ast/expr/astbinop.h>
+#include <ast/expr/astintegerexp.h>
+#include <ast/expr/astidentifierexp.h>
+#include <ast/expr/astbinopexp.h>
 #include <ast/astseqnode.h>
 #include <ast/stmt/astreturnstmt.h>
-#include <ast/type/asttype.h>
+#include <ast/type/asttypenode.h>
 #include <ast/type/astintegertype.h>
 #include <ast/stmt/astvardeclstmt.h>
 #include <ast/stmt/astvardefnstmt.h>
 #include <ast/type/astbooleantype.h>
-#include <ast/expr/astboolean.h>
-#include <ast/stmt/astscope.h>
-#include <ast/expr/astunop.h>
+#include <ast/expr/astbooleanexp.h>
+#include <ast/stmt/astscopestmt.h>
+#include <ast/expr/astunopexp.h>
 #include <ast/stmt/astifstmt.h>
 #include <ast/top/asttopnode.h>
-#include <ast/top/astfundefn.h>
+#include <ast/top/astfundefntop.h>
 #include <ast/type/astfuntype.h>
 #include <ast/type/astarg.h>
-#include <ast/expr/astcall.h>
+#include <ast/expr/astcallexp.h>
 #include <ast/type/astvoidtype.h>
 #include <ast/type/astptrtype.h>
 #include <ast/stmt/astexprstmt.h>
@@ -50,7 +50,7 @@ void yyerror(ASTTopSeqNode **root, const char *str) {
     ASTStmtSeqNode *stmt_seq;
     ASTExpNode *exp;
     ASTExpSeqNode *exp_seq;
-    ASTType *type;
+    ASTTypeNode *type;
     ASTArg *arg;
     ASTArgSeqNode *arg_seq;
     int number;
@@ -117,33 +117,33 @@ stmt_list:
   ;
 
 exp:
-    NUMBER                            { $$ = new ASTInteger($1); }
-  | TRUE                              { $$ = new ASTBoolean(true); }
-  | FALSE                             { $$ = new ASTBoolean(false); }
-  | IDENT                             { $$ = new ASTIdentifier(std::string($1)); free($1); }
-  | exp PLUS exp                      { $$ = new ASTBinop(ASTBinop::ADD, $1, $3); }
-  | exp MINUS exp                     { $$ = new ASTBinop(ASTBinop::SUB, $1, $3); }
-  | exp DIV exp                       { $$ = new ASTBinop(ASTBinop::DIV, $1, $3); }
-  | exp TIMES exp                     { $$ = new ASTBinop(ASTBinop::MUL, $1, $3); }
-  | exp MOD exp                       { $$ = new ASTBinop(ASTBinop::MOD, $1, $3); }
-  | exp SHL exp                       { $$ = new ASTBinop(ASTBinop::SHL, $1, $3); }
-  | exp SHR exp                       { $$ = new ASTBinop(ASTBinop::SHR, $1, $3); }
-  | exp AND exp                       { $$ = new ASTBinop(ASTBinop::AND, $1, $3); }
-  | exp OR exp                        { $$ = new ASTBinop(ASTBinop::OR, $1, $3); }
-  | exp BAND exp                      { $$ = new ASTBinop(ASTBinop::BAND, $1, $3); }
-  | exp BOR exp                       { $$ = new ASTBinop(ASTBinop::BOR, $1, $3); }
-  | exp BXOR exp                      { $$ = new ASTBinop(ASTBinop::BXOR, $1, $3); }
-  | exp EQ exp                        { $$ = new ASTBinop(ASTBinop::EQ, $1, $3); }
-  | exp NEQ exp                       { $$ = new ASTBinop(ASTBinop::NEQ, $1, $3); }
-  | exp GT exp                        { $$ = new ASTBinop(ASTBinop::GT, $1, $3); }
-  | exp LT exp                        { $$ = new ASTBinop(ASTBinop::LT, $1, $3); }
-  | exp GEQ exp                       { $$ = new ASTBinop(ASTBinop::GEQ, $1, $3); }
-  | exp LEQ exp                       { $$ = new ASTBinop(ASTBinop::LEQ, $1, $3); }
-  | NOT exp                           { $$ = new ASTUnop(ASTUnop::NOT, $2); }
-  | BNOT exp                          { $$ = new ASTUnop(ASTUnop::BNOT, $2); }
-  | MINUS exp %prec UMINUS            { $$ = new ASTUnop(ASTUnop::NEG, $2); }
+    NUMBER                            { $$ = new ASTIntegerExp($1); }
+  | TRUE                              { $$ = new ASTBooleanExp(true); }
+  | FALSE                             { $$ = new ASTBooleanExp(false); }
+  | IDENT                             { $$ = new ASTIdentifierExp(std::string($1)); free($1); }
+  | exp PLUS exp                      { $$ = new ASTBinopExp(ASTBinopExp::ADD, $1, $3); }
+  | exp MINUS exp                     { $$ = new ASTBinopExp(ASTBinopExp::SUB, $1, $3); }
+  | exp DIV exp                       { $$ = new ASTBinopExp(ASTBinopExp::DIV, $1, $3); }
+  | exp TIMES exp                     { $$ = new ASTBinopExp(ASTBinopExp::MUL, $1, $3); }
+  | exp MOD exp                       { $$ = new ASTBinopExp(ASTBinopExp::MOD, $1, $3); }
+  | exp SHL exp                       { $$ = new ASTBinopExp(ASTBinopExp::SHL, $1, $3); }
+  | exp SHR exp                       { $$ = new ASTBinopExp(ASTBinopExp::SHR, $1, $3); }
+  | exp AND exp                       { $$ = new ASTBinopExp(ASTBinopExp::AND, $1, $3); }
+  | exp OR exp                        { $$ = new ASTBinopExp(ASTBinopExp::OR, $1, $3); }
+  | exp BAND exp                      { $$ = new ASTBinopExp(ASTBinopExp::BAND, $1, $3); }
+  | exp BOR exp                       { $$ = new ASTBinopExp(ASTBinopExp::BOR, $1, $3); }
+  | exp BXOR exp                      { $$ = new ASTBinopExp(ASTBinopExp::BXOR, $1, $3); }
+  | exp EQ exp                        { $$ = new ASTBinopExp(ASTBinopExp::EQ, $1, $3); }
+  | exp NEQ exp                       { $$ = new ASTBinopExp(ASTBinopExp::NEQ, $1, $3); }
+  | exp GT exp                        { $$ = new ASTBinopExp(ASTBinopExp::GT, $1, $3); }
+  | exp LT exp                        { $$ = new ASTBinopExp(ASTBinopExp::LT, $1, $3); }
+  | exp GEQ exp                       { $$ = new ASTBinopExp(ASTBinopExp::GEQ, $1, $3); }
+  | exp LEQ exp                       { $$ = new ASTBinopExp(ASTBinopExp::LEQ, $1, $3); }
+  | NOT exp                           { $$ = new ASTUnopExp(ASTUnopExp::NOT, $2); }
+  | BNOT exp                          { $$ = new ASTUnopExp(ASTUnopExp::BNOT, $2); }
+  | MINUS exp %prec UMINUS            { $$ = new ASTUnopExp(ASTUnopExp::NEG, $2); }
   | LPAREN exp RPAREN                 { $$ = $2; }
-  | IDENT LPAREN arg_list RPAREN      { $$ = new ASTCall($1, $3); }
+  | IDENT LPAREN arg_list RPAREN      { $$ = new ASTCallExp($1, $3); }
   ;
 
 type:
@@ -163,7 +163,7 @@ stmt:
     simp SEMI                         { $$ = $1; }
   | RETURN exp SEMI                   { $$ = new ASTReturnStmt($2); }
   | RETURN SEMI                       { $$ = new ASTReturnStmt(NULL); }
-  | LBRACE stmt_list RBRACE           { $$ = new ASTScope($2); }
+  | LBRACE stmt_list RBRACE           { $$ = new ASTScopeStmt($2); }
   | IF LPAREN exp RPAREN stmt elseopt { $$ = new ASTIfStmt($3, new ASTStmtSeqNode($5, NULL), $6); }
   | WHILE LPAREN exp RPAREN stmt      { $$ = new ASTWhileStmt($3, new ASTStmtSeqNode($5, NULL))}
   ;
@@ -189,7 +189,7 @@ param_list:
 
 fundefn:
     type IDENT LPAREN param_list RPAREN LBRACE stmt_list RBRACE
-    { $$ = new ASTFunDefn($2, new ASTFunType($1, $4), $7); }
+    { $$ = new ASTFunDefnTop($2, new ASTFunType($1, $4), $7); }
   ;
 
 arg_list_follow:

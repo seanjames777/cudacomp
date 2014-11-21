@@ -9,21 +9,38 @@
 #ifndef __ASTINTEGERTYPE_H
 #define __ASTINTEGERTYPE_H
 
-#include <ast/type/asttype.h>
+#include <ast/type/asttypenode.h>
 
-class ASTIntegerType : public ASTType {
+/**
+ * @brief Integer type AST type node. Currently, these represent signed 32-bit
+ * integers only.
+ */
+class ASTIntegerType : public ASTTypeNode {
 private:
 
     static ASTIntegerType *instance;
 
 public:
 
+    /**
+     * @brief Constructor. This is a private constructor: use the singleton
+     * get() function.
+     */
     ASTIntegerType();
 
+    /**
+     * @brief Get the singleton instance of this class
+     */
     static ASTIntegerType *get();
 
-    bool equal(ASTType *other);
+    /**
+     * @copydoc ASTTypeNode::equal()
+     */
+    virtual bool equal(ASTTypeNode *other) override;
 
+    /**
+     * @copydoc ASTNode::print()
+     */
     virtual void print(std::ostream & ss) override;
 
 };

@@ -9,21 +9,38 @@
 #ifndef __ASTPTRTYPE_H
 #define __ASTPTRTYPE_H
 
-#include <ast/type/asttype.h>
+#include <ast/type/asttypenode.h>
 
-class ASTPtrType : public ASTType {
+/**
+ * @brief AST type node for a type of a pointer to a value of another type
+ */
+class ASTPtrType : public ASTTypeNode {
 private:
 
-    ASTType *toType;
+    ASTTypeNode *toType;
 
 public:
 
-    ASTPtrType(ASTType *toType);
+    /**
+     * @brief Constructor
+     *
+     * @param[in] toType Type pointers of this type point to
+     */
+    ASTPtrType(ASTTypeNode *toType);
 
-    ASTType *getToType();
+    /**
+     * @brief Get type pointers of this type point to
+     */
+    ASTTypeNode *getToType();
 
-    bool equal(ASTType *other);
+    /**
+     * @copydoc ASTTypeNodeNode::equal()
+     */
+    virtual bool equal(ASTTypeNode *other) override;
 
+    /**
+     * @copydoc ASTNode::print()
+     */
     virtual void print(std::ostream & ss) override;
 
 };

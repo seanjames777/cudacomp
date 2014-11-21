@@ -6,13 +6,13 @@
 
 #include <ast/type/astfuntype.h>
 
-ASTFunType::ASTFunType(ASTType *returnType, ASTArgSeqNode *args)
+ASTFunType::ASTFunType(ASTTypeNode *returnType, ASTArgSeqNode *args)
     : returnType(returnType),
       args(args)
 {
 }
 
-ASTType *ASTFunType::getReturnType() {
+ASTTypeNode *ASTFunType::getReturnType() {
     return returnType;
 }
 
@@ -20,7 +20,7 @@ ASTArgSeqNode *ASTFunType::getArgs() {
     return args;
 }
 
-bool ASTFunType::equal(ASTType *other_type) {
+bool ASTFunType::equal(ASTTypeNode *other_type) {
     if (other_type == NULL)
         return false;
 

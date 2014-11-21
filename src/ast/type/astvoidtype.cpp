@@ -18,7 +18,7 @@ ASTVoidType *ASTVoidType::get() {
     return instance;
 }
 
-bool ASTVoidType::equal(ASTType *other) {
+bool ASTVoidType::equal(ASTTypeNode *other) {
     return (other != NULL) && (dynamic_cast<ASTVoidType *>(other) != NULL);
 }
 

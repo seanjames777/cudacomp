@@ -50,41 +50,41 @@ endif ("${PTX_BACKEND}" MATCHES "TRUE")
 add_executable(cc
     src/ast/astnode.cpp
     src/ast/astseqnode.cpp
-    src/ast/expr/astbinop.cpp
-    src/ast/expr/astboolean.cpp
+    src/ast/expr/astbinopexp.cpp
+    src/ast/expr/astbooleanexp.cpp
+    src/ast/expr/astcallexp.cpp
     src/ast/expr/astexpnode.cpp
-    src/ast/expr/astidentifier.cpp
-    src/ast/expr/astinteger.cpp
-    src/ast/expr/astunop.cpp
-    src/ast/expr/astcall.cpp
+    src/ast/expr/astidentifierexp.cpp
+    src/ast/expr/astintegerexp.cpp
+    src/ast/expr/astunopexp.cpp
+    src/ast/stmt/astexprstmt.cpp
     src/ast/stmt/astifstmt.cpp
     src/ast/stmt/astreturnstmt.cpp
-    src/ast/stmt/astexprstmt.cpp
-    src/ast/stmt/astscope.cpp
+    src/ast/stmt/astscopestmt.cpp
     src/ast/stmt/aststmtnode.cpp
     src/ast/stmt/astvardeclstmt.cpp
     src/ast/stmt/astvardefnstmt.cpp
     src/ast/stmt/astwhilestmt.cpp
+    src/ast/top/astfundefntop.cpp
     src/ast/top/asttopnode.cpp
-    src/ast/top/astfundefn.cpp
-    src/ast/type/astbooleantype.cpp
-    src/ast/type/astvoidtype.cpp
-    src/ast/type/astptrtype.cpp
     src/ast/type/astarg.cpp
+    src/ast/type/astbooleantype.cpp
     src/ast/type/astfuntype.cpp
     src/ast/type/astintegertype.cpp
-    src/ast/type/asttype.cpp
+    src/ast/type/astptrtype.cpp
+    src/ast/type/asttypenode.cpp
+    src/ast/type/astvoidtype.cpp
     src/codegen/codegen.cpp
     src/codegen/codegenctx.cpp
     src/codegen/converttype.cpp
     src/main.cpp
     src/parser/parse.cpp
-    src/statics/statics.cpp
-    src/statics/typecheck.cpp
     src/statics/functioninfo.cpp
     src/statics/moduleinfo.cpp
-    src/statics/symboltable.cpp
     src/statics/returncheck.cpp
+    src/statics/statics.cpp
+    src/statics/symboltable.cpp
+    src/statics/typecheck.cpp
     ${BISON_parser_OUTPUTS}
     ${FLEX_lexer_OUTPUTS}
 )

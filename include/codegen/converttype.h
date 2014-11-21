@@ -1,5 +1,7 @@
 /**
- * @file converttype.cpp
+ * @file converttype.h
+ *
+ * @brief Converts between ASTTypeNode's and llvm::Type's
  *
  * @author Sean James <seanjames777@gmail.com>
  */
@@ -7,13 +9,11 @@
 #ifndef __CONVERTTYPE_H
 #define __CONVERTTYPE_H
 
-// TODO: probably should be called ASTTypeNode
-
-#include <ast/type/asttype.h>
+#include <ast/type/asttypenode.h>
 
 namespace Codegen {
 
-Type *convertType(ASTType *type);
+Type *convertType(ASTTypeNode *type);
 
 }
 

@@ -28,12 +28,21 @@ private:
 
 public:
 
+    /**
+     * @brief Constructor
+     *
+     * @param[in] head First element of the sequence
+     * @param[in] tail The rest of the sequence
+     */
     ASTSeqNode(T *head, ASTSeqNode<T> *tail)
         : head(head),
           tail(tail)
     {
     }
 
+    /**
+     * @brief Destructor
+     */
     ~ASTSeqNode() {
         delete head;
 
@@ -41,19 +50,38 @@ public:
             delete tail;
     }
 
+    /**
+     * @brief Get the first element of the sequence
+     */
     T *getHead() {
         return head;
     }
 
+    /**
+     * @brief Get the rest of the sequence
+     */
     ASTSeqNode<T> *getTail() {
         return tail;
     }
 
+    /**
+     * @brief Set the head pointer
+     */
+    void setHead(T *head) {
+        this->head = head;
+    }
+
+    /**
+     * @brief Set the tail pointer
+     */
     void setTail(ASTSeqNode<T> *tail) {
         this->tail = tail;
     }
 
-    void print(std::ostream & ss) override {
+    /**
+     * @copydoc ASTNode::print
+     */
+    virtual void print(std::ostream & ss) override {
         ss << "seq(";
         getHead()->print(ss);
         ss << "," << std::endl;
