@@ -1,8 +1,7 @@
 /**
  * @file aststmtnode.h
  *
- * @brief Abstract syntax tree abstract statement node. Statements do not have
- * a value, but are evaluated for their effects.
+ * @brief Abstract syntax tree abstract statement node
  *
  * @author Sean James <seanjames777@gmail.com>
  */
