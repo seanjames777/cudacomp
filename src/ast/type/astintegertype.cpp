@@ -18,7 +18,7 @@ ASTIntegerType *ASTIntegerType::get() {
     return instance;
 }
 
-bool ASTIntegerType::equal(ASTType *other) {
+bool ASTIntegerType::equal(ASTTypeNode *other) {
     return (other != NULL) && (dynamic_cast<ASTIntegerType *>(other) != NULL);
 }
 

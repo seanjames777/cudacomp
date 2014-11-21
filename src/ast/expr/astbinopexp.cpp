@@ -1,36 +1,36 @@
 /**
- * @file astbinop.cpp
+ * @file astbinopexp.cpp
  *
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <ast/expr/astbinop.h>
+#include <ast/expr/astbinopexp.h>
 
-ASTBinop::ASTBinop(enum op op, ASTExpNode *e1, ASTExpNode *e2)
+ASTBinopExp::ASTBinopExp(enum op op, ASTExpNode *e1, ASTExpNode *e2)
     : op(op),
       e1(e1),
       e2(e2)
 {
 }
 
-ASTBinop::~ASTBinop() {
+ASTBinopExp::~ASTBinopExp() {
     delete e1;
     delete e2;
 }
 
-enum ASTBinop::op ASTBinop::getOp() {
+enum ASTBinopExp::op ASTBinopExp::getOp() {
     return op;
 }
 
-ASTExpNode *ASTBinop::getE1() {
+ASTExpNode *ASTBinopExp::getE1() {
     return e1;
 }
 
-ASTExpNode *ASTBinop::getE2() {
+ASTExpNode *ASTBinopExp::getE2() {
     return e2;
 }
 
-void ASTBinop::print(std::ostream & ss) {
+void ASTBinopExp::print(std::ostream & ss) {
     ss << "bin(";
     e1->print(ss);
     ss << ", ";

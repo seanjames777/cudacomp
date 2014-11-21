@@ -6,16 +6,16 @@
 
 #include <ast/type/astptrtype.h>
 
-ASTPtrType::ASTPtrType(ASTType *toType)
+ASTPtrType::ASTPtrType(ASTTypeNode *toType)
     : toType(toType)
 {
 }
 
-ASTType *ASTPtrType::getToType() {
+ASTTypeNode *ASTPtrType::getToType() {
     return toType;
 }
 
-bool ASTPtrType::equal(ASTType *other) {
+bool ASTPtrType::equal(ASTTypeNode *other) {
     if (!other)
         return false;
 

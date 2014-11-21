@@ -11,7 +11,7 @@
 
 namespace Codegen {
 
-Type *convertType(ASTType *type) {
+Type *convertType(ASTTypeNode *type) {
     LLVMContext & ctx = getGlobalContext();
 
     if (ASTIntegerType *int_type = dynamic_cast<ASTIntegerType *>(type))

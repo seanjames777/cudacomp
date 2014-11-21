@@ -14,7 +14,7 @@
 #include <ast/stmt/aststmtnode.h>
 #include <ast/expr/astexpnode.h>
 #include <ast/top/asttopnode.h>
-#include <ast/type/asttype.h>
+#include <ast/type/asttypenode.h>
 #include <stdexcept>
 
 namespace Statics {
@@ -53,7 +53,7 @@ namespace Statics {
 
     typedef std::unordered_set<std::string> idset;
 
-    ASTType *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & def, ASTExpNode *node);
+    ASTTypeNode *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & def, ASTExpNode *node);
 
     void typecheck_stmts(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & def, ASTStmtSeqNode *node);
 

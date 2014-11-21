@@ -18,7 +18,7 @@ ASTBooleanType *ASTBooleanType::get() {
     return instance;
 }
 
-bool ASTBooleanType::equal(ASTType *other) {
+bool ASTBooleanType::equal(ASTTypeNode *other) {
     return (other != NULL) && (dynamic_cast<ASTBooleanType *>(other) != NULL);
 }
 

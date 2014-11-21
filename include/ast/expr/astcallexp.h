@@ -1,20 +1,20 @@
 /**
- * @file astcall.h
+ * @file astcallexp.h
  *
  * @brief Abstract syntax tree binary operation node
  *
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#ifndef __ASTCALL_H
-#define __ASTCALL_H
+#ifndef __ASTCALLEXP_H
+#define __ASTCALLEXP_H
 
 #include <ast/expr/astexpnode.h>
 
 /**
  * @brief Function call expression AST node
  */
-class ASTCall : public ASTExpNode {
+class ASTCallExp : public ASTExpNode {
 private:
 
     std::string id;
@@ -28,12 +28,12 @@ public:
      * @param[in] id   Name of function to call
      * @param[in] args Sequence of argument expressions
      */
-    ASTCall(std::string id, ASTExpSeqNode *args);
+    ASTCallExp(std::string id, ASTExpSeqNode *args);
 
     /**
      * @brief Destructor
      */
-    ~ASTCall();
+    ~ASTCallExp();
 
     /**
      * @brief Get name of function to call

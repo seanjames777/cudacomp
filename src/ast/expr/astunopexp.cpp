@@ -1,30 +1,30 @@
 /**
- * @file astunop.cpp
+ * @file astunopexp.cpp
  *
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <ast/expr/astunop.h>
+#include <ast/expr/astunopexp.h>
 
-ASTUnop::ASTUnop(enum op op, ASTExpNode *exp)
+ASTUnopExp::ASTUnopExp(enum op op, ASTExpNode *exp)
     : op(op),
       exp(exp)
 {
 }
 
-ASTUnop::~ASTUnop() {
+ASTUnopExp::~ASTUnopExp() {
     delete exp;
 }
 
-enum ASTUnop::op ASTUnop::getOp() {
+enum ASTUnopExp::op ASTUnopExp::getOp() {
     return op;
 }
 
-ASTExpNode *ASTUnop::getExp() {
+ASTExpNode *ASTUnopExp::getExp() {
     return exp;
 }
 
-void ASTUnop::print(std::ostream & ss) {
+void ASTUnopExp::print(std::ostream & ss) {
     ss << "un(";
     exp->print(ss);
     ss << ", ";

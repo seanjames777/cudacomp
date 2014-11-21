@@ -1,13 +1,13 @@
 /**
- * @file astinteger.h
+ * @file astintegerexp.h
  *
  * @brief Abstract syntax tree integer node
  *
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#ifndef __ASTINTEGER_H
-#define __ASTINTEGER_H
+#ifndef __ASTINTEGEREXP_H
+#define __ASTINTEGEREXP_H
 
 #include <defs.h>
 #include <ast/expr/astexpnode.h>
@@ -15,7 +15,7 @@
 /**
  * @brief Integer constant expression AST node
  */
-class ASTInteger : public ASTExpNode {
+class ASTIntegerExp : public ASTExpNode {
 private:
 
     int value;
@@ -27,12 +27,12 @@ public:
      *
      * @param[in] value Integer constant value
      */
-    ASTInteger(int value);
+    ASTIntegerExp(int value);
 
     /**
      * @brief Destructor
      */
-    ~ASTInteger();
+    ~ASTIntegerExp();
 
     /**
      * @brief Get integer value

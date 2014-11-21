@@ -1,13 +1,13 @@
 /**
- * @file astbinop.h
+ * @file astbinopexp.h
  *
  * @brief Abstract syntax tree binary operation node
  *
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#ifndef __ASTBINOP_H
-#define __ASTBINOP_H
+#ifndef __ASTBINOPEXP_H
+#define __ASTBINOPEXP_H
 
 #include <defs.h>
 #include <ast/expr/astexpnode.h>
@@ -15,7 +15,7 @@
 /**
  * @brief Binary operator expression AST node
  */
-class ASTBinop : public ASTExpNode {
+class ASTBinopExp : public ASTExpNode {
 public:
 
     /**
@@ -57,12 +57,12 @@ public:
      * @param[in] e1 Left-hand expression
      * @param[in] e2 Right-hand expression
      */
-    ASTBinop(enum op op, ASTExpNode *e1, ASTExpNode *e2);
+    ASTBinopExp(enum op op, ASTExpNode *e1, ASTExpNode *e2);
 
     /**
      * @brief Destructor
      */
-    ~ASTBinop();
+    ~ASTBinopExp();
 
     /**
      * @brief Get binary operation

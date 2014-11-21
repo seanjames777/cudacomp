@@ -11,14 +11,14 @@
 #define __FUNCTIONINFO_H
 
 #include <statics/symboltable.h>
-#include <ast/type/asttype.h>
+#include <ast/type/asttypenode.h>
 #include <ast/type/astfuntype.h>
 
 class FunctionInfo {
 private:
 
     ASTFunType *signature;
-    SymbolTable<ASTType *> locals; // including arguments
+    SymbolTable<ASTTypeNode *> locals; // including arguments
     std::string name;
 
 public:
@@ -29,9 +29,9 @@ public:
 
     std::string getName();
 
-    ASTType *getLocalType(std::string id);
+    ASTTypeNode *getLocalType(std::string id);
 
-    void addLocal(std::string id, ASTType *type);
+    void addLocal(std::string id, ASTTypeNode *type);
 
     bool hasLocal(std::string id);
 

@@ -1,13 +1,13 @@
 /**
- * @file astunop.h
+ * @file astunopexp.h
  *
  * @brief Abstract syntax tree unary operation node
  *
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#ifndef __ASTUNOP_H
-#define __ASTUNOP_H
+#ifndef __ASTUNOPEXP_H
+#define __ASTUNOPEXP_H
 
 #include <defs.h>
 #include <ast/expr/astexpnode.h>
@@ -15,7 +15,7 @@
 /**
  * @brief Unary operator expression AST node
  */
-class ASTUnop : public ASTExpNode {
+class ASTUnopExp : public ASTExpNode {
 public:
 
     /**
@@ -40,12 +40,12 @@ public:
      * @param[in] op  Unary operator
      * @param[in] exp Right-hand expression
      */
-    ASTUnop(enum op op, ASTExpNode *exp);
+    ASTUnopExp(enum op op, ASTExpNode *exp);
 
     /**
      * @brief Destructor
      */
-    ~ASTUnop();
+    ~ASTUnopExp();
 
     /**
      * @brief Get unary operator

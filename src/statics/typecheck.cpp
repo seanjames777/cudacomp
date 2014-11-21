@@ -5,21 +5,21 @@
  */
 
 #include <statics/typecheck.h>
-#include <ast/expr/astinteger.h>
-#include <ast/expr/astbinop.h>
+#include <ast/expr/astintegerexp.h>
+#include <ast/expr/astbinopexp.h>
 #include <ast/astseqnode.h>
 #include <ast/stmt/astreturnstmt.h>
-#include <ast/expr/astidentifier.h>
+#include <ast/expr/astidentifierexp.h>
 #include <ast/stmt/astvardeclstmt.h>
 #include <ast/stmt/astvardefnstmt.h>
 #include <ast/type/astintegertype.h>
-#include <ast/expr/astunop.h>
+#include <ast/expr/astunopexp.h>
 #include <ast/type/astbooleantype.h>
-#include <ast/stmt/astscope.h>
+#include <ast/stmt/astscopestmt.h>
 #include <ast/stmt/astifstmt.h>
-#include <ast/expr/astboolean.h>
-#include <ast/top/astfundefn.h>
-#include <ast/expr/astcall.h>
+#include <ast/expr/astbooleanexp.h>
+#include <ast/top/astfundefntop.h>
+#include <ast/expr/astcallexp.h>
 #include <ast/type/astvoidtype.h>
 #include <ast/type/astptrtype.h>
 #include <ast/stmt/astexprstmt.h>
@@ -48,14 +48,14 @@ IllegalTypeException::IllegalTypeException() {
     msg = "Illegal type";
 }
 
-ASTType *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & def, ASTExpNode *node) {
+ASTTypeNode *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & def, ASTExpNode *node) {
     // Integer constant
-    if (ASTInteger *int_exp = dynamic_cast<ASTInteger *>(node))
+    if (ASTIntegerExp *int_exp = dynamic_cast<ASTIntegerExp *>(node))
         return ASTIntegerType::get();
-    else if (ASTBoolean *bool_exp = dynamic_cast<ASTBoolean *>(node))
+    else if (ASTBooleanExp *bool_exp = dynamic_cast<ASTBooleanExp *>(node))
         return ASTBooleanType::get();
     // Variable reference
-    else if (ASTIdentifier *id_exp = dynamic_cast<ASTIdentifier *>(node)) {
+    else if (ASTIdentifierExp *id_exp = dynamic_cast<ASTIdentifierExp *>(node)) {
         // Must be declared
         if (decl.find(id_exp->getId()) == decl.end())
             throw new UndeclaredException(id_exp->getId());
@@ -68,19 +68,19 @@ ASTType *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset 
         return func->getLocalType(id_exp->getId());
     }
     // Unary operator
-    else if (ASTUnop *unop_exp = dynamic_cast<ASTUnop *>(node)) {
+    else if (ASTUnopExp *unop_exp = dynamic_cast<ASTUnopExp *>(node)) {
         // Get operand types
-        ASTType *t = typecheck_exp(mod, func, decl, def, unop_exp->getExp());
+        ASTTypeNode *t = typecheck_exp(mod, func, decl, def, unop_exp->getExp());
 
         // Types must be appropriate for operation
         switch(unop_exp->getOp()) {
-        case ASTUnop::NOT:
+        case ASTUnopExp::NOT:
             if (!t->equal(ASTBooleanType::get()))
                 throw new IllegalTypeException();
             return t;
             break;
-        case ASTUnop::BNOT:
-        case ASTUnop::NEG:
+        case ASTUnopExp::BNOT:
+        case ASTUnopExp::NEG:
             if (!t->equal(ASTIntegerType::get()))
                 throw new IllegalTypeException();
             return t;
@@ -88,46 +88,46 @@ ASTType *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset 
         }
     }
     // Binary operator
-    else if (ASTBinop *binop_exp = dynamic_cast<ASTBinop *>(node)) {
+    else if (ASTBinopExp *binop_exp = dynamic_cast<ASTBinopExp *>(node)) {
         // Get operand types
-        ASTType *t1 = typecheck_exp(mod, func, decl, def, binop_exp->getE1());
-        ASTType *t2 = typecheck_exp(mod, func, decl, def, binop_exp->getE1());
+        ASTTypeNode *t1 = typecheck_exp(mod, func, decl, def, binop_exp->getE1());
+        ASTTypeNode *t2 = typecheck_exp(mod, func, decl, def, binop_exp->getE1());
 
         // Types must be appropriate for operation
         switch(binop_exp->getOp()) {
-        case ASTBinop::ADD:
-        case ASTBinop::SUB:
-        case ASTBinop::MUL:
-        case ASTBinop::DIV:
-        case ASTBinop::MOD:
-        case ASTBinop::SHL:
-        case ASTBinop::SHR:
-        case ASTBinop::BAND:
-        case ASTBinop::BOR:
-        case ASTBinop::BXOR:
+        case ASTBinopExp::ADD:
+        case ASTBinopExp::SUB:
+        case ASTBinopExp::MUL:
+        case ASTBinopExp::DIV:
+        case ASTBinopExp::MOD:
+        case ASTBinopExp::SHL:
+        case ASTBinopExp::SHR:
+        case ASTBinopExp::BAND:
+        case ASTBinopExp::BOR:
+        case ASTBinopExp::BXOR:
             if (!t1->equal(ASTIntegerType::get()) || !t2->equal(ASTIntegerType::get()))
                 throw new IllegalTypeException();
             return ASTIntegerType::get();
-        case ASTBinop::OR:
-        case ASTBinop::AND:
+        case ASTBinopExp::OR:
+        case ASTBinopExp::AND:
             if (!t1->equal(ASTBooleanType::get()) || !t2->equal(ASTBooleanType::get()))
                 throw new IllegalTypeException();
             return ASTBooleanType::get();
-        case ASTBinop::LEQ:
-        case ASTBinop::GEQ:
-        case ASTBinop::LT:
-        case ASTBinop::GT:
+        case ASTBinopExp::LEQ:
+        case ASTBinopExp::GEQ:
+        case ASTBinopExp::LT:
+        case ASTBinopExp::GT:
             if (!t1->equal(ASTIntegerType::get()) || !t2->equal(ASTIntegerType::get()))
                 throw new IllegalTypeException();
             return ASTBooleanType::get();
-        case ASTBinop::EQ:
-        case ASTBinop::NEQ:
+        case ASTBinopExp::EQ:
+        case ASTBinopExp::NEQ:
             if (!t1->equal(t2) || (!t1->equal(ASTIntegerType::get()) && !t1->equal(ASTBooleanType::get())))
                 throw new IllegalTypeException();
             return ASTBooleanType::get();
         }
     }
-    else if (ASTCall *call_exp = dynamic_cast<ASTCall *>(node)) {
+    else if (ASTCallExp *call_exp = dynamic_cast<ASTCallExp *>(node)) {
         FunctionInfo *call_func = mod->getFunction(call_exp->getId());
 
         // Function must have been declared
@@ -155,8 +155,8 @@ ASTType *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset 
             else if (args == NULL && exprs == NULL)
                 break;
 
-            ASTType *exp_type = typecheck_exp(mod, call_func, decl, def, exprs->getHead());
-            ASTType *arg_type = args->getHead()->getType();
+            ASTTypeNode *exp_type = typecheck_exp(mod, call_func, decl, def, exprs->getHead());
+            ASTTypeNode *arg_type = args->getHead()->getType();
 
             // TODO: test for void argument
 
@@ -189,7 +189,7 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
     // before marking as declared, in case the definition tries to be
     // recursive.
     if (ASTVarDeclStmt *decl_stmt = dynamic_cast<ASTVarDeclStmt *>(head)) {
-        ASTType *decl_type = decl_stmt->getType();
+        ASTTypeNode *decl_type = decl_stmt->getType();
 
         // TODO: test for void declaration
 
@@ -201,7 +201,7 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
 
         // If there is a definition, check the type and mark as defined
         if (decl_exp) {
-            ASTType *exp_type = typecheck_exp(mod, func, decl, def, decl_exp);
+            ASTTypeNode *exp_type = typecheck_exp(mod, func, decl, def, decl_exp);
 
             if (!exp_type->equal(decl_type))
                 throw new IllegalTypeException();
@@ -219,8 +219,8 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
         if (decl.find(defn_stmt->getId()) == decl.end())
             throw new UndeclaredException(defn_stmt->getId());
 
-        ASTType *decl_type = func->getLocalType(defn_stmt->getId());
-        ASTType *exp_type = typecheck_exp(mod, func, decl, def, defn_stmt->getExp());
+        ASTTypeNode *decl_type = func->getLocalType(defn_stmt->getId());
+        ASTTypeNode *exp_type = typecheck_exp(mod, func, decl, def, defn_stmt->getExp());
 
         if (!exp_type->equal(decl_type))
             throw new IllegalTypeException();
@@ -230,7 +230,7 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
     }
     // Return statement
     else if (ASTReturnStmt *ret_node = dynamic_cast<ASTReturnStmt *>(head)) {
-        ASTType *expected = func->getSignature()->getReturnType();
+        ASTTypeNode *expected = func->getSignature()->getReturnType();
 
         bool isVoid = expected->equal(ASTVoidType::get());
 
@@ -244,7 +244,7 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
 
         // Must return the correct type in a non-void function
         if (ret_node->getExp()) {
-            ASTType *exp_type = typecheck_exp(mod, func, decl, def, ret_node->getExp());
+            ASTTypeNode *exp_type = typecheck_exp(mod, func, decl, def, ret_node->getExp());
 
             if (!exp_type->equal(expected))
                 throw new IllegalTypeException();
@@ -257,7 +257,7 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
         def = decl;
     }
     // Scope statement
-    else if (ASTScope *scope_node = dynamic_cast<ASTScope *>(head)) {
+    else if (ASTScopeStmt *scope_node = dynamic_cast<ASTScopeStmt *>(head)) {
         if (scope_node->getBody()) {
             // Scope inherits outside definitions/declarations
             idset scope_decl = decl;
@@ -279,7 +279,7 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
     // If statement
     else if (ASTIfStmt *if_node = dynamic_cast<ASTIfStmt *>(head)) {
         // Condition must be a boolean
-        ASTType *cond_type = typecheck_exp(mod, func, decl, def, if_node->getCond());
+        ASTTypeNode *cond_type = typecheck_exp(mod, func, decl, def, if_node->getCond());
 
         if (!cond_type->equal(ASTBooleanType::get()))
             throw new IllegalTypeException();
@@ -326,7 +326,7 @@ void typecheck_tops(ModuleInfo *mod, ASTTopSeqNode *seq_node) {
 }
 
 void typecheck_top(ModuleInfo *mod, ASTTopNode *node) {
-    if (ASTFunDefn *funDefn = dynamic_cast<ASTFunDefn *>(node)) {
+    if (ASTFunDefnTop *funDefn = dynamic_cast<ASTFunDefnTop *>(node)) {
         // Allocate space for information about this function
         FunctionInfo *funInfo = new FunctionInfo(funDefn->getName(), funDefn->getSignature());
         mod->addFunction(funDefn->getName(), funInfo);

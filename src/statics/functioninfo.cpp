@@ -20,11 +20,11 @@ ASTFunType *FunctionInfo::getSignature() {
     return signature;
 }
 
-ASTType *FunctionInfo::getLocalType(std::string id) {
+ASTTypeNode *FunctionInfo::getLocalType(std::string id) {
     return locals.get(id);
 }
 
-void FunctionInfo::addLocal(std::string id, ASTType *type) {
+void FunctionInfo::addLocal(std::string id, ASTTypeNode *type) {
     locals.set(id, type);
 }
 

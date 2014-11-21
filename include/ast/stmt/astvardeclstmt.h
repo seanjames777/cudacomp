@@ -11,7 +11,7 @@
 
 #include <ast/stmt/aststmtnode.h>
 #include <ast/expr/astexpnode.h>
-#include <ast/type/asttype.h>
+#include <ast/type/asttypenode.h>
 
 /**
  * @brief Variable declaration statement AST node. Declares and optionally
@@ -22,7 +22,7 @@ private:
 
     std::string id;
     ASTExpNode *exp;
-    ASTType *type;
+    ASTTypeNode *type;
 
 public:
 
@@ -33,7 +33,7 @@ public:
      * @param[in] id   Variable name
      * @param[in] exp  Initial definition, or null
      */
-    ASTVarDeclStmt(ASTType *type, std::string id, ASTExpNode *exp);
+    ASTVarDeclStmt(ASTTypeNode *type, std::string id, ASTExpNode *exp);
 
     /**
      * @brief Destructor
@@ -53,7 +53,7 @@ public:
     /**
      * @brief Get variable type
      */
-    ASTType *getType();
+    ASTTypeNode *getType();
 
     /**
      * @copydoc ASTNode::print()

@@ -9,21 +9,40 @@
 #ifndef __ASTBOOLEANTYPE_H
 #define __ASTBOOLEANTYPE_H
 
-#include <ast/type/asttype.h>
+#include <ast/type/asttypenode.h>
 
-class ASTBooleanType : public ASTType {
+/**
+ * @brief Boolean type AST type node
+ */
+class ASTBooleanType : public ASTTypeNode {
 private:
 
     static ASTBooleanType *instance;
 
 public:
 
+    /**
+     * @brief Constructor. This is a private constructor: use the singleton
+     * get() function.
+     *
+     * TODO: When we switch to shared pointers, make this private here and in
+     * other classes.
+     */
     ASTBooleanType();
 
+    /**
+     * @brief Get the singleton instance of this class
+     */
     static ASTBooleanType *get();
 
-    bool equal(ASTType *other);
+    /**
+     * @copydoc ASTTypeNode::equal()
+     */
+    virtual bool equal(ASTTypeNode *other) override;
 
+    /**
+     * @copydoc ASTNode::print()
+     */
     virtual void print(std::ostream & ss) override;
 };
 

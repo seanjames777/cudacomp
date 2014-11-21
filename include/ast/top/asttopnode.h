@@ -12,9 +12,16 @@
 #include <ast/astnode.h>
 #include <ast/astseqnode.h>
 
+/**
+ * @brief Base class for all top-level declarations and definitions in a module,
+ * such as functions, global variables, types, structs, etc.
+ */
 class ASTTopNode : public ASTNode {
 };
 
+/**
+ * @brief Sequence of top-level nodes
+ */
 typedef ASTSeqNode<ASTTopNode> ASTTopSeqNode;
 
 #endif

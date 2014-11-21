@@ -1,13 +1,13 @@
 /**
- * @file astboolean.h
+ * @file astbooleanexp.h
  *
  * @brief Abstract syntax tree boolean node
  *
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#ifndef __ASTBOOLEAN_H
-#define __ASTBOOLEAN_H
+#ifndef __ASTBOOLEANEXP_H
+#define __ASTBOOLEANEXP_H
 
 #include <defs.h>
 #include <ast/expr/astexpnode.h>
@@ -15,7 +15,7 @@
 /**
  * @brief Boolean constant expression AST node
  */
-class ASTBoolean : public ASTExpNode {
+class ASTBooleanExp : public ASTExpNode {
 private:
 
     bool value;
@@ -27,12 +27,12 @@ public:
      *
      * @param[in] value Boolean constant value
      */
-    ASTBoolean(bool value);
+    ASTBooleanExp(bool value);
 
     /**
      * @brief Destructor
      */
-    ~ASTBoolean();
+    ~ASTBooleanExp();
 
     /**
      * @brief Get boolean value
