@@ -6,6 +6,7 @@
 
 #include <codegen/codegenctx.h>
 #include <codegen/converttype.h>
+#include <ast/type/astvoidtype.h>
 
 namespace Codegen {
 
@@ -82,7 +83,9 @@ Function *CodegenCtx::createFunction(FunctionInfo *funcInfo) {
     ASTArgSeqNode *args = sig->getArgs();
     Type *returnType = convertType(sig->getReturnType());
 
-    if (emit_device)
+    bool isVoid = sig->getReturnType()->equal(ASTVoidType::get());
+
+    if (emit_device && !isVoid)
         argTypes.push_back(PointerType::getUnqual(returnType));
 
     // Add arguments to LLVM function type
@@ -141,7 +144,7 @@ void CodegenCtx::startFunction(std::string id) {
 }
 
 BasicBlock *CodegenCtx::createBlock() {
-    return BasicBlock::Create(context, "", function, NULL);
+    return BasicBlock::Create(context, "L", function, NULL);
 }
 
 void CodegenCtx::pushBlock(BasicBlock *block) {
@@ -166,8 +169,35 @@ void CodegenCtx::markKernel(Function *kernel) {
     cat->addOperand(node);
 }
 
+void CodegenCtx::insertMissingReturns(std::unordered_set<BasicBlock *> & visited, BasicBlock *bblock) {
+    // Skip if we have already checked this block
+    if (visited.find(bblock) != visited.end())
+        return;
+
+    // Mark as visited
+    visited.insert(bblock);
+
+    // Get the terminator instruction
+    TerminatorInst *term = bblock->getTerminator();
+
+    // The case we're interested in: insert a return
+    if (!term)
+        ReturnInst::Create(context, NULL, bblock);
+    // Otherwise, it's either a jump or return instruction, so we can just
+    // check each successor.
+    else
+        for (unsigned int i = 0; i < term->getNumSuccessors(); i++)
+            insertMissingReturns(visited, term->getSuccessor(i));
+}
+
 void CodegenCtx::finishFunction() {
     def_builder->CreateBr(first_bblock);
+
+    // Insert a return if one is missing and this is a void function
+    /*if (funcInfo->getSignature()->getReturnType()->equal(ASTVoidType::get())) {
+        std::unordered_set<BasicBlock *> visited;
+        insertMissingReturns(visited, first_bblock);
+    }*/
 }
 
 IRBuilder<> *CodegenCtx::getBuilder() {

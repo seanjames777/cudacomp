@@ -33,6 +33,10 @@ ASTStmtSeqNode *ASTFunDefn::getBody() {
     return body;
 }
 
+void ASTFunDefn::setBody(ASTStmtSeqNode *body) {
+    this->body = body;
+}
+
 void ASTFunDefn::print(std::ostream & ss) {
     // TODO
 }

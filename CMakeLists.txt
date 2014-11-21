@@ -35,6 +35,7 @@ add_executable(cc
     src/ast/expr/astcall.cpp
     src/ast/stmt/astifstmt.cpp
     src/ast/stmt/astreturnstmt.cpp
+    src/ast/stmt/astexprstmt.cpp
     src/ast/stmt/astscope.cpp
     src/ast/stmt/aststmtnode.cpp
     src/ast/stmt/astvardeclstmt.cpp
@@ -42,6 +43,8 @@ add_executable(cc
     src/ast/top/asttopnode.cpp
     src/ast/top/astfundefn.cpp
     src/ast/type/astbooleantype.cpp
+    src/ast/type/astvoidtype.cpp
+    src/ast/type/astptrtype.cpp
     src/ast/type/astarg.cpp
     src/ast/type/astfuntype.cpp
     src/ast/type/astintegertype.cpp

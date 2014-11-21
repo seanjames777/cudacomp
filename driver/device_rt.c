@@ -17,6 +17,11 @@ int main(int argc, char *argv[]) {
     CUmodule cudaModule;
     CUfunction function;
 
+    if (argc != 2) {
+        printf("Missing PTX file argument\n");
+        return -1;
+    }
+
     checkCudaErrors(cuInit(0));
 
     int devCount;
@@ -31,10 +36,10 @@ int main(int argc, char *argv[]) {
 
     checkCudaErrors(cuCtxCreate(&context, 0, device));
 
-    FILE *fd = fopen("device.ptx", "r");
+    FILE *fd = fopen(argv[1], "r");
 
     if (!fd) {
-        printf("Error: Cannot open device.ptx\n");
+        printf("Error: Cannot open %s\n", argv[1]);
         exit(-1);
     }
 
@@ -42,8 +47,9 @@ int main(int argc, char *argv[]) {
     int size = ftell(fd);
     fseek(fd, 0, SEEK_SET);
 
-    char *kernel = malloc(size);
+    char *kernel = malloc(size + 1);
     fread(kernel, 1, size, fd);
+    kernel[size] = 0; // null terminate
 
     fclose(fd);
 

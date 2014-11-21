@@ -3,11 +3,13 @@
 import sys
 import subprocess
 import time
+import md5
 
 ####### CONFIGURATION #######
 
 target = "host"
 run_list = []
+dump_temp = False
 
 tests = [
     ("../tests/testBinOps1.cc", 14),
@@ -42,7 +44,6 @@ tests = [
     ("../tests/testReturnCheck4.cc", 10),
     ("../tests/testReturnCheck5.cc", "noreturn"),
     ("../tests/testReturnCheck6.cc", 10),
-    ("../tests/testFib1.cc", 34),
     ("../tests/testCall1.cc", 5),
     ("../tests/testCall2.cc", "illegaltype"),
     ("../tests/testCall3.cc", "illegaltype"),
@@ -51,6 +52,13 @@ tests = [
     ("../tests/testCall6.cc", "illegaltype"),
     ("../tests/testCall7.cc", "illegaltype"),
     ("../tests/testCall8.cc", 20),
+    ("../tests/testCall9.cc", 5),
+    ("../tests/testCall10.cc", "illegaltype"),
+    ("../tests/testCall11.cc", "illegaltype"),
+    ("../tests/testCall12.cc", 5),
+    ("../tests/testFib1.cc", 34),
+    ("../tests/testFib2.cc", 34),
+    ("../tests/testFib3.cc", 34),
 ]
 
 # TODO: actually test type checking...
@@ -58,13 +66,15 @@ tests = [
 #############################
 
 def parse_args():
-    global target, input
+    global target, input, dump_temp
 
     for arg in sys.argv:
         if arg == "--host":
             target = "host"
         elif arg == "--device":
             target = "device"
+        elif arg == "--tmp":
+            dump_temp = True
         elif arg != sys.argv[0]:
             run_list.append(arg)
 
@@ -102,34 +112,38 @@ print "\033[34;1m***************************************************\033[0m"
 run = 0
 passed = 0
 
+run_shell([ "mkdir", "-p", "tmp" ])
+
 for (name, expected) in tests:
     if len(run_list) > 0 and not(name in run_list):
         continue
 
-    print "\033[37;1mTest '", name, "'\033[0m"
+    temp = "tmp/" + md5.new(name).hexdigest()
+
+    print "\033[37;1mTest '" + name + "'\033[0m"
+
+    if dump_temp:
+        print "    " + temp
 
     stat = -7
     output = []
 
     if target == "host":
-        (cc_stat, cc_out) = run_shell([ "../out/bin/cc", "-o", "host.ll", name ])
+        (cc_stat, cc_out) = run_shell([ "../out/bin/cc", "-o", temp + ".host.ll", name ])
         if cc_stat == 0:
-            run_shell([ "llc-mp-3.5", "-o", "host.o", "-filetype=obj", "host.ll" ])
-            run_shell([ "clang", "-o", "host", "host.o", "../out/bin/libhost_rt.a" ])
-            (stat, output) = run_shell([ "./host" ])
+            run_shell([ "llc-mp-3.5", "-o", temp + ".host.o", "-filetype=obj", temp + ".host.ll" ])
+            run_shell([ "clang", "-o", temp + ".host", temp + ".host.o", "../out/bin/libhost_rt.a" ])
+            (stat, output) = run_shell([ temp + ".host" ])
         else:
             (stat, output) = (cc_stat, cc_out)
-        run_shell([ "rm", "-f", "host.ll", "host.o", "host" ])
     else:
-        (cc_stat, cc_out) = run_shell([ "../out/bin/cc", "-o", "device.ll", "--emit-device", name ])
+        (cc_stat, cc_out) = run_shell([ "../out/bin/cc", "-o", temp + ".device.ll", "--emit-device", name ])
         if cc_stat == 0:
-            run_shell([ "llc-mp-3.5", "-o", "device.ptx", "device.ll" ])
-            run_shell([ "clang", "-o", "device", "../out/bin/libdevice_rt.a", "-framework", "CUDA" ])
-            (stat, output) = run_shell([ "./device" ])
+            run_shell([ "llc-mp-3.5", "-o", temp + ".device.ptx", temp + ".device.ll" ])
+            run_shell([ "clang", "-o", temp + ".device", "../out/bin/libdevice_rt.a", "-framework", "CUDA" ])
+            (stat, output) = run_shell([ temp + ".device", temp + ".device.ptx" ])
         else:
             (stat, output) = (cc_stat, cc_out)
-        run_shell([ "rm", "-f", "device.ll", "device.ptx", "device" ])
-        time.sleep(0.1)
 
     run = run + 1
 
@@ -147,6 +161,9 @@ for (name, expected) in tests:
         else:
             print "\033[32;1m    PASS:", expected, "\033[0m"
             passed = passed + 1
+
+if not(dump_temp):
+    run_shell([ "rm", "-rf", "tmp" ])
 
 print "\033[34;1m***************************************************\033[0m"
 print "\033[34;1m* Summary                                         *\033[0m"

@@ -34,6 +34,7 @@
 "else"                  { return ELSE; }
 "true"                  { yylval.boolean = true; return TRUE; } // TODO: don't need the boolean
 "false"                 { yylval.boolean = false; return FALSE; }
+"void"                  { return VOID; }
 
 [0-9]+                  { yylval.number = atoi(yytext); return NUMBER; }
 [_a-zA-Z][_a-zA-Z0-9]*  { yylval.string = strdup(yytext); return IDENT; }

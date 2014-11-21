@@ -17,7 +17,7 @@ TODO:
     don't really need to forward declare everything--we're smart enough
     expressions and arguments may not have type void
     functions can only be defined once
-    make sure argument moves are eliminated
     shared ptr
     "modernize" the C++
     empty program or check for main or something
+    look at what it does when a branch returns

@@ -38,6 +38,17 @@ private:
     // Current basic block
     IRBuilder<>               *body_builder; // IRBuilder for current block
 
+    /**
+     * @brief Insert return instructions in basic blocks that are missing a terminator.
+     * We know that the function is well-formed due to the statics checks, so the only possibility
+     * is that the (void) function did not have an explicit return statement. In the
+     * latter case, insert an empty return statement. Also checks any successor blocks.
+     *
+     * @param[inout] visited Set of blocks already visited
+     * @param[in]    bblock  Block to visit
+     */
+    void insertMissingReturns(std::unordered_set<BasicBlock *> & visited, BasicBlock *bblock);
+
 public:
 
     /**

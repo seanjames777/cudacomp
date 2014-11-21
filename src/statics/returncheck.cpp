@@ -19,6 +19,7 @@
 #include <ast/stmt/astifstmt.h>
 #include <ast/expr/astboolean.h>
 #include <ast/top/astfundefn.h>
+#include <ast/type/astvoidtype.h>
 
 namespace Statics {
 
@@ -77,10 +78,33 @@ void returncheck_tops(ModuleInfo *module, ASTTopSeqNode *nodes) {
 
 void returncheck_top(ModuleInfo *module, ASTTopNode *node) {
     if (ASTFunDefn *funDefn = dynamic_cast<ASTFunDefn *>(node)) {
+        bool isVoid = funDefn->getSignature()->getReturnType()->equal(ASTVoidType::get());
+
         FunctionInfo *func = module->getFunction(funDefn->getName());
 
-        if (!returncheck_stmts(func, funDefn->getBody()))
-            throw new NoReturnException();
+        // Check if all control flow paths return a value
+        if (!returncheck_stmts(func, funDefn->getBody())) {
+
+            // Void functions do not need to return on every control flow path, but the
+            // code generator requires that there be a return statement, so insert one.
+            if (isVoid) {
+                ASTStmtSeqNode *stmts = funDefn->getBody();
+
+                // Body is empty
+                if (stmts == NULL)
+                    funDefn->setBody(new ASTStmtSeqNode(new ASTReturnStmt(NULL), NULL));
+                // Seek to the end of the body and insert a return
+                else {
+                    while (stmts->getTail() != NULL)
+                        stmts = stmts->getTail();
+
+                    stmts->setTail(new ASTStmtSeqNode(new ASTReturnStmt(NULL), NULL));
+                }
+            }
+            // The program is legitimately wrong
+            else
+                throw new NoReturnException();
+        }
     }
     else
         throw new ASTMalformedException();

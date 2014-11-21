@@ -20,6 +20,8 @@
 #include <ast/type/astbooleantype.h>
 #include <codegen/converttype.h>
 #include <ast/expr/astcall.h>
+#include <ast/type/astvoidtype.h>
+#include <ast/stmt/astexprstmt.h>
 
 namespace Codegen {
 
@@ -80,9 +82,10 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
         Value *ret_val = NULL;
 
         ASTFunType *funDefn = ctx->getModuleInfo()->getFunction(call_exp->getId())->getSignature();
+        bool isVoid = funDefn->getReturnType()->equal(ASTVoidType::get());
 
         // In device mode, add a pointer to a new temp to get the return value
-        if (ctx->getEmitDevice()) {
+        if (ctx->getEmitDevice() && !isVoid) {
             // TODO use an address of instead maybe
             ret_val = ctx->createTemp(convertType(funDefn->getReturnType()));
             args.push_back(ret_val);
@@ -101,10 +104,13 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
 
         if (!ctx->getEmitDevice())
             ret_val = call;
-        else {
+        else if (!isVoid) {
             ret_val = builder->CreateLoad(ret_val);
         }
 
+        // If the function has a void return type, we'll return NULL, but this should have
+        // already been handled by the type checker: can't assign a void expression to any
+        // type of lvalue.
         return ret_val;
     }
     else
@@ -113,12 +119,14 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
     return NULL;
 }
 
-void codegen_stmts(CodegenCtx *ctx, ASTStmtSeqNode *seq_node) {
+bool codegen_stmts(CodegenCtx *ctx, ASTStmtSeqNode *seq_node) {
     while (seq_node != NULL) {
         if (!codegen_stmt(ctx, seq_node->getHead()))
-            break;
+            return false;
         seq_node = seq_node->getTail();
     }
+
+    return true;
 }
 
 bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *head) {
@@ -128,7 +136,7 @@ bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *head) {
     if (ASTReturnStmt *ret_node = dynamic_cast<ASTReturnStmt *>(head)) {
         ASTExpNode *ret_exp = ret_node->getExp();
 
-        // Need to return a value
+        // Void expressions don't need to return a value
         if (ret_exp) {
             Value *ret_val = codegen_exp(ctx, ret_exp);
 
@@ -169,7 +177,7 @@ bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *head) {
     // Scope
     else if (ASTScope *scope_stmt = dynamic_cast<ASTScope *>(head)) {
         if (scope_stmt->getBody())
-            codegen_stmts(ctx, scope_stmt->getBody());
+            return codegen_stmts(ctx, scope_stmt->getBody());
     }
     // If statement
     else if (ASTIfStmt *if_node = dynamic_cast<ASTIfStmt *>(head)) {
@@ -184,22 +192,39 @@ bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *head) {
 
         // Generate 'true' branch
         ctx->pushBlock(trueBlock);
-        codegen_stmts(ctx, if_node->getTrueStmt());
-        ctx->getBuilder()->CreateBr(doneBlock);
+
+        // Whether the left and right branches did not return
+        bool leftContinue = true;
+        bool rightContinue = true;
+
+        // Only need to insert the jump if the statement didn't return
+        if ((leftContinue = codegen_stmts(ctx, if_node->getTrueStmt())))
+            ctx->getBuilder()->CreateBr(doneBlock);
 
         // Generate 'false' branch
         ctx->pushBlock(falseBlock);
 
-        if (if_node->getFalseStmt())
-            codegen_stmts(ctx, if_node->getFalseStmt());
-
-        ctx->getBuilder()->CreateBr(doneBlock);
+        if (if_node->getFalseStmt()) {
+            if ((rightContinue = codegen_stmts(ctx, if_node->getFalseStmt())))
+                ctx->getBuilder()->CreateBr(doneBlock);
+        }
+        else
+            ctx->getBuilder()->CreateBr(doneBlock);
 
         // 'doneBlock' remains on the stack
-        ctx->pushBlock(doneBlock);
+        if (leftContinue || rightContinue)
+            ctx->pushBlock(doneBlock);
+        // We ended up not using this block, so delete it
+        else
+            doneBlock->eraseFromParent();
 
-        // TODO: check if this is making phi nodes
+        // If both branches return, the caller should stop, or we'll end up
+        // creating a block with no predecessors
+        return leftContinue || rightContinue;
     }
+    // Expression statement
+    else if (ASTExprStmt *exp_stmt = dynamic_cast<ASTExprStmt *>(head))
+        codegen_exp(ctx, exp_stmt->getExp());
     else
         throw new ASTMalformedException();
 

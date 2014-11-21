@@ -33,6 +33,8 @@ public:
 
     ASTStmtSeqNode *getBody();
 
+    void setBody(ASTStmtSeqNode *body);
+
     virtual void print(std::ostream & ss) override;
 
 };

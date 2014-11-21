@@ -22,6 +22,9 @@
 #include <ast/type/astfuntype.h>
 #include <ast/type/astarg.h>
 #include <ast/expr/astcall.h>
+#include <ast/type/astvoidtype.h>
+#include <ast/type/astptrtype.h>
+#include <ast/stmt/astexprstmt.h>
 
 #define YYERROR_VERBOSE
 
@@ -59,14 +62,14 @@ void yyerror(ASTTopSeqNode **root, const char *str) {
 %token <boolean> TRUE FALSE
 %token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR NOT BNOT
 %token ASSIGN SEMI COMMA
-%token INT BOOL
+%token INT BOOL VOID
 %token RETURN IF ELSE
 %token LPAREN RPAREN LBRACE RBRACE
 %token EQ NEQ LEQ GEQ LT GT
 
 %type <exp> exp
 %type <type> type
-%type <stmt> stmt
+%type <stmt> stmt simp
 %type <stmt_seq> stmt_list
 %type <stmt_seq> elseopt
 %type <arg> param
@@ -107,7 +110,6 @@ program:
     top_list                          { *root = $1; }
   ;
 
-
 stmt_list:
     /* empty */                       { $$ = NULL; }
   | stmt stmt_list                    { $$ = new ASTStmtSeqNode($1, $2); }
@@ -146,13 +148,20 @@ exp:
 type:
     INT                               { $$ = new ASTIntegerType(); }
   | BOOL                              { $$ = new ASTBooleanType(); }
+  | VOID                              { $$ = new ASTVoidType(); }
+  ;
+
+simp:
+    type IDENT                        { $$ = new ASTVarDeclStmt($1, std::string($2), NULL); free($2); }
+  | type IDENT ASSIGN exp             { $$ = new ASTVarDeclStmt($1, std::string($2), $4); free($2); }
+  | IDENT ASSIGN exp                  { $$ = new ASTVarDefnStmt(std::string($1), $3); free($1); } // TODO free
+  | exp                               { $$ = new ASTExprStmt($1); }
   ;
 
 stmt:
-    RETURN exp SEMI                   { $$ = new ASTReturnStmt($2); }
-  | type IDENT SEMI                   { $$ = new ASTVarDeclStmt($1, std::string($2), NULL); free($2); }
-  | type IDENT ASSIGN exp SEMI        { $$ = new ASTVarDeclStmt($1, std::string($2), $4); free($2); }
-  | IDENT ASSIGN exp SEMI             { $$ = new ASTVarDefnStmt(std::string($1), $3); free($1); } // TODO free
+    simp SEMI                         { $$ = $1; }
+  | RETURN exp SEMI                   { $$ = new ASTReturnStmt($2); }
+  | RETURN SEMI                       { $$ = new ASTReturnStmt(NULL); }
   | LBRACE stmt_list RBRACE           { $$ = new ASTScope($2); }
   | IF LPAREN exp RPAREN stmt elseopt { $$ = new ASTIfStmt($3, new ASTStmtSeqNode($5, NULL), $6); }
   ;

@@ -42,6 +42,10 @@ public:
         return tail;
     }
 
+    void setTail(ASTSeqNode<T> *tail) {
+        this->tail = tail;
+    }
+
     void print(std::ostream & ss) override {
         ss << "seq(";
         getHead()->print(ss);

@@ -11,12 +11,15 @@ ASTPtrType::ASTPtrType(ASTType *toType)
 {
 }
 
-ASTType *getToType() {
+ASTType *ASTPtrType::getToType() {
     return toType;
 }
 
 bool ASTPtrType::equal(ASTType *other) {
-    if (other && (ASTPtrType *other_ptr = dynamic_cast<ASTPtrType *>(other)))
+    if (!other)
+        return false;
+
+    if (ASTPtrType *other_ptr = dynamic_cast<ASTPtrType *>(other))
         return toType->equal(other_ptr->getToType());
 
     return false;

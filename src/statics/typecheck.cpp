@@ -20,6 +20,9 @@
 #include <ast/expr/astboolean.h>
 #include <ast/top/astfundefn.h>
 #include <ast/expr/astcall.h>
+#include <ast/type/astvoidtype.h>
+#include <ast/type/astptrtype.h>
+#include <ast/stmt/astexprstmt.h>
 
 namespace Statics {
 
@@ -148,6 +151,8 @@ ASTType *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset 
             ASTType *exp_type = typecheck_exp(mod, func, decl, def, exprs->getHead());
             ASTType *arg_type = args->getHead()->getType();
 
+            // TODO: test for void argument
+
             if (!exp_type->equal(arg_type))
                 throw new IllegalTypeException();
 
@@ -178,6 +183,8 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
     // recursive.
     if (ASTVarDeclStmt *decl_stmt = dynamic_cast<ASTVarDeclStmt *>(head)) {
         ASTType *decl_type = decl_stmt->getType();
+
+        // TODO: test for void declaration
 
         // Must not be declared yet
         if (decl.find(decl_stmt->getId()) != decl.end())
@@ -217,10 +224,24 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
     // Return statement
     else if (ASTReturnStmt *ret_node = dynamic_cast<ASTReturnStmt *>(head)) {
         ASTType *expected = func->getSignature()->getReturnType();
-        ASTType *exp_type = typecheck_exp(mod, func, decl, def, ret_node->getExp());
 
-        if (!exp_type->equal(expected))
-            throw new IllegalTypeException();
+        bool isVoid = expected->equal(ASTVoidType::get());
+
+        // Should not return anything in a void function
+        if (isVoid && ret_node->getExp())
+            throw new IllegalTypeException(); // TODO better exception
+
+        // Must return something in a non-void function
+        if (!ret_node->getExp() && !isVoid)
+            throw new IllegalTypeException(); // TODO better exception
+
+        // Must return the correct type in a non-void function
+        if (ret_node->getExp()) {
+            ASTType *exp_type = typecheck_exp(mod, func, decl, def, ret_node->getExp());
+
+            if (!exp_type->equal(expected))
+                throw new IllegalTypeException();
+        }
 
         // Return statements need to define any variables that have been
         // declared. Every control flow path from a declaration of a
@@ -248,6 +269,7 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
             def = new_def;
         }
     }
+    // If statement
     else if (ASTIfStmt *if_node = dynamic_cast<ASTIfStmt *>(head)) {
         // Condition must be a boolean
         ASTType *cond_type = typecheck_exp(mod, func, decl, def, if_node->getCond());
@@ -282,6 +304,9 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
 
         def = new_def;
     }
+    // Expression statement
+    else if (ASTExprStmt *exp_stmt = dynamic_cast<ASTExprStmt *>(head))
+        typecheck_exp(mod, func, decl, def, exp_stmt->getExp());
     else
         throw new ASTMalformedException();
 }
