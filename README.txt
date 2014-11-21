@@ -24,3 +24,9 @@ TEST:
     To run tests in device mode:
 
     ./driver.py --device
+
+DOCUMENTATION:
+
+    To build documentation with doxygen, simply:
+
+    make doc
