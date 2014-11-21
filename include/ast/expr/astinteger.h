@@ -12,6 +12,9 @@
 #include <defs.h>
 #include <ast/expr/astexpnode.h>
 
+/**
+ * @brief Integer constant expression AST node
+ */
 class ASTInteger : public ASTExpNode {
 private:
 
@@ -19,12 +22,26 @@ private:
 
 public:
 
+    /**
+     * @brief Constructor
+     *
+     * @param[in] value Integer constant value
+     */
     ASTInteger(int value);
 
+    /**
+     * @brief Destructor
+     */
     ~ASTInteger();
 
+    /**
+     * @brief Get integer value
+     */
     int getValue();
 
+    /**
+     * @copydoc ASTNode::print()
+     */
     void print(std::ostream & ss) override;
 
 };

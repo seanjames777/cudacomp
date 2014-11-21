@@ -12,6 +12,10 @@
 #include <defs.h>
 #include <ast/expr/astexpnode.h>
 
+/**
+ * @brief AST identifier expression nodes. Refers to a local variable in a
+ * function body.
+ */
 class ASTIdentifier : public ASTExpNode {
 private:
 
@@ -19,13 +23,27 @@ private:
 
 public:
 
+    /**
+     * @brief Constructor
+     *
+     * @param[in] value Local variable name
+     */
     ASTIdentifier(std::string value);
 
+    /**
+     * @brief Destructor
+     */
     ~ASTIdentifier();
 
+    /**
+     * @brief Get the referenced variable name
+     */
     std::string getId();
 
-    void print(std::ostream & ss) override;
+    /**
+     * @copydoc ASTNode::print()
+     */
+    virtual void print(std::ostream & ss) override;
 
 };
 

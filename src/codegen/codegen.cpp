@@ -41,7 +41,7 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
         switch(unop_exp->getOp()) {
         case ASTUnop::NOT:  return builder->CreateBinOp(Instruction::Xor, v, v);
         case ASTUnop::BNOT: return builder->CreateNot(v);
-        case ASTUnop::NEG:  return builder->CreateNeg(v);
+        case ASTUnop::NEG:  return builder->CreateNeg(v); // TODO investigate x86
         }
     }
     // Binary operator

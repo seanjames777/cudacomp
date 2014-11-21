@@ -12,13 +12,19 @@
 #include <defs.h>
 #include <ast/expr/astexpnode.h>
 
+/**
+ * @brief Unary operator expression AST node
+ */
 class ASTUnop : public ASTExpNode {
 public:
 
+    /**
+     * @brief Unary operators
+     */
     enum op {
-        NOT,
-        BNOT,
-        NEG
+        NOT,   //!< Boolean NOT
+        BNOT,  //!< Bitwise NOT
+        NEG    //!< Numeric negation
     };
 
 private:
@@ -28,14 +34,32 @@ private:
 
 public:
 
+    /**
+     * @brief Constructor
+     *
+     * @param[in] op  Unary operator
+     * @param[in] exp Right-hand expression
+     */
     ASTUnop(enum op op, ASTExpNode *exp);
 
+    /**
+     * @brief Destructor
+     */
     ~ASTUnop();
 
+    /**
+     * @brief Get unary operator
+     */
     enum op getOp();
 
+    /**
+     * @brief Get right-hand expression
+     */
     ASTExpNode *getExp();
 
+    /**
+     * @copydoc ASTNode::print
+     */
     void print(std::ostream & ss) override;
 
 };

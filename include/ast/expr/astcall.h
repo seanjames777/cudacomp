@@ -11,6 +11,9 @@
 
 #include <ast/expr/astexpnode.h>
 
+/**
+ * @brief Function call expression AST node
+ */
 class ASTCall : public ASTExpNode {
 private:
 
@@ -19,19 +22,34 @@ private:
 
 public:
 
+    /**
+     * @brief Constructor
+     *
+     * @param[in] id   Name of function to call
+     * @param[in] args Sequence of argument expressions
+     */
     ASTCall(std::string id, ASTExpSeqNode *args);
 
+    /**
+     * @brief Destructor
+     */
     ~ASTCall();
 
+    /**
+     * @brief Get name of function to call
+     */
     std::string getId();
 
+    /**
+     * @brief Get argument sequence to function call
+     */
     ASTExpSeqNode *getArgs();
 
+    /**
+     * @copydoc ASTNode::print()
+     */
     void print(std::ostream & ss) override;
 
 };
 
 #endif
-
-
-// TODO: need to create functions before generating their bodies... ugh
