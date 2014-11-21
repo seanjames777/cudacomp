@@ -16,6 +16,7 @@
 //#define DEBUG
 
 #ifdef DEBUG
+
 #define checkCudaErrors(expr) {              \
     CUresult err = (expr);                   \
     if (err != CUDA_SUCCESS) {               \
@@ -24,8 +25,17 @@
         exit(-1);                            \
     }                                        \
 }
+
+unsigned long long getCycleCount() {
+    unsigned int lo, hi;
+    __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
+    return ((unsigned long long)hi << 32) | lo;
+}
+
 #else
+
 #define checkCudaErrors(expr) (expr);
+
 #endif
 
 int main(int argc, char *argv[]) {
@@ -114,11 +124,23 @@ int main(int argc, char *argv[]) {
     void *kernelParams[1];
     kernelParams[0] = &devRetVal;
 
+#ifdef DEBUG
+    unsigned long long start = getCycleCount();
+#endif
+
     checkCudaErrors(cuLaunchKernel(function, 1, 1, 1, 1, 1, 1, 0, NULL, kernelParams, NULL));
+
+#ifdef DEBUG
+    unsigned long long end = getCycleCount();
+#endif
 
     checkCudaErrors(cuMemcpyDtoH(&retVal, devRetVal, sizeof(int)));
 
     printf("%d\n", retVal);
+
+#ifdef DEBUG
+    printf("%llu cycles\n", end - start);
+#endif
 
     checkCudaErrors(cuMemFree(devRetVal));
 
