@@ -1,8 +1,7 @@
 /**
  * @file astseqnode.h
  *
- * @brief Abstract syntax tree sequence statement node. Evaluates its head and
- * then its tail, which may be empty (NULL).
+ * @brief Abstract syntax tree sequence node.
  *
  * @author Sean James <seanjames777@gmail.com>
  */
@@ -12,6 +11,14 @@
 
 #include <ast/astnode.h>
 
+/**
+ * @brief Abstract base class of all "sequence" nodes. These are nodes which have
+ * a head and a tail, where the head is the first element of a sequence and the
+ * tail is another sequence node representing the rest of the sequence, or
+ * null to indicate the end of the sequence.
+ *
+ * @tparam T Type of "head" element
+ */
 template<typename T>
 class ASTSeqNode : public ASTNode {
 private:

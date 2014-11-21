@@ -26,7 +26,7 @@ public:
 };
 
 /**
- * @brief Base class of all AST nodes
+ * @brief Abstract base class of all AST nodes
  */
 class ASTNode {
 public:

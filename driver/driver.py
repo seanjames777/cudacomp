@@ -14,6 +14,7 @@ dump_temp = False
 
 SOURCE_DIR = "@CMAKE_CURRENT_SOURCE_DIR@/"
 BINARY_DIR = "@CMAKE_INSTALL_PREFIX@/"
+LLC = "@LLVM_LLC@"
 
 print SOURCE_DIR
 print BINARY_DIR
@@ -141,7 +142,7 @@ for (name, expected) in tests:
     if target == "host":
         (cc_stat, cc_out) = run_shell([ BINARY_DIR + "bin/cc", "-o", temp + "_host.ll", name ])
         if cc_stat == 0:
-            run_shell([ "llc-mp-3.5", "-o", temp + "_host.o", "-filetype=obj", temp + "_host.ll" ])
+            run_shell([ LLC, "-o", temp + "_host.o", "-filetype=obj", temp + "_host.ll" ])
             run_shell([ "clang", "-o", temp + "_host", temp + "_host.o", BINARY_DIR + "lib/libhost_rt.a" ])
             (stat, output) = run_shell([ temp + "_host" ])
         else:
@@ -149,7 +150,7 @@ for (name, expected) in tests:
     else:
         (cc_stat, cc_out) = run_shell([ BINARY_DIR + "bin/cc", "-o", temp + "_device.ll", "--emit-device", name ])
         if cc_stat == 0:
-            run_shell([ "llc-mp-3.5", "-o", temp + "_device.ptx", temp + "_device.ll" ])
+            run_shell([ LLC, "-o", temp + "_device.ptx", temp + "_device.ll" ])
             run_shell([ "nvcc", "-fatbin", "-o", temp + "_device.cubin", temp + "_device.ptx" ])
             run_shell([ "clang", "-o", temp + "_device", BINARY_DIR + "lib/libdevice_rt.a", "-framework", "CUDA",
                 "-sectcreate", "__TEXT", "__kernels", temp + "_device.cubin",

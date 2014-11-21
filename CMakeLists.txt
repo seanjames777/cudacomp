@@ -1,14 +1,29 @@
 cmake_minimum_required(VERSION 2.6)
 project(cuda_comp)
 
+##############################################
+# CONFIGURATION                              #
+##############################################
+
+if (NOT (DEFINED LLVM_SUFFIX))
+set(LLVM_SUFFIX  "-mp-3.5")
+endif (NOT (DEFINED LLVM_SUFFIX))
+
+set(LLVM_LLC     "llc${LLVM_SUFFIX}")
+set(LLVM_CONFIG  "llvm-config${LLVM_SUFFIX}")
+
+##############################################
+# END CONFIGURATION                          #
+##############################################
+
 # RPath
 set(CMAKE_INSTALL_RPATH "\$ORIGIN/")
 set(CMAKE_INSTALL_NAME_DIR "@executable_path/")
 
-execute_process(COMMAND llvm-config-mp-3.5 --cxxflags OUTPUT_VARIABLE LLVM_CXX_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
-execute_process(COMMAND llvm-config-mp-3.5 --ldflags OUTPUT_VARIABLE LLVM_LD_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
-execute_process(COMMAND llvm-config-mp-3.5 --libs core native OUTPUT_VARIABLE LLVM_LIBS OUTPUT_STRIP_TRAILING_WHITESPACE)
-execute_process(COMMAND llvm-config-mp-3.5 --system-libs core native OUTPUT_VARIABLE LLVM_SYS_LIBS OUTPUT_STRIP_TRAILING_WHITESPACE)
+execute_process(COMMAND ${LLVM_CONFIG} --cxxflags OUTPUT_VARIABLE LLVM_CXX_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
+execute_process(COMMAND ${LLVM_CONFIG} --ldflags OUTPUT_VARIABLE LLVM_LD_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
+execute_process(COMMAND ${LLVM_CONFIG} --libs core native OUTPUT_VARIABLE LLVM_LIBS OUTPUT_STRIP_TRAILING_WHITESPACE)
+execute_process(COMMAND ${LLVM_CONFIG} --system-libs core native OUTPUT_VARIABLE LLVM_SYS_LIBS OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 include_directories(include)
 

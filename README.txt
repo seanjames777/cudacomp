@@ -4,13 +4,19 @@ AUTHOR:
 
 BUILD:
 
-    Build using CMake. You will need Flex and Bison. These can be installed via,
-    for example, MacPorts.
+    Build using CMake. You will need to install some dependencies first:
 
-    mkdir build
-    cd build
-    cmake -DCMAKE_INSTALL_PREFIX=../out/ ../
-    make && make install
+    - Insatll Flex and Bison. These can be installed via, for example, MacPorts.
+    - Install LLVM, and tell the build system which LLVM to use. For example,
+      if the 'llc' command is available on your path as "llc-mp-3.5", then you
+      would configure CMake as follows.
+
+    Then, create a build directory, configure CMake, and build:
+
+      mkdir build
+      cd build
+      cmake -DCMAKE_INSTALL_PREFIX="../out/" -DLLVM_SUFFIX="-mp-3.5" ../
+      make && make install
 
 TEST:
 
@@ -19,14 +25,21 @@ TEST:
     directory, so you can run tests as follows. Note that you will need to
     use 'make install' above. 'make' alone is insufficient.
 
-    ./driver.py
+      ./driver.py
 
     To run tests in device mode:
 
-    ./driver.py --device
+      ./driver.py --device
+
+    To run specific tests, provide the name of the files in tests/:
+
+      ./driver.py testCall1.cc testCall2.cc
+
+    To add more tests, edit the CONFIGURATION section of driver/driver.py,
+    and rerun 'make && make install'.
 
 DOCUMENTATION:
 
     To build documentation with doxygen, simply:
 
-    make doc
+      make doc
