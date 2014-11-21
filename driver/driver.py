@@ -129,21 +129,22 @@ for (name, expected) in tests:
     output = []
 
     if target == "host":
-        (cc_stat, cc_out) = run_shell([ "../out/bin/cc", "-o", temp + ".host.ll", name ])
+        (cc_stat, cc_out) = run_shell([ "../out/bin/cc", "-o", temp + "_host.ll", name ])
         if cc_stat == 0:
-            run_shell([ "llc-mp-3.5", "-o", temp + ".host.o", "-filetype=obj", temp + ".host.ll" ])
-            run_shell([ "clang", "-o", temp + ".host", temp + ".host.o", "../out/bin/libhost_rt.a" ])
-            (stat, output) = run_shell([ temp + ".host" ])
+            run_shell([ "llc-mp-3.5", "-o", temp + "_host.o", "-filetype=obj", temp + "_host.ll" ])
+            run_shell([ "clang", "-o", temp + "_host", temp + "_host.o", "../out/bin/libhost_rt.a" ])
+            (stat, output) = run_shell([ temp + "_host" ])
         else:
             (stat, output) = (cc_stat, cc_out)
     else:
-        (cc_stat, cc_out) = run_shell([ "../out/bin/cc", "-o", temp + ".device.ll", "--emit-device", name ])
+        (cc_stat, cc_out) = run_shell([ "../out/bin/cc", "-o", temp + "_device.ll", "--emit-device", name ])
         if cc_stat == 0:
-            run_shell([ "llc-mp-3.5", "-o", temp + ".device.ptx", temp + ".device.ll" ])
-            run_shell([ "clang", "-o", temp + ".device", "../out/bin/libdevice_rt.a", "-framework", "CUDA",
-                "-sectcreate", "__TEXT", "__kernels", temp + ".device.ptx",
+            run_shell([ "llc-mp-3.5", "-o", temp + "_device.ptx", temp + "_device.ll" ])
+            run_shell([ "nvcc", "-fatbin", "-o", temp + "_device.cubin", temp + "_device.ptx" ])
+            run_shell([ "clang", "-o", temp + "_device", "../out/bin/libdevice_rt.a", "-framework", "CUDA",
+                "-sectcreate", "__TEXT", "__kernels", temp + "_device.cubin",
                 "-sectalign", "__TEXT", "__kernels", "8" ])
-            (stat, output) = run_shell([ temp + ".device" ])
+            (stat, output) = run_shell([ temp + "_device" ])
         else:
             (stat, output) = (cc_stat, cc_out)
 
