@@ -23,6 +23,7 @@
 #include <ast/type/astvoidtype.h>
 #include <ast/type/astptrtype.h>
 #include <ast/stmt/astexprstmt.h>
+#include <ast/stmt/astwhilestmt.h>
 
 namespace Statics {
 
@@ -310,6 +311,23 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
             std::inserter(new_def, new_def.end()));
 
         def = new_def;
+    }
+    // While statement
+    else if (ASTWhileStmt *while_node = dynamic_cast<ASTWhileStmt *>(head)) {
+        // Condition must be a boolean
+        ASTType *cond_type = typecheck_exp(mod, func, decl, def, while_node->getCond());
+
+        if (!cond_type->equal(ASTBooleanType::get()))
+            throw new IllegalTypeException();
+
+        // Treat body as scope
+        idset scope_decl_body = decl;
+        idset scope_def_body = def;
+
+        typecheck_stmts(mod, func, scope_decl_body, scope_def_body, while_node->getBodyStmt());
+
+        // Definitions and declarations inside the body of the loop do NOT propogate out
+
     }
     // Expression statement
     else if (ASTExprStmt *exp_stmt = dynamic_cast<ASTExprStmt *>(head))

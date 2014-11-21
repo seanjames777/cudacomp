@@ -25,6 +25,7 @@
 #include <ast/type/astvoidtype.h>
 #include <ast/type/astptrtype.h>
 #include <ast/stmt/astexprstmt.h>
+#include <ast/stmt/astwhilestmt.h>
 
 #define YYERROR_VERBOSE
 
@@ -63,7 +64,7 @@ void yyerror(ASTTopSeqNode **root, const char *str) {
 %token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR NOT BNOT
 %token ASSIGN SEMI COMMA
 %token INT BOOL VOID
-%token RETURN IF ELSE
+%token RETURN IF ELSE WHILE
 %token LPAREN RPAREN LBRACE RBRACE
 %token EQ NEQ LEQ GEQ LT GT
 
@@ -164,6 +165,7 @@ stmt:
   | RETURN SEMI                       { $$ = new ASTReturnStmt(NULL); }
   | LBRACE stmt_list RBRACE           { $$ = new ASTScope($2); }
   | IF LPAREN exp RPAREN stmt elseopt { $$ = new ASTIfStmt($3, new ASTStmtSeqNode($5, NULL), $6); }
+  | WHILE LPAREN exp RPAREN stmt      { $$ = new ASTWhileStmt($3, new ASTStmtSeqNode($5, NULL))}
   ;
 
 elseopt:

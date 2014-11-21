@@ -70,6 +70,8 @@ tests = [
     (SOURCE_DIR + "tests/testFib1.cc", 34),
     (SOURCE_DIR + "tests/testFib2.cc", 34),
     (SOURCE_DIR + "tests/testFib3.cc", 34),
+    (SOURCE_DIR + "tests/testWhile1.cc", 1),
+    (SOURCE_DIR + "tests/testWhile2.cc", 55)
 ]
 
 # TODO: actually test type checking...

@@ -22,6 +22,7 @@
 #include <ast/expr/astcall.h>
 #include <ast/type/astvoidtype.h>
 #include <ast/stmt/astexprstmt.h>
+#include <ast/stmt/astwhilestmt.h>
 
 namespace Codegen {
 
@@ -221,6 +222,33 @@ bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *head) {
         // If both branches return, the caller should stop, or we'll end up
         // creating a block with no predecessors
         return leftContinue || rightContinue;
+    }
+    // While statement
+    else if (ASTWhileStmt *while_node = dynamic_cast<ASTWhileStmt *>(head)) {
+        Value *cond = codegen_exp(ctx, while_node->getCond());
+
+        BasicBlock *bodyBlock = ctx->createBlock();
+        BasicBlock *doneBlock = ctx->createBlock();
+
+        // Generate conditional jump
+        ctx->getBuilder()->CreateCondBr(cond, bodyBlock, doneBlock);
+
+        // Generate while's 'body' branch
+        ctx->pushBlock(bodyBlock);
+
+        // Whether the body of the while loop returns
+        bool bodyContinue;
+
+        // Only need to insert looping conditional jump if body didn't return
+        if ((bodyContinue = codegen_stmts(ctx, while_node->getBodyStmt()))) {
+            Value *body_cond = codegen_exp(ctx, while_node->getCond());
+            ctx->getBuilder()->CreateCondBr(body_cond, bodyBlock, doneBlock);
+        }
+        // 'doneBlock' remains on the stack
+        ctx->pushBlock(doneBlock);
+
+        return true;
+
     }
     // Expression statement
     else if (ASTExprStmt *exp_stmt = dynamic_cast<ASTExprStmt *>(head))

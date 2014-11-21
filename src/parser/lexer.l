@@ -28,6 +28,7 @@
 %%
 
 "return"                { return RETURN; }
+"while"                 { return WHILE; }
 "int"                   { return INT; }
 "bool"                  { return BOOL; }
 "if"                    { return IF; }
