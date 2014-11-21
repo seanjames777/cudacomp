@@ -4,7 +4,9 @@ AUTHOR:
 
 BUILD:
 
-    Build using CMake:
+    Build using CMake. Note that the test and driver infrastructure currently
+    assume you are using exactly this setup. You will need Flex and Bison. These
+    can be installed via, for example, MacPorts.
 
     mkdir build
     cd build
@@ -14,10 +16,10 @@ BUILD:
 
 TEST:
 
-    Use the test driver to run tests:
+    Use the test driver to run tests.
 
-    ../driver/driver.py
+    ./driver.py
 
     To run tests in device mode:
 
-    ../driver/driver.py --device
+    ./driver.py --device

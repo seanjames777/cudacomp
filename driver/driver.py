@@ -4,6 +4,7 @@ import sys
 import subprocess
 import time
 import md5
+import os.path
 
 ####### CONFIGURATION #######
 
@@ -11,57 +12,63 @@ target = "host"
 run_list = []
 dump_temp = False
 
+SOURCE_DIR = "@CMAKE_CURRENT_SOURCE_DIR@/"
+BINARY_DIR = "@CMAKE_INSTALL_PREFIX@/"
+
+print SOURCE_DIR
+print BINARY_DIR
+
 tests = [
-    ("../tests/testBinOps1.cc", 14),
-    ("../tests/testBinOps2.cc", 2),
-    ("../tests/testCmp1.cc", 1),
-    ("../tests/testUndeclared.cc", "undeclared"),
-    ("../tests/testUndefined.cc", "undefined"),
-    ("../tests/testRedeclared.cc", "redeclared"),
-    ("../tests/testId1.cc", 10),
-    ("../tests/testId2.cc", 20),
-    ("../tests/testId3.cc", "undeclared"),
-    ("../tests/testId4.cc", 20),
-    ("../tests/testId5.cc", "undeclared"),
-    ("../tests/testId6.cc", 100),
-    ("../tests/testReturnDeclDef.cc", 5),
-    ("../tests/testUnOps1.cc", -1),
-    ("../tests/testUnOps2.cc", -1),
-    ("../tests/testUnOps3.cc", 2),
-    ("../tests/testScope1.cc", 10),
-    ("../tests/testScope2.cc", "undeclared"),
-    ("../tests/testScope3.cc", 10),
-    ("../tests/testScope4.cc", 10),
-    ("../tests/testIf1.cc", 10),
-    ("../tests/testIf2.cc", 20),
-    ("../tests/testIf3.cc", 10),
-    ("../tests/testIf4.cc", "undefined"),
-    ("../tests/testIf5.cc", 10),
-    ("../tests/testIf6.cc", 10),
-    ("../tests/testReturnCheck1.cc", "noreturn"),
-    ("../tests/testReturnCheck2.cc", 10),
-    ("../tests/testReturnCheck3.cc", 10),
-    ("../tests/testReturnCheck4.cc", 10),
-    ("../tests/testReturnCheck5.cc", "noreturn"),
-    ("../tests/testReturnCheck6.cc", 10),
-    ("../tests/testCall1.cc", 5),
-    ("../tests/testCall2.cc", "illegaltype"),
-    ("../tests/testCall3.cc", "illegaltype"),
-    ("../tests/testCall4.cc", "illegaltype"),
-    ("../tests/testCall5.cc", 5),
-    ("../tests/testCall6.cc", "illegaltype"),
-    ("../tests/testCall7.cc", "illegaltype"),
-    ("../tests/testCall8.cc", 20),
-    ("../tests/testCall9.cc", 5),
-    ("../tests/testCall10.cc", "illegaltype"),
-    ("../tests/testCall11.cc", "illegaltype"),
-    ("../tests/testCall12.cc", 5),
-    ("../tests/testCall13.cc", 11),
-    ("../tests/testCall14.cc", "illegaltype"),
-    ("../tests/testCall15.cc", "redeclared"),
-    ("../tests/testFib1.cc", 34),
-    ("../tests/testFib2.cc", 34),
-    ("../tests/testFib3.cc", 34),
+    (SOURCE_DIR + "tests/testBinOps1.cc", 14),
+    (SOURCE_DIR + "tests/testBinOps2.cc", 2),
+    (SOURCE_DIR + "tests/testCmp1.cc", 1),
+    (SOURCE_DIR + "tests/testUndeclared.cc", "undeclared"),
+    (SOURCE_DIR + "tests/testUndefined.cc", "undefined"),
+    (SOURCE_DIR + "tests/testRedeclared.cc", "redeclared"),
+    (SOURCE_DIR + "tests/testId1.cc", 10),
+    (SOURCE_DIR + "tests/testId2.cc", 20),
+    (SOURCE_DIR + "tests/testId3.cc", "undeclared"),
+    (SOURCE_DIR + "tests/testId4.cc", 20),
+    (SOURCE_DIR + "tests/testId5.cc", "undeclared"),
+    (SOURCE_DIR + "tests/testId6.cc", 100),
+    (SOURCE_DIR + "tests/testReturnDeclDef.cc", 5),
+    (SOURCE_DIR + "tests/testUnOps1.cc", -1),
+    (SOURCE_DIR + "tests/testUnOps2.cc", -1),
+    (SOURCE_DIR + "tests/testUnOps3.cc", 2),
+    (SOURCE_DIR + "tests/testScope1.cc", 10),
+    (SOURCE_DIR + "tests/testScope2.cc", "undeclared"),
+    (SOURCE_DIR + "tests/testScope3.cc", 10),
+    (SOURCE_DIR + "tests/testScope4.cc", 10),
+    (SOURCE_DIR + "tests/testIf1.cc", 10),
+    (SOURCE_DIR + "tests/testIf2.cc", 20),
+    (SOURCE_DIR + "tests/testIf3.cc", 10),
+    (SOURCE_DIR + "tests/testIf4.cc", "undefined"),
+    (SOURCE_DIR + "tests/testIf5.cc", 10),
+    (SOURCE_DIR + "tests/testIf6.cc", 10),
+    (SOURCE_DIR + "tests/testReturnCheck1.cc", "noreturn"),
+    (SOURCE_DIR + "tests/testReturnCheck2.cc", 10),
+    (SOURCE_DIR + "tests/testReturnCheck3.cc", 10),
+    (SOURCE_DIR + "tests/testReturnCheck4.cc", 10),
+    (SOURCE_DIR + "tests/testReturnCheck5.cc", "noreturn"),
+    (SOURCE_DIR + "tests/testReturnCheck6.cc", 10),
+    (SOURCE_DIR + "tests/testCall1.cc", 5),
+    (SOURCE_DIR + "tests/testCall2.cc", "illegaltype"),
+    (SOURCE_DIR + "tests/testCall3.cc", "illegaltype"),
+    (SOURCE_DIR + "tests/testCall4.cc", "illegaltype"),
+    (SOURCE_DIR + "tests/testCall5.cc", 5),
+    (SOURCE_DIR + "tests/testCall6.cc", "illegaltype"),
+    (SOURCE_DIR + "tests/testCall7.cc", "illegaltype"),
+    (SOURCE_DIR + "tests/testCall8.cc", 20),
+    (SOURCE_DIR + "tests/testCall9.cc", 5),
+    (SOURCE_DIR + "tests/testCall10.cc", "illegaltype"),
+    (SOURCE_DIR + "tests/testCall11.cc", "illegaltype"),
+    (SOURCE_DIR + "tests/testCall12.cc", 5),
+    (SOURCE_DIR + "tests/testCall13.cc", 11),
+    (SOURCE_DIR + "tests/testCall14.cc", "illegaltype"),
+    (SOURCE_DIR + "tests/testCall15.cc", "redeclared"),
+    (SOURCE_DIR + "tests/testFib1.cc", 34),
+    (SOURCE_DIR + "tests/testFib2.cc", 34),
+    (SOURCE_DIR + "tests/testFib3.cc", 34),
 ]
 
 # TODO: actually test type checking...
@@ -79,7 +86,7 @@ def parse_args():
         elif arg == "--tmp":
             dump_temp = True
         elif arg != sys.argv[0]:
-            run_list.append(arg)
+            run_list.append(os.path.basename(arg))
 
 def run_shell(command):
     proc = subprocess.Popen (command, stdout=subprocess.PIPE)
@@ -118,7 +125,7 @@ passed = 0
 run_shell([ "mkdir", "-p", "tmp" ])
 
 for (name, expected) in tests:
-    if len(run_list) > 0 and not(name in run_list):
+    if len(run_list) > 0 and not(os.path.basename(name) in run_list):
         continue
 
     temp = "tmp/" + md5.new(name).hexdigest()
@@ -132,19 +139,19 @@ for (name, expected) in tests:
     output = []
 
     if target == "host":
-        (cc_stat, cc_out) = run_shell([ "../out/bin/cc", "-o", temp + "_host.ll", name ])
+        (cc_stat, cc_out) = run_shell([ BINARY_DIR + "bin/cc", "-o", temp + "_host.ll", name ])
         if cc_stat == 0:
             run_shell([ "llc-mp-3.5", "-o", temp + "_host.o", "-filetype=obj", temp + "_host.ll" ])
-            run_shell([ "clang", "-o", temp + "_host", temp + "_host.o", "../out/bin/libhost_rt.a" ])
+            run_shell([ "clang", "-o", temp + "_host", temp + "_host.o", BINARY_DIR + "lib/libhost_rt.a" ])
             (stat, output) = run_shell([ temp + "_host" ])
         else:
             (stat, output) = (cc_stat, cc_out)
     else:
-        (cc_stat, cc_out) = run_shell([ "../out/bin/cc", "-o", temp + "_device.ll", "--emit-device", name ])
+        (cc_stat, cc_out) = run_shell([ BINARY_DIR + "bin/cc", "-o", temp + "_device.ll", "--emit-device", name ])
         if cc_stat == 0:
             run_shell([ "llc-mp-3.5", "-o", temp + "_device.ptx", temp + "_device.ll" ])
             run_shell([ "nvcc", "-fatbin", "-o", temp + "_device.cubin", temp + "_device.ptx" ])
-            run_shell([ "clang", "-o", temp + "_device", "../out/bin/libdevice_rt.a", "-framework", "CUDA",
+            run_shell([ "clang", "-o", temp + "_device", BINARY_DIR + "lib/libdevice_rt.a", "-framework", "CUDA",
                 "-sectcreate", "__TEXT", "__kernels", temp + "_device.cubin",
                 "-sectalign", "__TEXT", "__kernels", "8" ])
             (stat, output) = run_shell([ temp + "_device" ])

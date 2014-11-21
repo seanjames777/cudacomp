@@ -1,3 +1,5 @@
+#ifdef DEBUG
+
 char *getErrorString(CUresult result) {
     switch(result) {
     case CUDA_SUCCESS:
@@ -118,3 +120,5 @@ char *getErrorString(CUresult result) {
         return "CUDA_ERROR_UNKNOWN";
     }
 }
+
+#endif

@@ -23,6 +23,8 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 include_directories("/Developer/NVIDIA/CUDA-6.5/include/")
 
+# Configure main compiler executable
+
 add_executable(cc
     src/ast/astnode.cpp
     src/ast/astseqnode.cpp
@@ -75,6 +77,8 @@ target_link_libraries(cc
     ${LLVM_SYS_LIBS}
 )
 
+# Configure host and device runtime libraries
+
 add_library(host_rt
     driver/host_rt.c
 )
@@ -83,7 +87,28 @@ add_library(device_rt
     driver/device_rt.c
 )
 
-install(TARGETS cc DESTINATION bin/)
+# Configure documentation
 
-install(TARGETS host_rt DESTINATION bin/)
-install(TARGETS device_rt DESTINATION bin/)
+find_package(Doxygen)
+
+if (DOXYGEN_FOUND)
+# Substitutes macros into Doxyfile to set up the build paths
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile
+    ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_Configured)
+
+# Creates a 'make doc' target
+add_custom_target(doc
+    ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile_Configured
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Building API documentation" VERBATIM)
+endif (DOXYGEN_FOUND)
+
+# Configure test driver
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/driver/driver.py
+    ${CMAKE_CURRENT_BINARY_DIR}/driver.py)
+
+# Install everything
+
+install(TARGETS cc DESTINATION bin/)
+install(TARGETS host_rt DESTINATION lib/)
+install(TARGETS device_rt DESTINATION lib/)
