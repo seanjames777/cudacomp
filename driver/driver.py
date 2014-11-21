@@ -140,8 +140,10 @@ for (name, expected) in tests:
         (cc_stat, cc_out) = run_shell([ "../out/bin/cc", "-o", temp + ".device.ll", "--emit-device", name ])
         if cc_stat == 0:
             run_shell([ "llc-mp-3.5", "-o", temp + ".device.ptx", temp + ".device.ll" ])
-            run_shell([ "clang", "-o", temp + ".device", "../out/bin/libdevice_rt.a", "-framework", "CUDA" ])
-            (stat, output) = run_shell([ temp + ".device", temp + ".device.ptx" ])
+            run_shell([ "clang", "-o", temp + ".device", "../out/bin/libdevice_rt.a", "-framework", "CUDA",
+                "-sectcreate", "__TEXT", "__kernels", temp + ".device.ptx",
+                "-sectalign", "__TEXT", "__kernels", "8" ])
+            (stat, output) = run_shell([ temp + ".device" ])
         else:
             (stat, output) = (cc_stat, cc_out)
 

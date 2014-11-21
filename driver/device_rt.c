@@ -1,6 +1,16 @@
-#include <stdio.h>
+/**
+ * @file device_rt.c
+ *
+ * @brief Device runtime driver
+ *
+ * @author Sean James
+ */
 
-#include "cuda.h"
+#include <stdio.h>
+#include <cuda.h>
+#include <mach-o/getsect.h>
+#include <mach-o/dyld.h>
+#include <string.h>
 
 #define checkCudaErrors(expr) {        \
     CUresult err = (expr);             \
@@ -17,11 +27,6 @@ int main(int argc, char *argv[]) {
     CUmodule cudaModule;
     CUfunction function;
 
-    if (argc != 2) {
-        printf("Missing PTX file argument\n");
-        return -1;
-    }
-
     checkCudaErrors(cuInit(0));
 
     int devCount;
@@ -36,22 +41,21 @@ int main(int argc, char *argv[]) {
 
     checkCudaErrors(cuCtxCreate(&context, 0, device));
 
-    FILE *fd = fopen(argv[1], "r");
+    unsigned long size;
+    char *kernel_src = getsectdata("__TEXT", "__kernels", &size);
 
-    if (!fd) {
-        printf("Error: Cannot open %s\n", argv[1]);
-        exit(-1);
+    if (kernel_src == NULL) {
+        printf("Error locating kernel\n");
+        return -2;
     }
 
-    fseek(fd, 0, SEEK_END);
-    int size = ftell(fd);
-    fseek(fd, 0, SEEK_SET);
+    kernel_src += _dyld_get_image_vmaddr_slide(0);
 
+    // TODO: for now copy the whole thing just because we want to null terminate it. There is
+    // probably a nicer way.
     char *kernel = malloc(size + 1);
-    fread(kernel, 1, size, fd);
+    memcpy(kernel, kernel_src, size);
     kernel[size] = 0; // null terminate
-
-    fclose(fd);
 
     #define LOG_SZ 1024
     char *errors = malloc(LOG_SZ);
