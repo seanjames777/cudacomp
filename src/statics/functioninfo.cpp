@@ -10,6 +10,13 @@ FunctionInfo::FunctionInfo(std::string name, ASTFunType *signature)
     : name(name),
       signature(signature)
 {
+    ASTArgSeqNode *args = signature->getArgs();
+
+    while (args != NULL) {
+        ASTArg *arg = args->getHead();
+        addLocal(arg->getName(), arg->getType());
+        args = args->getTail();
+    }
 }
 
 std::string FunctionInfo::getName() {

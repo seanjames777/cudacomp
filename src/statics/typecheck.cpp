@@ -339,11 +339,11 @@ void typecheck_top(ModuleInfo *mod, ASTTopNode *node) {
 
         while (args != NULL) {
             ASTArg *arg = args->getHead();
-            funInfo->addLocal(arg->getName(), arg->getType());
-            args = args->getTail();
 
             decl.insert(arg->getName());
             def.insert(arg->getName());
+
+            args = args->getTail();
         }
 
         // Check the function body, building the local symbol table in the process

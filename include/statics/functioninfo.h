@@ -28,7 +28,7 @@ private:
 public:
 
     /**
-     * @brief Constructor
+     * @brief Constructor. Arguments will be added to the symbol table.
      *
      * @param[in] name      Function name
      * @param[in] signature Function signature
