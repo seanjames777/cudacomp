@@ -45,8 +45,8 @@ public:
 private:
 
     enum op op;
-    ASTExpNode *e1;
-    ASTExpNode *e2;
+    std::shared_ptr<ASTExpNode> e1;
+    std::shared_ptr<ASTExpNode> e2;
 
 public:
 
@@ -57,7 +57,7 @@ public:
      * @param[in] e1 Left-hand expression
      * @param[in] e2 Right-hand expression
      */
-    ASTBinopExp(enum op op, ASTExpNode *e1, ASTExpNode *e2);
+    ASTBinopExp(enum op op, std::shared_ptr<ASTExpNode> e1, std::shared_ptr<ASTExpNode> e2);
 
     /**
      * @brief Destructor
@@ -72,12 +72,12 @@ public:
     /**
      * @brief Get left-hand expression
      */
-    ASTExpNode *getE1();
+    std::shared_ptr<ASTExpNode> getE1();
 
     /**
      * @brief Get right-hand expression
      */
-    ASTExpNode *getE2();
+    std::shared_ptr<ASTExpNode> getE2();
 
     /**
      * @copydoc ASTNode::print()

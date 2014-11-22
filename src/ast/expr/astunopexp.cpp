@@ -6,21 +6,20 @@
 
 #include <ast/expr/astunopexp.h>
 
-ASTUnopExp::ASTUnopExp(enum op op, ASTExpNode *exp)
+ASTUnopExp::ASTUnopExp(enum op op, std::shared_ptr<ASTExpNode> exp)
     : op(op),
       exp(exp)
 {
 }
 
 ASTUnopExp::~ASTUnopExp() {
-    delete exp;
 }
 
 enum ASTUnopExp::op ASTUnopExp::getOp() {
     return op;
 }
 
-ASTExpNode *ASTUnopExp::getExp() {
+std::shared_ptr<ASTExpNode> ASTUnopExp::getExp() {
     return exp;
 }
 

@@ -10,7 +10,7 @@
 
 namespace Codegen {
 
-CodegenCtx::CodegenCtx(bool emit_device, ModuleInfo *modInfo)
+CodegenCtx::CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo)
     : module(NULL),
       context(getGlobalContext()),
       emit_device(emit_device),
@@ -25,7 +25,7 @@ CodegenCtx::CodegenCtx(bool emit_device, ModuleInfo *modInfo)
     module = new Module("", context);
 }
 
-ModuleInfo *CodegenCtx::getModuleInfo() {
+std::shared_ptr<ModuleInfo> CodegenCtx::getModuleInfo() {
     return modInfo;
 }
 
@@ -71,16 +71,16 @@ Function *CodegenCtx::getCurrentFunction() {
     return function;
 }
 
-FunctionInfo *CodegenCtx::getCurrentFunctionInfo() {
+std::shared_ptr<FunctionInfo> CodegenCtx::getCurrentFunctionInfo() {
     return funcInfo;
 }
 
-Function *CodegenCtx::createFunction(FunctionInfo *funcInfo) {
+Function *CodegenCtx::createFunction(std::shared_ptr<FunctionInfo> funcInfo) {
     std::vector<Type *> argTypes;
     FunctionType *ftype;
 
-    ASTFunType *sig = funcInfo->getSignature();
-    ASTArgSeqNode *args = sig->getArgs();
+    std::shared_ptr<ASTFunType> sig = funcInfo->getSignature();
+    std::shared_ptr<ASTArgSeqNode> args = sig->getArgs();
     Type *returnType = convertType(sig->getReturnType());
 
     bool isVoid = sig->getReturnType()->equal(ASTVoidType::get());
@@ -90,7 +90,7 @@ Function *CodegenCtx::createFunction(FunctionInfo *funcInfo) {
 
     // Add arguments to LLVM function type
     while (args != NULL) {
-        ASTArg *arg = args->getHead();
+        std::shared_ptr<ASTArgNode> arg = args->getHead();
         argTypes.push_back(convertType(arg->getType()));
         args = args->getTail();
     }
@@ -118,9 +118,9 @@ void CodegenCtx::startFunction(std::string id) {
     pushBlock(first_bblock);
 
     funcInfo = modInfo->getFunction(id);
-    ASTFunType *sig = funcInfo->getSignature();
+    std::shared_ptr<ASTFunType> sig = funcInfo->getSignature();
 
-    ASTArgSeqNode *args = sig->getArgs();
+    std::shared_ptr<ASTArgSeqNode> args = sig->getArgs();
     auto arg_iter = function->arg_begin();
 
     if (emit_device)
@@ -128,7 +128,7 @@ void CodegenCtx::startFunction(std::string id) {
 
     // Map arguments to symbol table. Move arguments into alloca's functions
     while (args != NULL) {
-        ASTArg *arg = args->getHead();
+        std::shared_ptr<ASTArgNode> arg = args->getHead();
 
         // Create a new memory location, and copy the argument into it. mem2reg
         // should promote it back into a register, and the move should be

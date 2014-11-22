@@ -19,7 +19,7 @@
 class ModuleInfo {
 private:
 
-    SymbolTable<FunctionInfo *> functions;
+    SymbolTable<std::shared_ptr<FunctionInfo>> functions;
 
 public:
 
@@ -33,14 +33,14 @@ public:
      *
      * @param[in] function Function information
      */
-    void addFunction(FunctionInfo *function);
+    void addFunction(std::shared_ptr<FunctionInfo> function);
 
     /**
      * @brief Get information about a function
      *
      * @param[in] id Function name
      */
-    FunctionInfo *getFunction(std::string id);
+    std::shared_ptr<FunctionInfo> getFunction(std::string id);
 
 };
 

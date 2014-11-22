@@ -6,17 +6,15 @@
 
 #include <ast/stmt/astexprstmt.h>
 
-ASTExprStmt::ASTExprStmt(ASTExpNode *exp)
+ASTExprStmt::ASTExprStmt(std::shared_ptr<ASTExpNode> exp)
     : exp(exp)
 {
 }
 
 ASTExprStmt::~ASTExprStmt() {
-    if (exp)
-        delete exp;
 }
 
-ASTExpNode *ASTExprStmt::getExp() {
+std::shared_ptr<ASTExpNode> ASTExprStmt::getExp() {
     return exp;
 }
 

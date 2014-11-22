@@ -6,20 +6,20 @@
 
 #include <ast/type/astbooleantype.h>
 
-ASTBooleanType *ASTBooleanType::instance = NULL;
+std::shared_ptr<ASTBooleanType> ASTBooleanType::instance = nullptr;
 
 ASTBooleanType::ASTBooleanType() {
 }
 
-ASTBooleanType *ASTBooleanType::get() {
+std::shared_ptr<ASTBooleanType> ASTBooleanType::get() {
     if (!instance)
-        instance = new ASTBooleanType();
+        instance = std::make_shared<ASTBooleanType>();
 
     return instance;
 }
 
-bool ASTBooleanType::equal(ASTTypeNode *other) {
-    return (other != NULL) && (dynamic_cast<ASTBooleanType *>(other) != NULL);
+bool ASTBooleanType::equal(std::shared_ptr<ASTTypeNode> other) {
+    return (other != nullptr) && (std::dynamic_pointer_cast<ASTBooleanType>(other) != nullptr);
 }
 
 void ASTBooleanType::print(std::ostream & ss) {

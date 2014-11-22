@@ -20,7 +20,7 @@
 #include <ast/top/asttopnode.h>
 #include <ast/top/astfundefntop.h>
 #include <ast/type/astfuntype.h>
-#include <ast/type/astarg.h>
+#include <ast/type/astargnode.h>
 
 #include "parser.hpp"
 %}

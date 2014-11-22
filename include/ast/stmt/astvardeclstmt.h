@@ -21,8 +21,8 @@ class ASTVarDeclStmt : public ASTStmtNode {
 private:
 
     std::string id;
-    ASTExpNode *exp;
-    ASTTypeNode *type;
+    std::shared_ptr<ASTExpNode> exp;
+    std::shared_ptr<ASTTypeNode> type;
 
 public:
 
@@ -33,7 +33,7 @@ public:
      * @param[in] id   Variable name
      * @param[in] exp  Initial definition, or null
      */
-    ASTVarDeclStmt(ASTTypeNode *type, std::string id, ASTExpNode *exp);
+    ASTVarDeclStmt(std::shared_ptr<ASTTypeNode> type, std::string id, std::shared_ptr<ASTExpNode> exp);
 
     /**
      * @brief Destructor
@@ -48,12 +48,12 @@ public:
     /**
      * @brief Get initial variable definition. May be null.
      */
-    ASTExpNode *getExp();
+    std::shared_ptr<ASTExpNode> getExp();
 
     /**
      * @brief Get variable type
      */
-    ASTTypeNode *getType();
+    std::shared_ptr<ASTTypeNode> getType();
 
     /**
      * @copydoc ASTNode::print()

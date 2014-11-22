@@ -6,21 +6,20 @@
 
 #include <ast/expr/astcallexp.h>
 
-ASTCallExp::ASTCallExp(std::string id, ASTExpSeqNode *args)
+ASTCallExp::ASTCallExp(std::string id, std::shared_ptr<ASTExpSeqNode> args)
     : id(id),
       args(args)
 {
 }
 
 ASTCallExp::~ASTCallExp() {
-    delete args;
 }
 
 std::string ASTCallExp::getId() {
     return id;
 }
 
-ASTExpSeqNode *ASTCallExp::getArgs() {
+std::shared_ptr<ASTExpSeqNode> ASTCallExp::getArgs() {
     return args;
 }
 

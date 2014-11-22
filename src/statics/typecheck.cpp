@@ -48,14 +48,20 @@ IllegalTypeException::IllegalTypeException() {
     msg = "Illegal type";
 }
 
-ASTTypeNode *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & def, ASTExpNode *node) {
+std::shared_ptr<ASTTypeNode> typecheck_exp(
+    std::shared_ptr<ModuleInfo> mod,
+    std::shared_ptr<FunctionInfo> func,
+    idset & decl,
+    idset & def,
+    std::shared_ptr<ASTExpNode> node)
+{
     // Integer constant
-    if (ASTIntegerExp *int_exp = dynamic_cast<ASTIntegerExp *>(node))
+    if (std::shared_ptr<ASTIntegerExp> int_exp = std::dynamic_pointer_cast<ASTIntegerExp>(node))
         return ASTIntegerType::get();
-    else if (ASTBooleanExp *bool_exp = dynamic_cast<ASTBooleanExp *>(node))
+    else if (std::shared_ptr<ASTBooleanExp> bool_exp = std::dynamic_pointer_cast<ASTBooleanExp>(node))
         return ASTBooleanType::get();
     // Variable reference
-    else if (ASTIdentifierExp *id_exp = dynamic_cast<ASTIdentifierExp *>(node)) {
+    else if (std::shared_ptr<ASTIdentifierExp> id_exp = std::dynamic_pointer_cast<ASTIdentifierExp>(node)) {
         // Must be declared
         if (decl.find(id_exp->getId()) == decl.end())
             throw new UndeclaredException(id_exp->getId());
@@ -68,9 +74,9 @@ ASTTypeNode *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, id
         return func->getLocalType(id_exp->getId());
     }
     // Unary operator
-    else if (ASTUnopExp *unop_exp = dynamic_cast<ASTUnopExp *>(node)) {
+    else if (std::shared_ptr<ASTUnopExp> unop_exp = std::dynamic_pointer_cast<ASTUnopExp>(node)) {
         // Get operand types
-        ASTTypeNode *t = typecheck_exp(mod, func, decl, def, unop_exp->getExp());
+        std::shared_ptr<ASTTypeNode> t = typecheck_exp(mod, func, decl, def, unop_exp->getExp());
 
         // Types must be appropriate for operation
         switch(unop_exp->getOp()) {
@@ -88,10 +94,10 @@ ASTTypeNode *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, id
         }
     }
     // Binary operator
-    else if (ASTBinopExp *binop_exp = dynamic_cast<ASTBinopExp *>(node)) {
+    else if (std::shared_ptr<ASTBinopExp> binop_exp = std::dynamic_pointer_cast<ASTBinopExp>(node)) {
         // Get operand types
-        ASTTypeNode *t1 = typecheck_exp(mod, func, decl, def, binop_exp->getE1());
-        ASTTypeNode *t2 = typecheck_exp(mod, func, decl, def, binop_exp->getE1());
+        std::shared_ptr<ASTTypeNode> t1 = typecheck_exp(mod, func, decl, def, binop_exp->getE1());
+        std::shared_ptr<ASTTypeNode> t2 = typecheck_exp(mod, func, decl, def, binop_exp->getE1());
 
         // Types must be appropriate for operation
         switch(binop_exp->getOp()) {
@@ -127,8 +133,8 @@ ASTTypeNode *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, id
             return ASTBooleanType::get();
         }
     }
-    else if (ASTCallExp *call_exp = dynamic_cast<ASTCallExp *>(node)) {
-        FunctionInfo *call_func = mod->getFunction(call_exp->getId());
+    else if (std::shared_ptr<ASTCallExp> call_exp = std::dynamic_pointer_cast<ASTCallExp>(node)) {
+        std::shared_ptr<FunctionInfo> call_func = mod->getFunction(call_exp->getId());
 
         // Function must have been declared
         if (!call_func)
@@ -142,21 +148,21 @@ ASTTypeNode *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, id
         // TODO: make sure it is eventually defined
         // TODO: make sure any other declarations/definitions match
 
-        ASTFunType *sig = call_func->getSignature();
+        std::shared_ptr<ASTFunType> sig = call_func->getSignature();
 
         // Check the expressions against the signature
-        ASTExpSeqNode *exprs = call_exp->getArgs();
-        ASTArgSeqNode *args = sig->getArgs();
+        std::shared_ptr<ASTExpSeqNode> exprs = call_exp->getArgs();
+        std::shared_ptr<ASTArgSeqNode> args = sig->getArgs();
 
         while (true) {
             // Make sure the argument counts match
-            if ((args == NULL || exprs == NULL) && (args != NULL || exprs != NULL))
+            if ((args == nullptr || exprs == nullptr) && (args != nullptr || exprs != nullptr))
                 throw new IllegalTypeException(); // TODO maybe a different exception
-            else if (args == NULL && exprs == NULL)
+            else if (args == nullptr && exprs == nullptr)
                 break;
 
-            ASTTypeNode *exp_type = typecheck_exp(mod, call_func, decl, def, exprs->getHead());
-            ASTTypeNode *arg_type = args->getHead()->getType();
+            std::shared_ptr<ASTTypeNode> exp_type = typecheck_exp(mod, call_func, decl, def, exprs->getHead());
+            std::shared_ptr<ASTTypeNode> arg_type = args->getHead()->getType();
 
             // TODO: test for void argument
 
@@ -176,20 +182,32 @@ ASTTypeNode *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, id
         throw new ASTMalformedException();
 }
 
-void typecheck_stmts(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & def, ASTStmtSeqNode *seq_node) {
-    while (seq_node != NULL) {
+void typecheck_stmts(
+    std::shared_ptr<ModuleInfo> mod,
+    std::shared_ptr<FunctionInfo> func,
+    idset & decl,
+    idset & def,
+    std::shared_ptr<ASTStmtSeqNode> seq_node)
+{
+    while (seq_node != nullptr) {
         typecheck_stmt(mod, func, decl, def, seq_node->getHead());
         seq_node = seq_node->getTail();
     }
 }
 
-void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & def, ASTStmtNode *head) {
+void typecheck_stmt(
+    std::shared_ptr<ModuleInfo> mod,
+    std::shared_ptr<FunctionInfo> func,
+    idset & decl,
+    idset & def,
+    std::shared_ptr<ASTStmtNode> head)
+{
     // If the first node is a variable declaration, we need to declare and
     // possibly define it in the rest of the code. Need to check the type
     // before marking as declared, in case the definition tries to be
     // recursive.
-    if (ASTVarDeclStmt *decl_stmt = dynamic_cast<ASTVarDeclStmt *>(head)) {
-        ASTTypeNode *decl_type = decl_stmt->getType();
+    if (std::shared_ptr<ASTVarDeclStmt> decl_stmt = std::dynamic_pointer_cast<ASTVarDeclStmt>(head)) {
+        std::shared_ptr<ASTTypeNode> decl_type = decl_stmt->getType();
 
         // TODO: test for void declaration
 
@@ -197,11 +215,11 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
         if (decl.find(decl_stmt->getId()) != decl.end())
             throw new RedeclaredException(decl_stmt->getId());
 
-        ASTExpNode *decl_exp = decl_stmt->getExp();
+        std::shared_ptr<ASTExpNode> decl_exp = decl_stmt->getExp();
 
         // If there is a definition, check the type and mark as defined
         if (decl_exp) {
-            ASTTypeNode *exp_type = typecheck_exp(mod, func, decl, def, decl_exp);
+            std::shared_ptr<ASTTypeNode> exp_type = typecheck_exp(mod, func, decl, def, decl_exp);
 
             if (!exp_type->equal(decl_type))
                 throw new IllegalTypeException();
@@ -214,13 +232,13 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
         func->addLocal(decl_stmt->getId(), decl_type); // TODO declareSymbol
     }
     // Variable assignment. Mark as defined and check the rest of the code
-    else if (ASTVarDefnStmt *defn_stmt = dynamic_cast<ASTVarDefnStmt *>(head)) {
+    else if (std::shared_ptr<ASTVarDefnStmt> defn_stmt = std::dynamic_pointer_cast<ASTVarDefnStmt>(head)) {
         // Must be declared
         if (decl.find(defn_stmt->getId()) == decl.end())
             throw new UndeclaredException(defn_stmt->getId());
 
-        ASTTypeNode *decl_type = func->getLocalType(defn_stmt->getId());
-        ASTTypeNode *exp_type = typecheck_exp(mod, func, decl, def, defn_stmt->getExp());
+        std::shared_ptr<ASTTypeNode> decl_type = func->getLocalType(defn_stmt->getId());
+        std::shared_ptr<ASTTypeNode> exp_type = typecheck_exp(mod, func, decl, def, defn_stmt->getExp());
 
         if (!exp_type->equal(decl_type))
             throw new IllegalTypeException();
@@ -229,8 +247,8 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
             def.insert(defn_stmt->getId());
     }
     // Return statement
-    else if (ASTReturnStmt *ret_node = dynamic_cast<ASTReturnStmt *>(head)) {
-        ASTTypeNode *expected = func->getSignature()->getReturnType();
+    else if (std::shared_ptr<ASTReturnStmt> ret_node = std::dynamic_pointer_cast<ASTReturnStmt>(head)) {
+        std::shared_ptr<ASTTypeNode> expected = func->getSignature()->getReturnType();
 
         bool isVoid = expected->equal(ASTVoidType::get());
 
@@ -244,7 +262,7 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
 
         // Must return the correct type in a non-void function
         if (ret_node->getExp()) {
-            ASTTypeNode *exp_type = typecheck_exp(mod, func, decl, def, ret_node->getExp());
+            std::shared_ptr<ASTTypeNode> exp_type = typecheck_exp(mod, func, decl, def, ret_node->getExp());
 
             if (!exp_type->equal(expected))
                 throw new IllegalTypeException();
@@ -257,7 +275,7 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
         def = decl;
     }
     // Scope statement
-    else if (ASTScopeStmt *scope_node = dynamic_cast<ASTScopeStmt *>(head)) {
+    else if (std::shared_ptr<ASTScopeStmt> scope_node = std::dynamic_pointer_cast<ASTScopeStmt>(head)) {
         if (scope_node->getBody()) {
             // Scope inherits outside definitions/declarations
             idset scope_decl = decl;
@@ -277,9 +295,9 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
         }
     }
     // If statement
-    else if (ASTIfStmt *if_node = dynamic_cast<ASTIfStmt *>(head)) {
+    else if (std::shared_ptr<ASTIfStmt> if_node = std::dynamic_pointer_cast<ASTIfStmt>(head)) {
         // Condition must be a boolean
-        ASTTypeNode *cond_type = typecheck_exp(mod, func, decl, def, if_node->getCond());
+        std::shared_ptr<ASTTypeNode> cond_type = typecheck_exp(mod, func, decl, def, if_node->getCond());
 
         if (!cond_type->equal(ASTBooleanType::get()))
             throw new IllegalTypeException();
@@ -312,33 +330,39 @@ void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & d
         def = new_def;
     }
     // Expression statement
-    else if (ASTExprStmt *exp_stmt = dynamic_cast<ASTExprStmt *>(head))
+    else if (std::shared_ptr<ASTExprStmt> exp_stmt = std::dynamic_pointer_cast<ASTExprStmt>(head))
         typecheck_exp(mod, func, decl, def, exp_stmt->getExp());
     else
         throw new ASTMalformedException();
 }
 
-void typecheck_tops(ModuleInfo *mod, ASTTopSeqNode *seq_node) {
-    while (seq_node != NULL) {
+void typecheck_tops(
+    std::shared_ptr<ModuleInfo> mod,
+    std::shared_ptr<ASTTopSeqNode> seq_node)
+{
+    while (seq_node != nullptr) {
         typecheck_top(mod, seq_node->getHead());
         seq_node = seq_node->getTail();
     }
 }
 
-void typecheck_top(ModuleInfo *mod, ASTTopNode *node) {
-    if (ASTFunDefnTop *funDefn = dynamic_cast<ASTFunDefnTop *>(node)) {
+void typecheck_top(
+    std::shared_ptr<ModuleInfo> mod,
+    std::shared_ptr<ASTTopNode> node)
+{
+    if (std::shared_ptr<ASTFunDefnTop> funDefn = std::dynamic_pointer_cast<ASTFunDefnTop>(node)) {
         // Allocate space for information about this function
-        FunctionInfo *funInfo = new FunctionInfo(funDefn->getName(), funDefn->getSignature());
+        std::shared_ptr<FunctionInfo> funInfo = std::make_shared<FunctionInfo>(funDefn->getName(), funDefn->getSignature());
         mod->addFunction(funInfo);
 
         idset decl, def;
 
         // Add all arguments to the local symbol table and mark them as declared
         // and defined.
-        ASTArgSeqNode *args = funDefn->getSignature()->getArgs();
+        std::shared_ptr<ASTArgSeqNode> args = funDefn->getSignature()->getArgs();
 
-        while (args != NULL) {
-            ASTArg *arg = args->getHead();
+        while (args != nullptr) {
+            std::shared_ptr<ASTArgNode> arg = args->getHead();
 
             decl.insert(arg->getName());
             def.insert(arg->getName());

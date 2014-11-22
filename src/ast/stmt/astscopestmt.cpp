@@ -6,16 +6,15 @@
 
 #include <ast/stmt/astscopestmt.h>
 
-ASTScopeStmt::ASTScopeStmt(ASTStmtSeqNode *body)
+ASTScopeStmt::ASTScopeStmt(std::shared_ptr<ASTStmtSeqNode> body)
     : body(body)
 {
 }
 
 ASTScopeStmt::~ASTScopeStmt() {
-    delete body;
 }
 
-ASTStmtSeqNode *ASTScopeStmt::getBody() {
+std::shared_ptr<ASTStmtSeqNode> ASTScopeStmt::getBody() {
     return body;
 }
 

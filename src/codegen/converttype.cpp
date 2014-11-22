@@ -11,14 +11,14 @@
 
 namespace Codegen {
 
-Type *convertType(ASTTypeNode *type) {
+Type *convertType(std::shared_ptr<ASTTypeNode> type) {
     LLVMContext & ctx = getGlobalContext();
 
-    if (ASTIntegerType *int_type = dynamic_cast<ASTIntegerType *>(type))
+    if (std::shared_ptr<ASTIntegerType> int_type = std::dynamic_pointer_cast<ASTIntegerType>(type))
         return Type::getInt32Ty(ctx);
-    else if (ASTBooleanType *bool_type = dynamic_cast<ASTBooleanType *>(type))
+    else if (std::shared_ptr<ASTBooleanType> bool_type = std::dynamic_pointer_cast<ASTBooleanType>(type))
         return Type::getInt1Ty(ctx);
-    else if (ASTVoidType *void_type = dynamic_cast<ASTVoidType *>(type))
+    else if (std::shared_ptr<ASTVoidType> void_type = std::dynamic_pointer_cast<ASTVoidType>(type))
         return Type::getVoidTy(ctx);
     else
         throw new ASTMalformedException();

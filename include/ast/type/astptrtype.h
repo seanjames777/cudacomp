@@ -17,7 +17,7 @@
 class ASTPtrType : public ASTTypeNode {
 private:
 
-    ASTTypeNode *toType;
+    std::shared_ptr<ASTTypeNode> toType;
 
 public:
 
@@ -26,17 +26,17 @@ public:
      *
      * @param[in] toType Type pointers of this type point to
      */
-    ASTPtrType(ASTTypeNode *toType);
+    ASTPtrType(std::shared_ptr<ASTTypeNode> toType);
 
     /**
      * @brief Get type pointers of this type point to
      */
-    ASTTypeNode *getToType();
+    std::shared_ptr<ASTTypeNode> getToType();
 
     /**
      * @copydoc ASTTypeNodeNode::equal()
      */
-    virtual bool equal(ASTTypeNode *other) override;
+    virtual bool equal(std::shared_ptr<ASTTypeNode> other) override;
 
     /**
      * @copydoc ASTNode::print()

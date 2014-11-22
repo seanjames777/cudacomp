@@ -19,15 +19,15 @@
 
 namespace Codegen {
 
-    Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node);
+    Value *codegen_exp(CodegenCtx *ctx, std::shared_ptr<ASTExpNode> node);
 
-    bool codegen_stmts(CodegenCtx *ctx, ASTStmtSeqNode *nodes);
+    bool codegen_stmts(CodegenCtx *ctx, std::shared_ptr<ASTStmtSeqNode> nodes);
 
-    bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *node);
+    bool codegen_stmt(CodegenCtx *ctx, std::shared_ptr<ASTStmtNode> node);
 
-    void codegen_top(CodegenCtx *ctx, ASTTopNode *node);
+    void codegen_top(CodegenCtx *ctx, std::shared_ptr<ASTTopNode> node);
 
-    void codegen_tops(ModuleInfo *module, ASTTopSeqNode *nodes, bool emitDevice, std::ostream & out);
+    void codegen_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTopSeqNode> nodes, bool emitDevice, std::ostream & out);
 
 }
 

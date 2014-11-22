@@ -53,15 +53,34 @@ namespace Statics {
 
     typedef std::unordered_set<std::string> idset;
 
-    ASTTypeNode *typecheck_exp(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & def, ASTExpNode *node);
+    std::shared_ptr<ASTTypeNode> typecheck_exp(
+        std::shared_ptr<ModuleInfo> mod,
+        std::shared_ptr<FunctionInfo> func,
+        idset & decl,
+        idset & def,
+        std::shared_ptr<ASTExpNode> node);
 
-    void typecheck_stmts(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & def, ASTStmtSeqNode *node);
+    void typecheck_stmts(
+        std::shared_ptr<ModuleInfo> mod,
+        std::shared_ptr<FunctionInfo> func,
+        idset & decl,
+        idset & def,
+        std::shared_ptr<ASTStmtSeqNode> node);
 
-    void typecheck_stmt(ModuleInfo *mod, FunctionInfo *func, idset & decl, idset & def, ASTStmtNode *node);
+    void typecheck_stmt(
+        std::shared_ptr<ModuleInfo> mod,
+        std::shared_ptr<FunctionInfo> func,
+        idset & decl,
+        idset & def,
+        std::shared_ptr<ASTStmtNode> node);
 
-    void typecheck_tops(ModuleInfo *mod, ASTTopSeqNode *node);
+    void typecheck_tops(
+        std::shared_ptr<ModuleInfo> mod,
+        std::shared_ptr<ASTTopSeqNode> node);
 
-    void typecheck_top(ModuleInfo *mod, ASTTopNode *node);
+    void typecheck_top(
+        std::shared_ptr<ModuleInfo> mod,
+        std::shared_ptr<ASTTopNode> node);
 
 };
 

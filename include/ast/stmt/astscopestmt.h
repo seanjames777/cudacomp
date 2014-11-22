@@ -18,7 +18,7 @@
 class ASTScopeStmt : public ASTStmtNode {
 private:
 
-    ASTStmtSeqNode *body;
+    std::shared_ptr<ASTStmtSeqNode> body;
 
 public:
 
@@ -27,7 +27,7 @@ public:
      *
      * @param[in] body Scope body statement sequence
      */
-    ASTScopeStmt(ASTStmtSeqNode *body);
+    ASTScopeStmt(std::shared_ptr<ASTStmtSeqNode> body);
 
     /**
      * @brief Destructor
@@ -37,7 +37,7 @@ public:
     /**
      * @brief Get the scope body statement sequence
      */
-    ASTStmtSeqNode *getBody();
+    std::shared_ptr<ASTStmtSeqNode> getBody();
 
     /**
      * @copydoc ASTNode::print()

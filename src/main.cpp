@@ -33,15 +33,15 @@ void parseArgs(int argc, char *argv[]) {
 int main(int argc, char *argv[]) {
     parseArgs(argc, argv);
 
-    ASTTopSeqNode *node = Parser::parse(args.in_file);
+    std::shared_ptr<ASTTopSeqNode> node = Parser::parse(args.in_file);
 
     if (!node)
         return -1;
 
-    ModuleInfo moduleInfo;
+    std::shared_ptr<ModuleInfo> moduleInfo;
 
     try {
-        Statics::run(node, &moduleInfo);
+        moduleInfo = Statics::run(node);
     }
     catch (Statics::UndefinedException *except) {
         std::cout << "undefined" << std::endl;
@@ -77,14 +77,12 @@ int main(int argc, char *argv[]) {
             return -1;
         }
 
-        Codegen::codegen_tops(&moduleInfo, node, args.emit_device, out);
+        Codegen::codegen_tops(moduleInfo, node, args.emit_device, out);
 
         out.close();
     }
     else
-        Codegen::codegen_tops(&moduleInfo, node, args.emit_device, std::cout);
-
-    delete node;
+        Codegen::codegen_tops(moduleInfo, node, args.emit_device, std::cout);
 
     return 0;
 }

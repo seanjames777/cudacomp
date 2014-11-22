@@ -6,20 +6,20 @@
 
 #include <ast/type/astintegertype.h>
 
-ASTIntegerType *ASTIntegerType::instance = NULL;
+std::shared_ptr<ASTIntegerType> ASTIntegerType::instance = nullptr;
 
 ASTIntegerType::ASTIntegerType() {
 }
 
-ASTIntegerType *ASTIntegerType::get() {
+std::shared_ptr<ASTIntegerType> ASTIntegerType::get() {
     if (!instance)
-        instance = new ASTIntegerType();
+        instance = std::make_shared<ASTIntegerType>();
 
     return instance;
 }
 
-bool ASTIntegerType::equal(ASTTypeNode *other) {
-    return (other != NULL) && (dynamic_cast<ASTIntegerType *>(other) != NULL);
+bool ASTIntegerType::equal(std::shared_ptr<ASTTypeNode> other) {
+    return (other != nullptr) && (std::dynamic_pointer_cast<ASTIntegerType>(other) != nullptr);
 }
 
 void ASTIntegerType::print(std::ostream & ss) {

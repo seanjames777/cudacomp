@@ -20,8 +20,8 @@
 class FunctionInfo {
 private:
 
-    ASTFunType *signature;
-    SymbolTable<ASTTypeNode *> locals; // including arguments
+    std::shared_ptr<ASTFunType> signature;
+    SymbolTable<std::shared_ptr<ASTTypeNode>> locals; // including arguments
     std::string name;
 
 public:
@@ -32,12 +32,12 @@ public:
      * @param[in] name      Function name
      * @param[in] signature Function signature
      */
-    FunctionInfo(std::string name, ASTFunType *signature);
+    FunctionInfo(std::string name, std::shared_ptr<ASTFunType> signature);
 
     /**
      * @brief Get function signature
      */
-    ASTFunType *getSignature();
+    std::shared_ptr<ASTFunType> getSignature();
 
     /**
      * @brief Get function name
@@ -50,14 +50,14 @@ public:
      * @param[in] id   Symbol name
      * @param[in] type Symbol type
      */
-    void addLocal(std::string id, ASTTypeNode *type);
+    void addLocal(std::string id, std::shared_ptr<ASTTypeNode> type);
 
     /**
      * @brief Get the type of a symbol in the function's body
      *
      * @param[in] id Symbol name
      */
-    ASTTypeNode *getLocalType(std::string id);
+    std::shared_ptr<ASTTypeNode> getLocalType(std::string id);
 
     /**
      * @brief Check whether a local symbol has been declared

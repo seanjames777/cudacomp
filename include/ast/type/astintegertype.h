@@ -18,7 +18,7 @@
 class ASTIntegerType : public ASTTypeNode {
 private:
 
-    static ASTIntegerType *instance;
+    static std::shared_ptr<ASTIntegerType> instance;
 
 public:
 
@@ -31,12 +31,12 @@ public:
     /**
      * @brief Get the singleton instance of this class
      */
-    static ASTIntegerType *get();
+    static std::shared_ptr<ASTIntegerType> get();
 
     /**
      * @copydoc ASTTypeNode::equal()
      */
-    virtual bool equal(ASTTypeNode *other) override;
+    virtual bool equal(std::shared_ptr<ASTTypeNode> other) override;
 
     /**
      * @copydoc ASTNode::print()

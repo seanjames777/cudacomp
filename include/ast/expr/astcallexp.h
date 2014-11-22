@@ -18,7 +18,7 @@ class ASTCallExp : public ASTExpNode {
 private:
 
     std::string id;
-    ASTExpSeqNode *args;
+    std::shared_ptr<ASTExpSeqNode> args;
 
 public:
 
@@ -28,7 +28,7 @@ public:
      * @param[in] id   Name of function to call
      * @param[in] args Sequence of argument expressions
      */
-    ASTCallExp(std::string id, ASTExpSeqNode *args);
+    ASTCallExp(std::string id, std::shared_ptr<ASTExpSeqNode> args);
 
     /**
      * @brief Destructor
@@ -43,7 +43,7 @@ public:
     /**
      * @brief Get argument sequence to function call
      */
-    ASTExpSeqNode *getArgs();
+    std::shared_ptr<ASTExpSeqNode> getArgs();
 
     /**
      * @copydoc ASTNode::print()

@@ -27,7 +27,7 @@ public:
      *
      * @param[in] other ASTTypeNode to compare to
      */
-    virtual bool equal(ASTTypeNode *other) = 0;
+    virtual bool equal(std::shared_ptr<ASTTypeNode> other) = 0;
 
 };
 

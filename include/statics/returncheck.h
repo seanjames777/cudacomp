@@ -30,13 +30,13 @@ namespace Statics {
         IllegalReturnTypeException();
     };
 
-    bool returncheck_stmts(FunctionInfo *func, ASTStmtSeqNode *nodes);
+    bool returncheck_stmts(std::shared_ptr<FunctionInfo> func, std::shared_ptr<ASTStmtSeqNode> nodes);
 
-    bool returncheck_stmt(FunctionInfo *func, ASTStmtNode *node);
+    bool returncheck_stmt(std::shared_ptr<FunctionInfo> func, std::shared_ptr<ASTStmtNode> node);
 
-    void returncheck_tops(ModuleInfo *module, ASTTopSeqNode *nodes);
+    void returncheck_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTopSeqNode> nodes);
 
-    void returncheck_top(ModuleInfo *module, ASTTopNode *node);
+    void returncheck_top(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTopNode> node);
 
 };
 

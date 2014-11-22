@@ -14,7 +14,7 @@
 
 namespace Parser {
 
-ASTTopSeqNode *parse(const char *file);
+std::shared_ptr<ASTTopSeqNode> parse(const char *file);
 
 };
 

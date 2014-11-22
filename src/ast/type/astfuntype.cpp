@@ -6,39 +6,39 @@
 
 #include <ast/type/astfuntype.h>
 
-ASTFunType::ASTFunType(ASTTypeNode *returnType, ASTArgSeqNode *args)
+ASTFunType::ASTFunType(std::shared_ptr<ASTTypeNode> returnType, std::shared_ptr<ASTArgSeqNode> args)
     : returnType(returnType),
       args(args)
 {
 }
 
-ASTTypeNode *ASTFunType::getReturnType() {
+std::shared_ptr<ASTTypeNode> ASTFunType::getReturnType() {
     return returnType;
 }
 
-ASTArgSeqNode *ASTFunType::getArgs() {
+std::shared_ptr<ASTArgSeqNode> ASTFunType::getArgs() {
     return args;
 }
 
-bool ASTFunType::equal(ASTTypeNode *other_type) {
-    if (other_type == NULL)
+bool ASTFunType::equal(std::shared_ptr<ASTTypeNode> other_type) {
+    if (other_type == nullptr)
         return false;
 
-    ASTFunType *other = dynamic_cast<ASTFunType *>(other_type);
+    std::shared_ptr<ASTFunType> other = std::dynamic_pointer_cast<ASTFunType>(other_type);
 
-    if (other == NULL)
+    if (other == nullptr)
         return false;
 
     if (!returnType->equal(other->returnType))
         return false;
 
-    ASTArgSeqNode *my_arg = args;
-    ASTArgSeqNode *other_arg = other->args;
+    std::shared_ptr<ASTArgSeqNode> my_arg = args;
+    std::shared_ptr<ASTArgSeqNode> other_arg = other->args;
 
     while (true) {
-        if (my_arg == NULL && other_arg == NULL)
+        if (my_arg == nullptr && other_arg == nullptr)
             return true;
-        else if ((my_arg == NULL && other_arg != NULL) || (my_arg != NULL && other_arg == NULL))
+        else if ((my_arg == nullptr && other_arg != nullptr) || (my_arg != nullptr && other_arg == nullptr))
             return false;
         else if (!my_arg->getHead()->getType()->equal(other_arg->getHead()->getType()))
             return false;
@@ -53,14 +53,14 @@ void ASTFunType::print(std::ostream & ss) {
 
     ss << "(";
 
-    ASTArgSeqNode *arg = args;
+    std::shared_ptr<ASTArgSeqNode> arg = args;
 
-    while (arg != NULL) {
+    while (arg != nullptr) {
         arg->print(ss);
 
         arg = arg->getTail();
 
-        if (arg != NULL)
+        if (arg != nullptr)
             ss << ", ";
     }
 

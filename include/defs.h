@@ -17,6 +17,7 @@
 #include <unordered_set>
 #include <algorithm>
 #include <sstream>
+#include <memory>
 
 // TODO move me
 #include <llvm/IR/Module.h>

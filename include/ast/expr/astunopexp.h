@@ -30,7 +30,7 @@ public:
 private:
 
     enum op op;
-    ASTExpNode *exp;
+    std::shared_ptr<ASTExpNode> exp;
 
 public:
 
@@ -40,7 +40,7 @@ public:
      * @param[in] op  Unary operator
      * @param[in] exp Right-hand expression
      */
-    ASTUnopExp(enum op op, ASTExpNode *exp);
+    ASTUnopExp(enum op op, std::shared_ptr<ASTExpNode> exp);
 
     /**
      * @brief Destructor
@@ -55,7 +55,7 @@ public:
     /**
      * @brief Get right-hand expression
      */
-    ASTExpNode *getExp();
+    std::shared_ptr<ASTExpNode> getExp();
 
     /**
      * @copydoc ASTNode::print
