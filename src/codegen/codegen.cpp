@@ -79,7 +79,7 @@ Value *codegen_exp(CodegenCtx *ctx, std::shared_ptr<ASTExpNode> node) {
     else if (std::shared_ptr<ASTCallExp> call_exp = std::dynamic_pointer_cast<ASTCallExp>(node)) {
         std::vector<Value *> args;
 
-        Value *ret_val = NULL;
+        Value *ret_val = nullptr;
 
         std::shared_ptr<ASTFunType> funDefn = ctx->getModuleInfo()->getFunction(call_exp->getId())->getSignature();
         bool isVoid = funDefn->getReturnType()->equal(ASTVoidType::get());
@@ -94,7 +94,7 @@ Value *codegen_exp(CodegenCtx *ctx, std::shared_ptr<ASTExpNode> node) {
         std::shared_ptr<ASTExpSeqNode> exp_args = call_exp->getArgs();
 
         // Codegen each argument
-        while (exp_args != NULL) {
+        while (exp_args != nullptr) {
             std::shared_ptr<ASTExpNode> arg = exp_args->getHead();
             args.push_back(codegen_exp(ctx, arg));
             exp_args = exp_args->getTail();
@@ -108,7 +108,7 @@ Value *codegen_exp(CodegenCtx *ctx, std::shared_ptr<ASTExpNode> node) {
             ret_val = builder->CreateLoad(ret_val);
         }
 
-        // If the function has a void return type, we'll return NULL, but this should have
+        // If the function has a void return type, we'll return nullptr, but this should have
         // already been handled by the type checker: can't assign a void expression to any
         // type of lvalue.
         return ret_val;
@@ -116,11 +116,11 @@ Value *codegen_exp(CodegenCtx *ctx, std::shared_ptr<ASTExpNode> node) {
     else
         throw new ASTMalformedException();
 
-    return NULL;
+    return nullptr;
 }
 
 bool codegen_stmts(CodegenCtx *ctx, std::shared_ptr<ASTStmtSeqNode> seq_node) {
-    while (seq_node != NULL) {
+    while (seq_node != nullptr) {
         if (!codegen_stmt(ctx, seq_node->getHead()))
             return false;
         seq_node = seq_node->getTail();
@@ -146,13 +146,13 @@ bool codegen_stmt(CodegenCtx *ctx, std::shared_ptr<ASTStmtNode> head) {
                 Value *out_arg = ctx->getCurrentFunction()->arg_begin();
 
                 builder->CreateStore(ret_val, out_arg);
-                builder->CreateRet(NULL);
+                builder->CreateRet(nullptr);
             }
             else
                 builder->CreateRet(ret_val);
         }
         else
-            builder->CreateRet(NULL);
+            builder->CreateRet(nullptr);
 
         // Don't keep generating code because we've returned and we can't add a basic block
         // after the return anyway.
@@ -236,7 +236,7 @@ void codegen_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTopSeqN
 
     std::shared_ptr<ASTTopSeqNode> node = nodes;
 
-    while (node != NULL) {
+    while (node != nullptr) {
         std::shared_ptr<ASTTopNode> top_node = node->getHead();
 
         // Create LLVM functions for each function
@@ -250,7 +250,7 @@ void codegen_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTopSeqN
 
     node = nodes;
 
-    while (node != NULL) {
+    while (node != nullptr) {
         codegen_top(&ctx, node->getHead());
         node = node->getTail();
     }

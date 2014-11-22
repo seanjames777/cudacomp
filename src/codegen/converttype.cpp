@@ -23,7 +23,7 @@ Type *convertType(std::shared_ptr<ASTTypeNode> type) {
     else
         throw new ASTMalformedException();
 
-    return NULL;
+    return nullptr;
 }
 
 }

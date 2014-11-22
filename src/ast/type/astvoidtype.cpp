@@ -19,7 +19,7 @@ std::shared_ptr<ASTVoidType> ASTVoidType::get() {
 }
 
 bool ASTVoidType::equal(std::shared_ptr<ASTTypeNode> other) {
-    return (other != NULL) && (std::dynamic_pointer_cast<ASTVoidType>(other) != NULL);
+    return (other != nullptr) && (std::dynamic_pointer_cast<ASTVoidType>(other) != nullptr);
 }
 
 void ASTVoidType::print(std::ostream & ss) {

@@ -12,7 +12,7 @@ FunctionInfo::FunctionInfo(std::string name, std::shared_ptr<ASTFunType> signatu
 {
     std::shared_ptr<ASTArgSeqNode> args = signature->getArgs();
 
-    while (args != NULL) {
+    while (args != nullptr) {
         std::shared_ptr<ASTArgNode> arg = args->getHead();
         addLocal(arg->getName(), arg->getType());
         args = args->getTail();

@@ -15,7 +15,7 @@ void ModuleInfo::addFunction(std::shared_ptr<FunctionInfo> function) {
 
 std::shared_ptr<FunctionInfo> ModuleInfo::getFunction(std::string id) {
     if (!functions.hasSymbol(id))
-        return NULL;
+        return nullptr;
 
     return functions.get(id);
 }

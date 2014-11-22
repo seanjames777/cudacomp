@@ -11,16 +11,16 @@
 namespace Codegen {
 
 CodegenCtx::CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo)
-    : module(NULL),
+    : module(nullptr),
       context(getGlobalContext()),
       emit_device(emit_device),
       modInfo(modInfo),
-      def_bblock(NULL),
-      first_bblock(NULL),
-      def_builder(NULL),
-      function(NULL),
-      funcInfo(NULL),
-      body_builder(NULL)
+      def_bblock(nullptr),
+      first_bblock(nullptr),
+      def_builder(nullptr),
+      function(nullptr),
+      funcInfo(nullptr),
+      body_builder(nullptr)
 {
     module = new Module("", context);
 }
@@ -89,7 +89,7 @@ Function *CodegenCtx::createFunction(std::shared_ptr<FunctionInfo> funcInfo) {
         argTypes.push_back(PointerType::getUnqual(returnType));
 
     // Add arguments to LLVM function type
-    while (args != NULL) {
+    while (args != nullptr) {
         std::shared_ptr<ASTArgNode> arg = args->getHead();
         argTypes.push_back(convertType(arg->getType()));
         args = args->getTail();
@@ -111,7 +111,7 @@ void CodegenCtx::startFunction(std::string id) {
     symbols.clear();
     blocks.clear();
 
-    def_bblock = BasicBlock::Create(context, "defs", function, NULL);
+    def_bblock = BasicBlock::Create(context, "defs", function, nullptr);
     def_builder = new IRBuilder<>(def_bblock);
 
     first_bblock = createBlock();
@@ -127,7 +127,7 @@ void CodegenCtx::startFunction(std::string id) {
         arg_iter++;
 
     // Map arguments to symbol table. Move arguments into alloca's functions
-    while (args != NULL) {
+    while (args != nullptr) {
         std::shared_ptr<ASTArgNode> arg = args->getHead();
 
         // Create a new memory location, and copy the argument into it. mem2reg
@@ -144,7 +144,7 @@ void CodegenCtx::startFunction(std::string id) {
 }
 
 BasicBlock *CodegenCtx::createBlock() {
-    return BasicBlock::Create(context, "L", function, NULL);
+    return BasicBlock::Create(context, "L", function, nullptr);
 }
 
 void CodegenCtx::pushBlock(BasicBlock *block) {
@@ -182,7 +182,7 @@ void CodegenCtx::insertMissingReturns(std::unordered_set<BasicBlock *> & visited
 
     // The case we're interested in: insert a return
     if (!term)
-        ReturnInst::Create(context, NULL, bblock);
+        ReturnInst::Create(context, nullptr, bblock);
     // Otherwise, it's either a jump or return instruction, so we can just
     // check each successor.
     else

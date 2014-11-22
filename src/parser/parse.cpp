@@ -12,13 +12,13 @@ extern FILE *yyin;
 namespace Parser {
 
 std::shared_ptr<ASTTopSeqNode> parse(const char *file) {
-    FILE *fp = NULL;
+    FILE *fp = nullptr;
 
     if (file) {
         fp = fopen(file, "r");
 
         if (!fp)
-            return NULL;
+            return nullptr;
 
         yyin = fp;
     }
@@ -29,7 +29,7 @@ std::shared_ptr<ASTTopSeqNode> parse(const char *file) {
         if (file)
             fclose(fp);
 
-        return NULL;
+        return nullptr;
     }
 
     if (file)
