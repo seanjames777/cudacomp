@@ -19,7 +19,7 @@
 class ASTReturnStmt : public ASTStmtNode {
 private:
 
-    ASTExpNode *exp;
+    std::shared_ptr<ASTExpNode> exp;
 
 public:
 
@@ -28,7 +28,7 @@ public:
      *
      * @param[in] exp Value expression to return, or null
      */
-    ASTReturnStmt(ASTExpNode *exp);
+    ASTReturnStmt(std::shared_ptr<ASTExpNode> exp);
 
     /**
      * @brief Destructor
@@ -38,7 +38,7 @@ public:
     /**
      * @brief Get value to return. May be null.
      */
-    ASTExpNode *getExp();
+    std::shared_ptr<ASTExpNode> getExp();
 
     /**
      * @copydoc ASTNode::print()

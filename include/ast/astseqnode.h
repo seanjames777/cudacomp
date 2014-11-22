@@ -23,8 +23,8 @@ template<typename T>
 class ASTSeqNode : public ASTNode {
 private:
 
-    T *head;
-    ASTSeqNode<T> *tail;
+    std::shared_ptr<T> head;
+    std::shared_ptr<ASTSeqNode<T>> tail;
 
 public:
 
@@ -34,7 +34,7 @@ public:
      * @param[in] head First element of the sequence
      * @param[in] tail The rest of the sequence
      */
-    ASTSeqNode(T *head, ASTSeqNode<T> *tail)
+    ASTSeqNode(std::shared_ptr<T> head, std::shared_ptr<ASTSeqNode<T>> tail)
         : head(head),
           tail(tail)
     {
@@ -44,37 +44,33 @@ public:
      * @brief Destructor
      */
     ~ASTSeqNode() {
-        delete head;
-
-        if (tail)
-            delete tail;
     }
 
     /**
      * @brief Get the first element of the sequence
      */
-    T *getHead() {
+    std::shared_ptr<T> getHead() {
         return head;
     }
 
     /**
      * @brief Get the rest of the sequence
      */
-    ASTSeqNode<T> *getTail() {
+    std::shared_ptr<ASTSeqNode<T>> getTail() {
         return tail;
     }
 
     /**
      * @brief Set the head pointer
      */
-    void setHead(T *head) {
+    void setHead(std::shared_ptr<T> head) {
         this->head = head;
     }
 
     /**
      * @brief Set the tail pointer
      */
-    void setTail(ASTSeqNode<T> *tail) {
+    void setTail(std::shared_ptr<ASTSeqNode<T>> tail) {
         this->tail = tail;
     }
 

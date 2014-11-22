@@ -6,22 +6,20 @@
 
 #include <ast/stmt/astwhilestmt.h>
 
-ASTWhileStmt::ASTWhileStmt(ASTExpNode *cond, ASTStmtSeqNode *bodyStmt)
+ASTWhileStmt::ASTWhileStmt(std::shared_ptr<ASTExpNode> cond, std::shared_ptr<ASTStmtSeqNode> bodyStmt)
     : cond(cond),
       bodyStmt(bodyStmt)
 {
 }
 
 ASTWhileStmt::~ASTWhileStmt() {
-    delete cond;
-    delete bodyStmt;
 }
 
-ASTExpNode *ASTWhileStmt::getCond() {
+std::shared_ptr<ASTExpNode> ASTWhileStmt::getCond() {
     return cond;
 }
 
-ASTStmtSeqNode *ASTWhileStmt::getBodyStmt() {
+std::shared_ptr<ASTStmtSeqNode> ASTWhileStmt::getBodyStmt() {
     return bodyStmt;
 }
 

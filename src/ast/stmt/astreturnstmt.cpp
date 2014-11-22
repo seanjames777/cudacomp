@@ -6,17 +6,15 @@
 
 #include <ast/stmt/astreturnstmt.h>
 
-ASTReturnStmt::ASTReturnStmt(ASTExpNode *exp)
+ASTReturnStmt::ASTReturnStmt(std::shared_ptr<ASTExpNode> exp)
     : exp(exp)
 {
 }
 
 ASTReturnStmt::~ASTReturnStmt() {
-    if (exp)
-        delete exp;
 }
 
-ASTExpNode *ASTReturnStmt::getExp() {
+std::shared_ptr<ASTExpNode> ASTReturnStmt::getExp() {
     return exp;
 }
 

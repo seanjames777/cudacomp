@@ -6,7 +6,7 @@
 
 #include <ast/expr/astbinopexp.h>
 
-ASTBinopExp::ASTBinopExp(enum op op, ASTExpNode *e1, ASTExpNode *e2)
+ASTBinopExp::ASTBinopExp(enum op op, std::shared_ptr<ASTExpNode> e1, std::shared_ptr<ASTExpNode> e2)
     : op(op),
       e1(e1),
       e2(e2)
@@ -14,19 +14,17 @@ ASTBinopExp::ASTBinopExp(enum op op, ASTExpNode *e1, ASTExpNode *e2)
 }
 
 ASTBinopExp::~ASTBinopExp() {
-    delete e1;
-    delete e2;
 }
 
 enum ASTBinopExp::op ASTBinopExp::getOp() {
     return op;
 }
 
-ASTExpNode *ASTBinopExp::getE1() {
+std::shared_ptr<ASTExpNode> ASTBinopExp::getE1() {
     return e1;
 }
 
-ASTExpNode *ASTBinopExp::getE2() {
+std::shared_ptr<ASTExpNode> ASTBinopExp::getE2() {
     return e2;
 }
 

@@ -26,17 +26,17 @@
 
 namespace Codegen {
 
-Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
-    IRBuilder<> *builder = ctx->getBuilder();
+Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
+    std::shared_ptr<IRBuilder<>> builder = ctx->getBuilder();
 
     // Integer constant
-    if (ASTIntegerExp *int_exp = dynamic_cast<ASTIntegerExp *>(node))
+    if (std::shared_ptr<ASTIntegerExp> int_exp = std::dynamic_pointer_cast<ASTIntegerExp>(node))
         return ConstantInt::get(convertType(ASTIntegerType::get()), int_exp->getValue());
     // Boolean constant
-    else if (ASTBooleanExp *bool_exp = dynamic_cast<ASTBooleanExp *>(node))
+    else if (std::shared_ptr<ASTBooleanExp> bool_exp = std::dynamic_pointer_cast<ASTBooleanExp>(node))
         return ConstantInt::get(convertType(ASTBooleanType::get()), (int)bool_exp->getValue());
     // Unary operator
-    else if (ASTUnopExp *unop_exp = dynamic_cast<ASTUnopExp *>(node)) {
+    else if (std::shared_ptr<ASTUnopExp> unop_exp = std::dynamic_pointer_cast<ASTUnopExp>(node)) {
         Value *v = codegen_exp(ctx, unop_exp->getExp());
 
         switch(unop_exp->getOp()) {
@@ -46,7 +46,7 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
         }
     }
     // Binary operator
-    else if (ASTBinopExp *binop_exp = dynamic_cast<ASTBinopExp *>(node)) {
+    else if (std::shared_ptr<ASTBinopExp> binop_exp = std::dynamic_pointer_cast<ASTBinopExp>(node)) {
         Value *v1 = codegen_exp(ctx, binop_exp->getE1());
         Value *v2 = codegen_exp(ctx, binop_exp->getE2());
 
@@ -72,17 +72,17 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
         }
     }
     // Identifier reference
-    else if (ASTIdentifierExp *id_exp = dynamic_cast<ASTIdentifierExp *>(node)) {
+    else if (std::shared_ptr<ASTIdentifierExp> id_exp = std::dynamic_pointer_cast<ASTIdentifierExp>(node)) {
         Value *id_ptr = ctx->getOrCreateSymbol(id_exp->getId());
         return builder->CreateLoad(id_ptr);
     }
     // Function call
-    else if (ASTCallExp *call_exp = dynamic_cast<ASTCallExp *>(node)) {
+    else if (std::shared_ptr<ASTCallExp> call_exp = std::dynamic_pointer_cast<ASTCallExp>(node)) {
         std::vector<Value *> args;
 
-        Value *ret_val = NULL;
+        Value *ret_val = nullptr;
 
-        ASTFunType *funDefn = ctx->getModuleInfo()->getFunction(call_exp->getId())->getSignature();
+        std::shared_ptr<ASTFunType> funDefn = ctx->getModuleInfo()->getFunction(call_exp->getId())->getSignature();
         bool isVoid = funDefn->getReturnType()->equal(ASTVoidType::get());
 
         // In device mode, add a pointer to a new temp to get the return value
@@ -92,11 +92,11 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
             args.push_back(ret_val);
         }
 
-        ASTExpSeqNode *exp_args = call_exp->getArgs();
+        std::shared_ptr<ASTExpSeqNode> exp_args = call_exp->getArgs();
 
         // Codegen each argument
-        while (exp_args != NULL) {
-            ASTExpNode *arg = exp_args->getHead();
+        while (exp_args != nullptr) {
+            std::shared_ptr<ASTExpNode> arg = exp_args->getHead();
             args.push_back(codegen_exp(ctx, arg));
             exp_args = exp_args->getTail();
         }
@@ -109,7 +109,7 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
             ret_val = builder->CreateLoad(ret_val);
         }
 
-        // If the function has a void return type, we'll return NULL, but this should have
+        // If the function has a void return type, we'll return nullptr, but this should have
         // already been handled by the type checker: can't assign a void expression to any
         // type of lvalue.
         return ret_val;
@@ -117,11 +117,11 @@ Value *codegen_exp(CodegenCtx *ctx, ASTExpNode *node) {
     else
         throw new ASTMalformedException();
 
-    return NULL;
+    return nullptr;
 }
 
-bool codegen_stmts(CodegenCtx *ctx, ASTStmtSeqNode *seq_node) {
-    while (seq_node != NULL) {
+bool codegen_stmts(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtSeqNode> seq_node) {
+    while (seq_node != nullptr) {
         if (!codegen_stmt(ctx, seq_node->getHead()))
             return false;
         seq_node = seq_node->getTail();
@@ -130,12 +130,12 @@ bool codegen_stmts(CodegenCtx *ctx, ASTStmtSeqNode *seq_node) {
     return true;
 }
 
-bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *head) {
-    IRBuilder<> *builder = ctx->getBuilder();
+bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> head) {
+    std::shared_ptr<IRBuilder<>> builder = ctx->getBuilder();
 
     // Return instruction
-    if (ASTReturnStmt *ret_node = dynamic_cast<ASTReturnStmt *>(head)) {
-        ASTExpNode *ret_exp = ret_node->getExp();
+    if (std::shared_ptr<ASTReturnStmt> ret_node = std::dynamic_pointer_cast<ASTReturnStmt>(head)) {
+        std::shared_ptr<ASTExpNode> ret_exp = ret_node->getExp();
 
         // Void expressions don't need to return a value
         if (ret_exp) {
@@ -147,20 +147,20 @@ bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *head) {
                 Value *out_arg = ctx->getCurrentFunction()->arg_begin();
 
                 builder->CreateStore(ret_val, out_arg);
-                builder->CreateRet(NULL);
+                builder->CreateRet(nullptr);
             }
             else
                 builder->CreateRet(ret_val);
         }
         else
-            builder->CreateRet(NULL);
+            builder->CreateRet(nullptr);
 
         // Don't keep generating code because we've returned and we can't add a basic block
         // after the return anyway.
         return false;
     }
     // Variable declaration
-    else if (ASTVarDeclStmt *decl_stmt = dynamic_cast<ASTVarDeclStmt *>(head)) {
+    else if (std::shared_ptr<ASTVarDeclStmt> decl_stmt = std::dynamic_pointer_cast<ASTVarDeclStmt>(head)) {
         // Creates an alloca. TODO maybe getOrCreateId()
         Value *mem = ctx->getOrCreateSymbol(decl_stmt->getId());
 
@@ -170,18 +170,18 @@ bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *head) {
         }
     }
     // Variable definution
-    else if (ASTVarDefnStmt *decl_stmt = dynamic_cast<ASTVarDefnStmt *>(head)) {
+    else if (std::shared_ptr<ASTVarDefnStmt> decl_stmt = std::dynamic_pointer_cast<ASTVarDefnStmt>(head)) {
         Value *mem = ctx->getOrCreateSymbol(decl_stmt->getId());
         Value *exp_val = codegen_exp(ctx, decl_stmt->getExp());
         builder->CreateStore(exp_val, mem);
     }
     // Scope
-    else if (ASTScopeStmt *scope_stmt = dynamic_cast<ASTScopeStmt *>(head)) {
+    else if (std::shared_ptr<ASTScopeStmt> scope_stmt = std::dynamic_pointer_cast<ASTScopeStmt>(head)) {
         if (scope_stmt->getBody())
             return codegen_stmts(ctx, scope_stmt->getBody());
     }
     // If statement
-    else if (ASTIfStmt *if_node = dynamic_cast<ASTIfStmt *>(head)) {
+    else if (std::shared_ptr<ASTIfStmt> if_node = std::dynamic_pointer_cast<ASTIfStmt>(head)) {
         Value *cond = codegen_exp(ctx, if_node->getCond());
 
         BasicBlock *trueBlock = ctx->createBlock();
@@ -224,7 +224,7 @@ bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *head) {
         return leftContinue || rightContinue;
     }
     // While statement
-    else if (ASTWhileStmt *while_node = dynamic_cast<ASTWhileStmt *>(head)) {
+    else if (std::shared_ptr<ASTWhileStmt> while_node = std::dynamic_pointer_cast<ASTWhileStmt>(head)) {
         Value *cond = codegen_exp(ctx, while_node->getCond());
 
         BasicBlock *bodyBlock = ctx->createBlock();
@@ -251,7 +251,7 @@ bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *head) {
 
     }
     // Expression statement
-    else if (ASTExprStmt *exp_stmt = dynamic_cast<ASTExprStmt *>(head))
+    else if (std::shared_ptr<ASTExprStmt> exp_stmt = std::dynamic_pointer_cast<ASTExprStmt>(head))
         codegen_exp(ctx, exp_stmt->getExp());
     else
         throw new ASTMalformedException();
@@ -259,18 +259,18 @@ bool codegen_stmt(CodegenCtx *ctx, ASTStmtNode *head) {
     return true;
 }
 
-void codegen_tops(ModuleInfo *module, ASTTopSeqNode *nodes, bool emitDevice, std::ostream & out) {
-    CodegenCtx ctx(emitDevice, module);
+void codegen_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTopSeqNode> nodes, bool emitDevice, std::ostream & out) {
+    std::shared_ptr<CodegenCtx> ctx = std::make_shared<CodegenCtx>(emitDevice, module);
 
-    ASTTopSeqNode *node = nodes;
+    std::shared_ptr<ASTTopSeqNode> node = nodes;
 
-    while (node != NULL) {
-        ASTTopNode *top_node = node->getHead();
+    while (node != nullptr) {
+        std::shared_ptr<ASTTopNode> top_node = node->getHead();
 
         // Create LLVM functions for each function
-        if (ASTFunDefnTop *funDefn = dynamic_cast<ASTFunDefnTop *>(top_node)) {
-            FunctionInfo *funInfo = module->getFunction(funDefn->getName());
-            ctx.createFunction(funInfo);
+        if (std::shared_ptr<ASTFunDefnTop> funDefn = std::dynamic_pointer_cast<ASTFunDefnTop>(top_node)) {
+            std::shared_ptr<FunctionInfo> funInfo = module->getFunction(funDefn->getName());
+            ctx->createFunction(funInfo);
         }
 
         node = node->getTail();
@@ -278,17 +278,17 @@ void codegen_tops(ModuleInfo *module, ASTTopSeqNode *nodes, bool emitDevice, std
 
     node = nodes;
 
-    while (node != NULL) {
-        codegen_top(&ctx, node->getHead());
+    while (node != nullptr) {
+        codegen_top(ctx, node->getHead());
         node = node->getTail();
     }
 
-    ctx.emit(out);
+    ctx->emit(out);
 }
 
-void codegen_top(CodegenCtx *ctx, ASTTopNode *node) {
-    if (ASTFunDefnTop *funDefn = dynamic_cast<ASTFunDefnTop *>(node)) {
-        FunctionInfo *func = ctx->getModuleInfo()->getFunction(funDefn->getName());
+void codegen_top(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTTopNode> node) {
+    if (std::shared_ptr<ASTFunDefnTop> funDefn = std::dynamic_pointer_cast<ASTFunDefnTop>(node)) {
+        std::shared_ptr<FunctionInfo> func = ctx->getModuleInfo()->getFunction(funDefn->getName());
 
         ctx->startFunction(func->getName());
         codegen_stmts(ctx, funDefn->getBody());

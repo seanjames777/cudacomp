@@ -6,7 +6,7 @@
 
 #include <ast/top/astfundefntop.h>
 
-ASTFunDefnTop::ASTFunDefnTop(std::string name, ASTFunType *sig, ASTStmtSeqNode *body)
+ASTFunDefnTop::ASTFunDefnTop(std::string name, std::shared_ptr<ASTFunType> sig, std::shared_ptr<ASTStmtSeqNode> body)
     : name(name),
       sig(sig),
       body(body)
@@ -14,26 +14,21 @@ ASTFunDefnTop::ASTFunDefnTop(std::string name, ASTFunType *sig, ASTStmtSeqNode *
 }
 
 ASTFunDefnTop::~ASTFunDefnTop() {
-    if (sig)
-        delete sig;
-
-    if (body)
-        delete body;
 }
 
 std::string ASTFunDefnTop::getName() {
     return name;
 }
 
-ASTFunType *ASTFunDefnTop::getSignature() {
+std::shared_ptr<ASTFunType> ASTFunDefnTop::getSignature() {
     return sig;
 }
 
-ASTStmtSeqNode *ASTFunDefnTop::getBody() {
+std::shared_ptr<ASTStmtSeqNode> ASTFunDefnTop::getBody() {
     return body;
 }
 
-void ASTFunDefnTop::setBody(ASTStmtSeqNode *body) {
+void ASTFunDefnTop::setBody(std::shared_ptr<ASTStmtSeqNode> body) {
     this->body = body;
 }
 

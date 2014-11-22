@@ -6,7 +6,7 @@
 
 #include <ast/stmt/astvardeclstmt.h>
 
-ASTVarDeclStmt::ASTVarDeclStmt(ASTTypeNode *type, std::string id, ASTExpNode *exp)
+ASTVarDeclStmt::ASTVarDeclStmt(std::shared_ptr<ASTTypeNode> type, std::string id, std::shared_ptr<ASTExpNode> exp)
     : type(type),
       id(id),
       exp(exp)
@@ -14,21 +14,17 @@ ASTVarDeclStmt::ASTVarDeclStmt(ASTTypeNode *type, std::string id, ASTExpNode *ex
 }
 
 ASTVarDeclStmt::~ASTVarDeclStmt() {
-    if (exp)
-        delete exp;
-
-    delete type;
 }
 
 std::string ASTVarDeclStmt::getId() {
     return id;
 }
 
-ASTExpNode *ASTVarDeclStmt::getExp() {
+std::shared_ptr<ASTExpNode> ASTVarDeclStmt::getExp() {
     return exp;
 }
 
-ASTTypeNode *ASTVarDeclStmt::getType() {
+std::shared_ptr<ASTTypeNode> ASTVarDeclStmt::getType() {
     return type;
 }
 

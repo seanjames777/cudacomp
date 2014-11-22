@@ -13,7 +13,7 @@
 
 namespace Codegen {
 
-Type *convertType(ASTTypeNode *type);
+Type *convertType(std::shared_ptr<ASTTypeNode> type);
 
 }
 

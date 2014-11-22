@@ -6,21 +6,20 @@
 
 #include <ast/stmt/astvardefnstmt.h>
 
-ASTVarDefnStmt::ASTVarDefnStmt(std::string id, ASTExpNode *exp)
+ASTVarDefnStmt::ASTVarDefnStmt(std::string id, std::shared_ptr<ASTExpNode> exp)
     : id(id),
       exp(exp)
 {
 }
 
 ASTVarDefnStmt::~ASTVarDefnStmt() {
-    delete exp;
 }
 
 std::string ASTVarDefnStmt::getId() {
     return id;
 }
 
-ASTExpNode *ASTVarDefnStmt::getExp() {
+std::shared_ptr<ASTExpNode> ASTVarDefnStmt::getExp() {
     return exp;
 }
 

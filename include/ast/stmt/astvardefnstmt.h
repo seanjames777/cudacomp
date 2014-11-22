@@ -20,7 +20,7 @@ class ASTVarDefnStmt : public ASTStmtNode {
 private:
 
     std::string id;
-    ASTExpNode *exp;
+    std::shared_ptr<ASTExpNode> exp;
 
 public:
 
@@ -30,7 +30,7 @@ public:
      * @param[in] id  Variable name
      * @param[in] exp New value expression
      */
-    ASTVarDefnStmt(std::string id, ASTExpNode *exp);
+    ASTVarDefnStmt(std::string id, std::shared_ptr<ASTExpNode> exp);
 
     /**
      * @brief Destructor
@@ -45,7 +45,7 @@ public:
     /**
      * @brief Get expression to assign value from
      */
-    ASTExpNode *getExp();
+    std::shared_ptr<ASTExpNode> getExp();
 
     /**
      * @coypdoc ASTNode::print()

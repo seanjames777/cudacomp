@@ -17,7 +17,7 @@
 class ASTBooleanType : public ASTTypeNode {
 private:
 
-    static ASTBooleanType *instance;
+    static std::shared_ptr<ASTBooleanType> instance;
 
 public:
 
@@ -33,12 +33,12 @@ public:
     /**
      * @brief Get the singleton instance of this class
      */
-    static ASTBooleanType *get();
+    static std::shared_ptr<ASTBooleanType> get();
 
     /**
      * @copydoc ASTTypeNode::equal()
      */
-    virtual bool equal(ASTTypeNode *other) override;
+    virtual bool equal(std::shared_ptr<ASTTypeNode> other) override;
 
     /**
      * @copydoc ASTNode::print()

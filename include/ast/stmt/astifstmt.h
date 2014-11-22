@@ -18,9 +18,9 @@
 class ASTIfStmt : public ASTStmtNode {
 private:
 
-    ASTExpNode *cond;
-    ASTStmtSeqNode *trueStmt;
-    ASTStmtSeqNode *falseStmt;
+    std::shared_ptr<ASTExpNode> cond;
+    std::shared_ptr<ASTStmtSeqNode> trueStmt;
+    std::shared_ptr<ASTStmtSeqNode> falseStmt;
 
 public:
 
@@ -32,7 +32,7 @@ public:
      * @param[in] falseStmt Statement sequence to evaluate when condition is
      *                      false. May be null.
      */
-    ASTIfStmt(ASTExpNode *cond, ASTStmtSeqNode *trueStmt, ASTStmtSeqNode *falseStmt);
+    ASTIfStmt(std::shared_ptr<ASTExpNode> cond, std::shared_ptr<ASTStmtSeqNode> trueStmt, std::shared_ptr<ASTStmtSeqNode> falseStmt);
 
     /**
      * @brief Destructor
@@ -42,18 +42,18 @@ public:
     /**
      * @brief Get expression to branch on
      */
-    ASTExpNode *getCond();
+    std::shared_ptr<ASTExpNode> getCond();
 
     /**
      * @brief Get statement sequence to evaluate when condition is true
      */
-    ASTStmtSeqNode *getTrueStmt();
+    std::shared_ptr<ASTStmtSeqNode> getTrueStmt();
 
     /**
      * @brief Get statement sequence to evaluate when condition is false. May
      * be null.
      */
-    ASTStmtSeqNode *getFalseStmt();
+    std::shared_ptr<ASTStmtSeqNode> getFalseStmt();
 
     /**
      * @copydoc ASTNode::print()

@@ -17,7 +17,7 @@
 class ASTVoidType : public ASTTypeNode {
 private:
 
-    static ASTVoidType *instance;
+    static std::shared_ptr<ASTVoidType> instance;
 
 public:
 
@@ -30,12 +30,12 @@ public:
     /**
      * @brief Get the singleton instance of this class
      */
-    static ASTVoidType *get();
+    static std::shared_ptr<ASTVoidType> get();
 
     /**
      * @copydoc ASTTypeNode::equal()
      */
-    virtual bool equal(ASTTypeNode *other) override;
+    virtual bool equal(std::shared_ptr<ASTTypeNode> other) override;
 
     /**
      * @copydoc ASTNode::print()

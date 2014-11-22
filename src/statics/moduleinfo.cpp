@@ -9,13 +9,13 @@
 ModuleInfo::ModuleInfo() {
 }
 
-void ModuleInfo::addFunction(std::string id, FunctionInfo *function) {
-    functions.set(id, function);
+void ModuleInfo::addFunction(std::shared_ptr<FunctionInfo> function) {
+    functions.set(function->getName(), function);
 }
 
-FunctionInfo *ModuleInfo::getFunction(std::string id) {
+std::shared_ptr<FunctionInfo> ModuleInfo::getFunction(std::string id) {
     if (!functions.hasSymbol(id))
-        return NULL;
+        return nullptr;
 
     return functions.get(id);
 }

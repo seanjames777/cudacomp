@@ -33,8 +33,8 @@ IllegalReturnTypeException::IllegalReturnTypeException()
 {
 }
 
-bool returncheck_stmts(FunctionInfo *func, ASTStmtSeqNode *seq_node) {
-    while (seq_node != NULL) {
+bool returncheck_stmts(std::shared_ptr<FunctionInfo> func, std::shared_ptr<ASTStmtSeqNode> seq_node) {
+    while (seq_node != nullptr) {
         if (returncheck_stmt(func, seq_node->getHead()))
             return true;
         seq_node = seq_node->getTail();
@@ -43,17 +43,17 @@ bool returncheck_stmts(FunctionInfo *func, ASTStmtSeqNode *seq_node) {
     return false;
 }
 
-bool returncheck_stmt(FunctionInfo *func, ASTStmtNode *head) {
+bool returncheck_stmt(std::shared_ptr<FunctionInfo> func, std::shared_ptr<ASTStmtNode> head) {
     // Return statement
-    if (ASTReturnStmt *ret_node = dynamic_cast<ASTReturnStmt *>(head))
+    if (std::shared_ptr<ASTReturnStmt> ret_node = std::dynamic_pointer_cast<ASTReturnStmt>(head))
         return true;
     // Scope statement
-    else if (ASTScopeStmt *scope_node = dynamic_cast<ASTScopeStmt *>(head)) {
+    else if (std::shared_ptr<ASTScopeStmt> scope_node = std::dynamic_pointer_cast<ASTScopeStmt>(head)) {
         // May be in the body. Otherwise, keep going.
         if (scope_node->getBody() && returncheck_stmts(func, scope_node->getBody()))
             return true;
     }
-    else if (ASTIfStmt *if_node = dynamic_cast<ASTIfStmt *>(head)) {
+    else if (std::shared_ptr<ASTIfStmt> if_node = std::dynamic_pointer_cast<ASTIfStmt>(head)) {
         // If there is only a true statement, we need to also have a return
         // after the if statement. If both branches are present, and they
         // BOTH return, then the whole statement returns.
@@ -67,20 +67,20 @@ bool returncheck_stmt(FunctionInfo *func, ASTStmtNode *head) {
     return false;
 }
 
-void returncheck_tops(ModuleInfo *module, ASTTopSeqNode *nodes) {
-    ASTTopSeqNode *seq_node = nodes;
+void returncheck_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTopSeqNode> nodes) {
+    std::shared_ptr<ASTTopSeqNode> seq_node = nodes;
 
-    while (seq_node != NULL) {
+    while (seq_node != nullptr) {
         returncheck_top(module, seq_node->getHead());
         seq_node = seq_node->getTail();
     }
 }
 
-void returncheck_top(ModuleInfo *module, ASTTopNode *node) {
-    if (ASTFunDefnTop *funDefn = dynamic_cast<ASTFunDefnTop *>(node)) {
+void returncheck_top(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTopNode> node) {
+    if (std::shared_ptr<ASTFunDefnTop> funDefn = std::dynamic_pointer_cast<ASTFunDefnTop>(node)) {
         bool isVoid = funDefn->getSignature()->getReturnType()->equal(ASTVoidType::get());
 
-        FunctionInfo *func = module->getFunction(funDefn->getName());
+        std::shared_ptr<FunctionInfo> func = module->getFunction(funDefn->getName());
 
         // Check if all control flow paths return a value
         if (!returncheck_stmts(func, funDefn->getBody())) {
@@ -88,17 +88,17 @@ void returncheck_top(ModuleInfo *module, ASTTopNode *node) {
             // Void functions do not need to return on every control flow path, but the
             // code generator requires that there be a return statement, so insert one.
             if (isVoid) {
-                ASTStmtSeqNode *stmts = funDefn->getBody();
+                std::shared_ptr<ASTStmtSeqNode> stmts = funDefn->getBody();
 
                 // Body is empty
-                if (stmts == NULL)
-                    funDefn->setBody(new ASTStmtSeqNode(new ASTReturnStmt(NULL), NULL));
+                if (stmts == nullptr)
+                    funDefn->setBody(std::make_shared<ASTStmtSeqNode>(std::make_shared<ASTReturnStmt>(nullptr), nullptr));
                 // Seek to the end of the body and insert a return
                 else {
-                    while (stmts->getTail() != NULL)
+                    while (stmts->getTail() != nullptr)
                         stmts = stmts->getTail();
 
-                    stmts->setTail(new ASTStmtSeqNode(new ASTReturnStmt(NULL), NULL));
+                    stmts->setTail(std::make_shared<ASTStmtSeqNode>(std::make_shared<ASTReturnStmt>(nullptr), nullptr));
                 }
             }
             // The program is legitimately wrong

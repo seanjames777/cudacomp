@@ -1,5 +1,5 @@
 /**
- * @file asttype.cpp
+ * @file asttypenode.cpp
  *
  * @author Sean James <seanjames777@gmail.com>
  */

@@ -20,23 +20,23 @@ class CodegenCtx {
 private:
 
     // Whole module
-    Module                    *module;       // LLVM module for all functions
-    LLVMContext               &context;      // LLVM context
-    bool                       emit_device;  // Should we emit GPU code
-    SymbolTable<Function *>    functions;    // Mapping from function names to LLVM functions
-    ModuleInfo                *modInfo;      // Information about module
+    std::shared_ptr<Module>        module;       // LLVM module for all functions
+    LLVMContext                   &context;      // LLVM context
+    bool                           emit_device;  // Should we emit GPU code
+    SymbolTable<Function *>        functions;    // Mapping from function names to LLVM functions
+    std::shared_ptr<ModuleInfo>    modInfo;      // Information about module
 
     // Current function
-    BasicBlock                *def_bblock;   // Locals definition block, assists with SSA
-    BasicBlock                *first_bblock; // First block (after def block)
-    IRBuilder<>               *def_builder;  // IRBuilder for def block
-    SymbolTable<Value *>       symbols;      // Mapping from local symbols to LLVM values
-    Function                  *function;     // LLVM function
-    std::vector<BasicBlock *>  blocks;       // Stack of basic blocks
-    FunctionInfo              *funcInfo;     // Information about current function
+    BasicBlock                    *def_bblock;   // Locals definition block, assists with SSA
+    BasicBlock                    *first_bblock; // First block (after def block)
+    std::shared_ptr<IRBuilder<>>   def_builder;  // IRBuilder for def block
+    SymbolTable<Value *>           symbols;      // Mapping from local symbols to LLVM values
+    Function                      *function;     // LLVM function
+    std::vector<BasicBlock *>      blocks;       // Stack of basic blocks
+    std::shared_ptr<FunctionInfo>  funcInfo;     // Information about current function
 
     // Current basic block
-    IRBuilder<>               *body_builder; // IRBuilder for current block
+    std::shared_ptr<IRBuilder<>>   body_builder; // IRBuilder for current block
 
     /**
      * @brief Insert return instructions in basic blocks that are missing a terminator.
@@ -57,17 +57,17 @@ public:
      * @param[in] emit_device Whether to emit GPU code
      * @param[in] modInfo     Module information
      */
-    CodegenCtx(bool emit_device, ModuleInfo *modInfo);
+    CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo);
 
     /**
      * @brief Get module information
      */
-    ModuleInfo *getModuleInfo();
+    std::shared_ptr<ModuleInfo> getModuleInfo();
 
     /**
      * @brief Get LLVM module
      */
-    Module *getModule();
+    std::shared_ptr<Module> getModule();
 
     /**
      * @brief Get whether we should emit GPU code
@@ -85,12 +85,14 @@ public:
     void emit(std::ostream & out);
 
     /**
-     * @brief Create an LLVM function for a FunctionInfo
+     * @brief Create an LLVM function for a FunctionInfo. The pointer will be
+     * owned by the LLVM module.
      */
-    Function *createFunction(FunctionInfo *funcInfo);
+    Function *createFunction(std::shared_ptr<FunctionInfo> funcInfo);
 
     /**
-     * @brief Get a function by name
+     * @brief Get a function by name. It must have been created already through
+     * createFunction().
      */
     Function *getFunction(std::string id);
 
@@ -103,7 +105,7 @@ public:
     /**
      * @brief Get information about current function
      */
-    FunctionInfo *getCurrentFunctionInfo();
+    std::shared_ptr<FunctionInfo> getCurrentFunctionInfo();
 
     /**
      * @brief Get the current LLVM function
@@ -152,7 +154,7 @@ public:
     /**
      * @brief Get an IR builder for the "current" basic block
      */
-    IRBuilder<> *getBuilder();
+    std::shared_ptr<IRBuilder<>> getBuilder();
 
 };
 

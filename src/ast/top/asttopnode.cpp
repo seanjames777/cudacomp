@@ -5,3 +5,6 @@
  */
 
 #include <ast/top/asttopnode.h>
+
+ASTTopNode::ASTTopNode() {
+}

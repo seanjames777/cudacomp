@@ -6,25 +6,32 @@
 
 #include <statics/functioninfo.h>
 
-FunctionInfo::FunctionInfo(std::string name, ASTFunType *signature)
+FunctionInfo::FunctionInfo(std::string name, std::shared_ptr<ASTFunType> signature)
     : name(name),
       signature(signature)
 {
+    std::shared_ptr<ASTArgSeqNode> args = signature->getArgs();
+
+    while (args != nullptr) {
+        std::shared_ptr<ASTArgNode> arg = args->getHead();
+        addLocal(arg->getName(), arg->getType());
+        args = args->getTail();
+    }
 }
 
 std::string FunctionInfo::getName() {
     return name;
 }
 
-ASTFunType *FunctionInfo::getSignature() {
+std::shared_ptr<ASTFunType> FunctionInfo::getSignature() {
     return signature;
 }
 
-ASTTypeNode *FunctionInfo::getLocalType(std::string id) {
+std::shared_ptr<ASTTypeNode> FunctionInfo::getLocalType(std::string id) {
     return locals.get(id);
 }
 
-void FunctionInfo::addLocal(std::string id, ASTTypeNode *type) {
+void FunctionInfo::addLocal(std::string id, std::shared_ptr<ASTTypeNode> type) {
     locals.set(id, type);
 }
 

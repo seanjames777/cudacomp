@@ -15,19 +15,37 @@
 class ASTWhileStmt : public ASTStmtNode {
 private:
 
-    ASTExpNode *cond;
-    ASTStmtSeqNode *bodyStmt;
+    std::shared_ptr<ASTExpNode> cond;
+    std::shared_ptr<ASTStmtSeqNode> bodyStmt;
 
 public:
 
-    ASTWhileStmt(ASTExpNode *cond, ASTStmtSeqNode *bodyStmt);
+    /**
+     * Constructor
+     *
+     * @param[in] cond     Loop condition
+     * @param[in] bodyStmt Statement sequence to evaluate in a loop while the condition is true
+     */
+    ASTWhileStmt(std::shared_ptr<ASTExpNode> cond, std::shared_ptr<ASTStmtSeqNode> bodyStmt);
 
+    /**
+     * @brief Destructor
+     */
     ~ASTWhileStmt();
 
-    ASTExpNode *getCond();
+    /**
+     * @brief Get expression for loop's condition
+     */
+    std::shared_ptr<ASTExpNode> getCond();
 
-    ASTStmtSeqNode *getBodyStmt();
+    /**
+     * @brief Get statement sequence to evaluate in a loop while the condition is true
+     */
+    std::shared_ptr<ASTStmtSeqNode> getBodyStmt();
 
+    /**
+     * @copydoc ASTNode::print()
+     */
     void print(std::ostream & ss) override;
 
 };

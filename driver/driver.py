@@ -16,9 +16,6 @@ SOURCE_DIR = "@CMAKE_CURRENT_SOURCE_DIR@/"
 BINARY_DIR = "@CMAKE_INSTALL_PREFIX@/"
 LLC = "@LLVM_LLC@"
 
-print SOURCE_DIR
-print BINARY_DIR
-
 tests = [
     (SOURCE_DIR + "tests/testBinOps1.cc", 14),
     (SOURCE_DIR + "tests/testBinOps2.cc", 2),

@@ -10,26 +10,26 @@
 
 namespace Codegen {
 
-CodegenCtx::CodegenCtx(bool emit_device, ModuleInfo *modInfo)
-    : module(NULL),
+CodegenCtx::CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo)
+    : module(nullptr),
       context(getGlobalContext()),
       emit_device(emit_device),
       modInfo(modInfo),
-      def_bblock(NULL),
-      first_bblock(NULL),
-      def_builder(NULL),
-      function(NULL),
-      funcInfo(NULL),
-      body_builder(NULL)
+      def_bblock(nullptr),
+      first_bblock(nullptr),
+      def_builder(nullptr),
+      function(nullptr),
+      funcInfo(nullptr),
+      body_builder(nullptr)
 {
-    module = new Module("", context);
+    module = std::make_shared<Module>("", context);
 }
 
-ModuleInfo *CodegenCtx::getModuleInfo() {
+std::shared_ptr<ModuleInfo> CodegenCtx::getModuleInfo() {
     return modInfo;
 }
 
-Module *CodegenCtx::getModule() {
+std::shared_ptr<Module> CodegenCtx::getModule() {
     return module;
 }
 
@@ -71,16 +71,16 @@ Function *CodegenCtx::getCurrentFunction() {
     return function;
 }
 
-FunctionInfo *CodegenCtx::getCurrentFunctionInfo() {
+std::shared_ptr<FunctionInfo> CodegenCtx::getCurrentFunctionInfo() {
     return funcInfo;
 }
 
-Function *CodegenCtx::createFunction(FunctionInfo *funcInfo) {
+Function *CodegenCtx::createFunction(std::shared_ptr<FunctionInfo> funcInfo) {
     std::vector<Type *> argTypes;
     FunctionType *ftype;
 
-    ASTFunType *sig = funcInfo->getSignature();
-    ASTArgSeqNode *args = sig->getArgs();
+    std::shared_ptr<ASTFunType> sig = funcInfo->getSignature();
+    std::shared_ptr<ASTArgSeqNode> args = sig->getArgs();
     Type *returnType = convertType(sig->getReturnType());
 
     bool isVoid = sig->getReturnType()->equal(ASTVoidType::get());
@@ -89,8 +89,8 @@ Function *CodegenCtx::createFunction(FunctionInfo *funcInfo) {
         argTypes.push_back(PointerType::getUnqual(returnType));
 
     // Add arguments to LLVM function type
-    while (args != NULL) {
-        ASTArg *arg = args->getHead();
+    while (args != nullptr) {
+        std::shared_ptr<ASTArgNode> arg = args->getHead();
         argTypes.push_back(convertType(arg->getType()));
         args = args->getTail();
     }
@@ -100,7 +100,7 @@ Function *CodegenCtx::createFunction(FunctionInfo *funcInfo) {
     else
         ftype = FunctionType::get(returnType, argTypes, false);
 
-    Function *function = Function::Create(ftype, GlobalValue::ExternalLinkage, funcInfo->getName(), module);
+    Function *function = Function::Create(ftype, GlobalValue::ExternalLinkage, funcInfo->getName(), module.get());
     functions.set(funcInfo->getName(), function);
 
     return function;
@@ -111,24 +111,24 @@ void CodegenCtx::startFunction(std::string id) {
     symbols.clear();
     blocks.clear();
 
-    def_bblock = BasicBlock::Create(context, "defs", function, NULL);
-    def_builder = new IRBuilder<>(def_bblock);
+    def_bblock = BasicBlock::Create(context, "defs", function, nullptr);
+    def_builder = std::make_shared<IRBuilder<>>(def_bblock);
 
     first_bblock = createBlock();
     pushBlock(first_bblock);
 
     funcInfo = modInfo->getFunction(id);
-    ASTFunType *sig = funcInfo->getSignature();
+    std::shared_ptr<ASTFunType> sig = funcInfo->getSignature();
 
-    ASTArgSeqNode *args = sig->getArgs();
+    std::shared_ptr<ASTArgSeqNode> args = sig->getArgs();
     auto arg_iter = function->arg_begin();
 
     if (emit_device)
         arg_iter++;
 
     // Map arguments to symbol table. Move arguments into alloca's functions
-    while (args != NULL) {
-        ASTArg *arg = args->getHead();
+    while (args != nullptr) {
+        std::shared_ptr<ASTArgNode> arg = args->getHead();
 
         // Create a new memory location, and copy the argument into it. mem2reg
         // should promote it back into a register, and the move should be
@@ -144,18 +144,18 @@ void CodegenCtx::startFunction(std::string id) {
 }
 
 BasicBlock *CodegenCtx::createBlock() {
-    return BasicBlock::Create(context, "L", function, NULL);
+    return BasicBlock::Create(context, "L", function, nullptr);
 }
 
 void CodegenCtx::pushBlock(BasicBlock *block) {
     blocks.push_back(block);
-    this->body_builder = new IRBuilder<>(block);
+    this->body_builder = std::make_shared<IRBuilder<>>(block);
 }
 
 void CodegenCtx::popBlock() {
     blocks.pop_back();
     BasicBlock *block = blocks.back();
-    this->body_builder = new IRBuilder<>(block);
+    this->body_builder = std::make_shared<IRBuilder<>>(block);
 }
 
 void CodegenCtx::markKernel(Function *kernel) {
@@ -182,7 +182,7 @@ void CodegenCtx::insertMissingReturns(std::unordered_set<BasicBlock *> & visited
 
     // The case we're interested in: insert a return
     if (!term)
-        ReturnInst::Create(context, NULL, bblock);
+        ReturnInst::Create(context, nullptr, bblock);
     // Otherwise, it's either a jump or return instruction, so we can just
     // check each successor.
     else
@@ -200,7 +200,7 @@ void CodegenCtx::finishFunction() {
     }*/
 }
 
-IRBuilder<> *CodegenCtx::getBuilder() {
+std::shared_ptr<IRBuilder<>> CodegenCtx::getBuilder() {
     return body_builder;
 }
 

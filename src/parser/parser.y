@@ -20,7 +20,7 @@
 #include <ast/top/asttopnode.h>
 #include <ast/top/astfundefntop.h>
 #include <ast/type/astfuntype.h>
-#include <ast/type/astarg.h>
+#include <ast/type/astargnode.h>
 #include <ast/expr/astcallexp.h>
 #include <ast/type/astvoidtype.h>
 #include <ast/type/astptrtype.h>
@@ -35,14 +35,19 @@ int yywrap() {
     return 1;
 }
 
-void yyerror(ASTTopSeqNode **root, const char *str) {
+void yyerror(std::shared_ptr<ASTTopSeqNode> *root, const char *str) {
     fprintf(stderr, "Error: %s\n", str);
 }
 
 %}
 
-%parse-param { ASTTopSeqNode **root }
+// Note: We can't return anything, so we need to use a pointer to a shared
+// pointer. TODO: Could use a reference, but it's not much of an improvement.
+%parse-param { std::shared_ptr<ASTTopSeqNode> *root }
 
+// Note: We need to use regular pointers here, because otherwise we can't easily
+// put them in a union. This makes the actual parser code a bit dense/ugly, but
+// the alternative is to not use shared pointers at all.
 %union {
     ASTTopNode *top;
     ASTTopSeqNode *top_seq;
@@ -51,7 +56,7 @@ void yyerror(ASTTopSeqNode **root, const char *str) {
     ASTExpNode *exp;
     ASTExpSeqNode *exp_seq;
     ASTTypeNode *type;
-    ASTArg *arg;
+    ASTArgNode *arg;
     ASTArgSeqNode *arg_seq;
     int number;
     char *string;
@@ -103,17 +108,17 @@ top:
   ;
 
 top_list:
-    /* empty */                       { $$ = NULL; }
-  | top top_list                      { $$ = new ASTTopSeqNode($1, $2); }
+    /* empty */                       { $$ = nullptr; }
+  | top top_list                      { $$ = new ASTTopSeqNode(std::shared_ptr<ASTTopNode>($1), std::shared_ptr<ASTTopSeqNode>($2)); }
   ;
 
 program:
-    top_list                          { *root = $1; }
+    top_list                          { *root = std::shared_ptr<ASTTopSeqNode>($1); }
   ;
 
 stmt_list:
-    /* empty */                       { $$ = NULL; }
-  | stmt stmt_list                    { $$ = new ASTStmtSeqNode($1, $2); }
+    /* empty */                       { $$ = nullptr; }
+  | stmt stmt_list                    { $$ = new ASTStmtSeqNode(std::shared_ptr<ASTStmtNode>($1), std::shared_ptr<ASTStmtSeqNode>($2)); }
   ;
 
 exp:
@@ -121,29 +126,29 @@ exp:
   | TRUE                              { $$ = new ASTBooleanExp(true); }
   | FALSE                             { $$ = new ASTBooleanExp(false); }
   | IDENT                             { $$ = new ASTIdentifierExp(std::string($1)); free($1); }
-  | exp PLUS exp                      { $$ = new ASTBinopExp(ASTBinopExp::ADD, $1, $3); }
-  | exp MINUS exp                     { $$ = new ASTBinopExp(ASTBinopExp::SUB, $1, $3); }
-  | exp DIV exp                       { $$ = new ASTBinopExp(ASTBinopExp::DIV, $1, $3); }
-  | exp TIMES exp                     { $$ = new ASTBinopExp(ASTBinopExp::MUL, $1, $3); }
-  | exp MOD exp                       { $$ = new ASTBinopExp(ASTBinopExp::MOD, $1, $3); }
-  | exp SHL exp                       { $$ = new ASTBinopExp(ASTBinopExp::SHL, $1, $3); }
-  | exp SHR exp                       { $$ = new ASTBinopExp(ASTBinopExp::SHR, $1, $3); }
-  | exp AND exp                       { $$ = new ASTBinopExp(ASTBinopExp::AND, $1, $3); }
-  | exp OR exp                        { $$ = new ASTBinopExp(ASTBinopExp::OR, $1, $3); }
-  | exp BAND exp                      { $$ = new ASTBinopExp(ASTBinopExp::BAND, $1, $3); }
-  | exp BOR exp                       { $$ = new ASTBinopExp(ASTBinopExp::BOR, $1, $3); }
-  | exp BXOR exp                      { $$ = new ASTBinopExp(ASTBinopExp::BXOR, $1, $3); }
-  | exp EQ exp                        { $$ = new ASTBinopExp(ASTBinopExp::EQ, $1, $3); }
-  | exp NEQ exp                       { $$ = new ASTBinopExp(ASTBinopExp::NEQ, $1, $3); }
-  | exp GT exp                        { $$ = new ASTBinopExp(ASTBinopExp::GT, $1, $3); }
-  | exp LT exp                        { $$ = new ASTBinopExp(ASTBinopExp::LT, $1, $3); }
-  | exp GEQ exp                       { $$ = new ASTBinopExp(ASTBinopExp::GEQ, $1, $3); }
-  | exp LEQ exp                       { $$ = new ASTBinopExp(ASTBinopExp::LEQ, $1, $3); }
-  | NOT exp                           { $$ = new ASTUnopExp(ASTUnopExp::NOT, $2); }
-  | BNOT exp                          { $$ = new ASTUnopExp(ASTUnopExp::BNOT, $2); }
-  | MINUS exp %prec UMINUS            { $$ = new ASTUnopExp(ASTUnopExp::NEG, $2); }
+  | exp PLUS exp                      { $$ = new ASTBinopExp(ASTBinopExp::ADD, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp MINUS exp                     { $$ = new ASTBinopExp(ASTBinopExp::SUB, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp DIV exp                       { $$ = new ASTBinopExp(ASTBinopExp::DIV, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp TIMES exp                     { $$ = new ASTBinopExp(ASTBinopExp::MUL, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp MOD exp                       { $$ = new ASTBinopExp(ASTBinopExp::MOD, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp SHL exp                       { $$ = new ASTBinopExp(ASTBinopExp::SHL, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp SHR exp                       { $$ = new ASTBinopExp(ASTBinopExp::SHR, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp AND exp                       { $$ = new ASTBinopExp(ASTBinopExp::AND, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp OR exp                        { $$ = new ASTBinopExp(ASTBinopExp::OR, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp BAND exp                      { $$ = new ASTBinopExp(ASTBinopExp::BAND, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp BOR exp                       { $$ = new ASTBinopExp(ASTBinopExp::BOR, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp BXOR exp                      { $$ = new ASTBinopExp(ASTBinopExp::BXOR, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp EQ exp                        { $$ = new ASTBinopExp(ASTBinopExp::EQ, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp NEQ exp                       { $$ = new ASTBinopExp(ASTBinopExp::NEQ, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp GT exp                        { $$ = new ASTBinopExp(ASTBinopExp::GT, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp LT exp                        { $$ = new ASTBinopExp(ASTBinopExp::LT, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp GEQ exp                       { $$ = new ASTBinopExp(ASTBinopExp::GEQ, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp LEQ exp                       { $$ = new ASTBinopExp(ASTBinopExp::LEQ, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | NOT exp                           { $$ = new ASTUnopExp(ASTUnopExp::NOT, std::shared_ptr<ASTExpNode>($2)); }
+  | BNOT exp                          { $$ = new ASTUnopExp(ASTUnopExp::BNOT, std::shared_ptr<ASTExpNode>($2)); }
+  | MINUS exp %prec UMINUS            { $$ = new ASTUnopExp(ASTUnopExp::NEG, std::shared_ptr<ASTExpNode>($2)); }
   | LPAREN exp RPAREN                 { $$ = $2; }
-  | IDENT LPAREN arg_list RPAREN      { $$ = new ASTCallExp($1, $3); }
+  | IDENT LPAREN arg_list RPAREN      { $$ = new ASTCallExp($1, std::shared_ptr<ASTExpSeqNode>($3)); }
   ;
 
 type:
@@ -153,51 +158,51 @@ type:
   ;
 
 simp:
-    type IDENT                        { $$ = new ASTVarDeclStmt($1, std::string($2), NULL); free($2); }
-  | type IDENT ASSIGN exp             { $$ = new ASTVarDeclStmt($1, std::string($2), $4); free($2); }
-  | IDENT ASSIGN exp                  { $$ = new ASTVarDefnStmt(std::string($1), $3); free($1); } // TODO free
-  | exp                               { $$ = new ASTExprStmt($1); }
+    type IDENT                        { $$ = new ASTVarDeclStmt(std::shared_ptr<ASTTypeNode>($1), std::string($2), nullptr); free($2); }
+  | type IDENT ASSIGN exp             { $$ = new ASTVarDeclStmt(std::shared_ptr<ASTTypeNode>($1), std::string($2), std::shared_ptr<ASTExpNode>($4)); free($2); }
+  | IDENT ASSIGN exp                  { $$ = new ASTVarDefnStmt(std::string($1), std::shared_ptr<ASTExpNode>($3)); free($1); } // TODO free
+  | exp                               { $$ = new ASTExprStmt(std::shared_ptr<ASTExpNode>($1)); }
   ;
 
 stmt:
     simp SEMI                         { $$ = $1; }
-  | RETURN exp SEMI                   { $$ = new ASTReturnStmt($2); }
-  | RETURN SEMI                       { $$ = new ASTReturnStmt(NULL); }
-  | LBRACE stmt_list RBRACE           { $$ = new ASTScopeStmt($2); }
-  | IF LPAREN exp RPAREN stmt elseopt { $$ = new ASTIfStmt($3, new ASTStmtSeqNode($5, NULL), $6); }
-  | WHILE LPAREN exp RPAREN stmt      { $$ = new ASTWhileStmt($3, new ASTStmtSeqNode($5, NULL))}
+  | RETURN exp SEMI                   { $$ = new ASTReturnStmt(std::shared_ptr<ASTExpNode>($2)); }
+  | RETURN SEMI                       { $$ = new ASTReturnStmt(nullptr); }
+  | LBRACE stmt_list RBRACE           { $$ = new ASTScopeStmt(std::shared_ptr<ASTStmtSeqNode>($2)); }
+  | IF LPAREN exp RPAREN stmt elseopt { $$ = new ASTIfStmt(std::shared_ptr<ASTExpNode>($3), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($5), nullptr), std::shared_ptr<ASTStmtSeqNode>($6)); }
+  | WHILE LPAREN exp RPAREN stmt      { $$ = new ASTWhileStmt(std::shared_ptr<ASTExpNode>($3), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($5), nullptr)) }
   ;
 
 elseopt:
-    /* empty */                       { $$ = NULL; }
-  | ELSE stmt                         { $$ = new ASTStmtSeqNode($2, NULL); }
+    /* empty */                       { $$ = nullptr; }
+  | ELSE stmt                         { $$ = new ASTStmtSeqNode(std::shared_ptr<ASTStmtNode>($2), nullptr); }
   ;
 
 param:
-    type IDENT                        { $$ = new ASTArg($1, std::string($2)); free($2); }
+    type IDENT                        { $$ = new ASTArgNode(std::shared_ptr<ASTTypeNode>($1), std::string($2)); free($2); }
   ;
 
 param_list_follow:
-    /* empty */                       { $$ = NULL; }
-  | COMMA param param_list_follow     { $$ = new ASTArgSeqNode($2, $3); }
+    /* empty */                       { $$ = nullptr; }
+  | COMMA param param_list_follow     { $$ = new ASTArgSeqNode(std::shared_ptr<ASTArgNode>($2), std::shared_ptr<ASTArgSeqNode>($3)); }
   ;
 
 param_list:
-    /* empty */                       { $$ = NULL; }
-  | param param_list_follow           { $$ = new ASTArgSeqNode($1, $2); }
+    /* empty */                       { $$ = nullptr; }
+  | param param_list_follow           { $$ = new ASTArgSeqNode(std::shared_ptr<ASTArgNode>($1), std::shared_ptr<ASTArgSeqNode>($2)); }
   ;
 
 fundefn:
     type IDENT LPAREN param_list RPAREN LBRACE stmt_list RBRACE
-    { $$ = new ASTFunDefnTop($2, new ASTFunType($1, $4), $7); }
+    { $$ = new ASTFunDefnTop($2, std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($1), std::shared_ptr<ASTArgSeqNode>($4)), std::shared_ptr<ASTStmtSeqNode>($7)); }
   ;
 
 arg_list_follow:
-    /* empty */                       { $$ = NULL; }
-  | COMMA exp arg_list_follow         { $$ = new ASTExpSeqNode($2, $3); }
+    /* empty */                       { $$ = nullptr; }
+  | COMMA exp arg_list_follow         { $$ = new ASTExpSeqNode(std::shared_ptr<ASTExpNode>($2), std::shared_ptr<ASTExpSeqNode>($3)); }
   ;
 
 arg_list:
-    /* empty */                       { $$ = NULL; }
-  | exp arg_list_follow               { $$ = new ASTExpSeqNode($1, $2); }
+    /* empty */                       { $$ = nullptr; }
+  | exp arg_list_follow               { $$ = new ASTExpSeqNode(std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpSeqNode>($2)); }
   ;

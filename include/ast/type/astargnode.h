@@ -1,13 +1,13 @@
 /**
- * @file astarg.h
+ * @file astargnode.h
  *
  * @brief Abstract syntax function argument node
  *
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#ifndef __ASTARG_H
-#define __ASTARG_H
+#ifndef __ASTARGNODE_H
+#define __ASTARGNODE_H
 
 #include <ast/type/asttypenode.h>
 #include <ast/astseqnode.h>
@@ -18,10 +18,10 @@
  * and definitions, but it fits best here as it is especially not an expression
  * or statement.
  */
-struct ASTArg : public ASTNode {
+struct ASTArgNode : public ASTNode {
 private:
 
-    ASTTypeNode *type;
+    std::shared_ptr<ASTTypeNode> type;
 
     // Do not rely on the name, it is only used for parsing function definitions
     std::string name;
@@ -34,12 +34,12 @@ public:
      * @param[in] type Argument type
      * @param[in] name Argument name
      */
-    ASTArg(ASTTypeNode *type, std::string name);
+    ASTArgNode(std::shared_ptr<ASTTypeNode> type, std::string name);
 
     /**
      * @brief Get argument type
      */
-    ASTTypeNode *getType();
+    std::shared_ptr<ASTTypeNode> getType();
 
     /**
      * @brief Get argument name
@@ -54,8 +54,8 @@ public:
 };
 
 /**
- * @brief Sequence of ASTArg nodes
+ * @brief Sequence of ASTArgNode nodes
  */
-typedef ASTSeqNode<ASTArg> ASTArgSeqNode;
+typedef ASTSeqNode<ASTArgNode> ASTArgSeqNode;
 
 #endif

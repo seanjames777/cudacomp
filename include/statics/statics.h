@@ -24,9 +24,10 @@ namespace Statics {
  * function signatures, etc.
  *
  * @param[in]  node   Top-level linked list output by parser
- * @param[out] module Output module information
+ *
+ * @return Output module information
  */
-void run(ASTTopSeqNode *node, ModuleInfo *module);
+std::shared_ptr<ModuleInfo> run(std::shared_ptr<ASTTopSeqNode> node);
 
 }
 

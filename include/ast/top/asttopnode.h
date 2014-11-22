@@ -17,6 +17,13 @@
  * such as functions, global variables, types, structs, etc.
  */
 class ASTTopNode : public ASTNode {
+public:
+
+    /**
+     * @brief Constructor
+     */
+    ASTTopNode();
+
 };
 
 /**

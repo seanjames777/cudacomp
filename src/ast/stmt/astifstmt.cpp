@@ -6,7 +6,7 @@
 
 #include <ast/stmt/astifstmt.h>
 
-ASTIfStmt::ASTIfStmt(ASTExpNode *cond, ASTStmtSeqNode *trueStmt, ASTStmtSeqNode *falseStmt)
+ASTIfStmt::ASTIfStmt(std::shared_ptr<ASTExpNode> cond, std::shared_ptr<ASTStmtSeqNode> trueStmt, std::shared_ptr<ASTStmtSeqNode> falseStmt)
     : cond(cond),
       trueStmt(trueStmt),
       falseStmt(falseStmt)
@@ -14,22 +14,17 @@ ASTIfStmt::ASTIfStmt(ASTExpNode *cond, ASTStmtSeqNode *trueStmt, ASTStmtSeqNode 
 }
 
 ASTIfStmt::~ASTIfStmt() {
-    delete cond;
-    delete trueStmt;
-
-    if (falseStmt)
-        delete falseStmt;
 }
 
-ASTExpNode *ASTIfStmt::getCond() {
+std::shared_ptr<ASTExpNode> ASTIfStmt::getCond() {
     return cond;
 }
 
-ASTStmtSeqNode *ASTIfStmt::getTrueStmt() {
+std::shared_ptr<ASTStmtSeqNode> ASTIfStmt::getTrueStmt() {
     return trueStmt;
 }
 
-ASTStmtSeqNode *ASTIfStmt::getFalseStmt() {
+std::shared_ptr<ASTStmtSeqNode> ASTIfStmt::getFalseStmt() {
     return falseStmt;
 }
 

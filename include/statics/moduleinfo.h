@@ -1,8 +1,7 @@
 /**
  * @file moduleinfo.h
  *
- * @brief Information about a module, including function signatures, type
- * definitions, etc.
+ * @brief Information about a module
  *
  * @author Sean James <seanjames777@gmail.com>
  */
@@ -13,18 +12,35 @@
 #include <statics/symboltable.h>
 #include <statics/functioninfo.h>
 
+/**
+ * @brief Packages all of the information known about a module. A module contains
+ * global variables, functions, struct declarations, type definitions, etc.
+ */
 class ModuleInfo {
 private:
 
-    SymbolTable<FunctionInfo *> functions;
+    SymbolTable<std::shared_ptr<FunctionInfo>> functions;
 
 public:
 
+    /**
+     * @brief Constructor
+     */
     ModuleInfo();
 
-    void addFunction(std::string id, FunctionInfo *function);
+    /**
+     * @brief Add a function to the module
+     *
+     * @param[in] function Function information
+     */
+    void addFunction(std::shared_ptr<FunctionInfo> function);
 
-    FunctionInfo *getFunction(std::string id);
+    /**
+     * @brief Get information about a function
+     *
+     * @param[in] id Function name
+     */
+    std::shared_ptr<FunctionInfo> getFunction(std::string id);
 
 };
 

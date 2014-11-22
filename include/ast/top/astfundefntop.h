@@ -11,7 +11,7 @@
 
 #include <ast/top/asttopnode.h>
 #include <ast/stmt/aststmtnode.h>
-#include <ast/type/astarg.h>
+#include <ast/type/astargnode.h>
 #include <ast/type/astfuntype.h>
 
 /**
@@ -21,8 +21,8 @@ class ASTFunDefnTop : public ASTTopNode {
 private:
 
     std::string name;
-    ASTFunType *sig;
-    ASTStmtSeqNode *body;
+    std::shared_ptr<ASTFunType> sig;
+    std::shared_ptr<ASTStmtSeqNode> body;
 
 public:
 
@@ -33,7 +33,7 @@ public:
      * @param[in] sig  Function signature
      * @param[in] body Function body statement sequence
      */
-    ASTFunDefnTop(std::string name, ASTFunType *sig, ASTStmtSeqNode *body);
+    ASTFunDefnTop(std::string name, std::shared_ptr<ASTFunType> sig, std::shared_ptr<ASTStmtSeqNode> body);
 
     /**
      * @brief Destructor
@@ -48,17 +48,17 @@ public:
     /**
      * @brief Get function type/signature
      */
-    ASTFunType *getSignature();
+    std::shared_ptr<ASTFunType> getSignature();
 
     /**
      * @brief Get function body statement sequence
      */
-    ASTStmtSeqNode *getBody();
+    std::shared_ptr<ASTStmtSeqNode> getBody();
 
     /**
      * @brief Set the function body statement sequence
      */
-    void setBody(ASTStmtSeqNode *body);
+    void setBody(std::shared_ptr<ASTStmtSeqNode> body);
 
     /**
      * @copydoc ASTNode::print()

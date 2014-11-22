@@ -6,20 +6,20 @@
 
 #include <ast/type/astvoidtype.h>
 
-ASTVoidType *ASTVoidType::instance = NULL;
+std::shared_ptr<ASTVoidType> ASTVoidType::instance = nullptr;
 
 ASTVoidType::ASTVoidType() {
 }
 
-ASTVoidType *ASTVoidType::get() {
+std::shared_ptr<ASTVoidType> ASTVoidType::get() {
     if (!instance)
-        instance = new ASTVoidType();
+        instance = std::make_shared<ASTVoidType>();
 
     return instance;
 }
 
-bool ASTVoidType::equal(ASTTypeNode *other) {
-    return (other != NULL) && (dynamic_cast<ASTVoidType *>(other) != NULL);
+bool ASTVoidType::equal(std::shared_ptr<ASTTypeNode> other) {
+    return (other != nullptr) && (std::dynamic_pointer_cast<ASTVoidType>(other) != nullptr);
 }
 
 void ASTVoidType::print(std::ostream & ss) {

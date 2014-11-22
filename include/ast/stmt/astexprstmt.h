@@ -20,7 +20,7 @@
 class ASTExprStmt : public ASTStmtNode {
 private:
 
-    ASTExpNode *exp;
+    std::shared_ptr<ASTExpNode> exp;
 
 public:
 
@@ -29,7 +29,7 @@ public:
      *
      * @param[in] exp Expression to evaluate
      */
-    ASTExprStmt(ASTExpNode *exp);
+    ASTExprStmt(std::shared_ptr<ASTExpNode> exp);
 
     /**
      * @brief Destructor
@@ -39,7 +39,7 @@ public:
     /**
      * @brief Get expression to evaluate
      */
-    ASTExpNode *getExp();
+    std::shared_ptr<ASTExpNode> getExp();
 
     /**
      * @copydoc ASTNode::print()
