@@ -18,12 +18,12 @@
 #include <ast/stmt/astscopestmt.h>
 #include <ast/stmt/astifstmt.h>
 #include <ast/expr/astbooleanexp.h>
-#include <ast/top/astfundefntop.h>
+#include <ast/decl/astfundecl.h>
 #include <ast/expr/astcallexp.h>
 #include <ast/type/astvoidtype.h>
 #include <ast/type/astptrtype.h>
 #include <ast/stmt/astexprstmt.h>
-#include <ast/top/asttypedefntop.h>
+#include <ast/decl/asttypedecl.h>
 
 namespace Statics {
 
@@ -339,7 +339,7 @@ void typecheck_stmt(
 
 void typecheck_tops(
     std::shared_ptr<ModuleInfo> mod,
-    std::shared_ptr<ASTTopSeqNode> seq_node)
+    std::shared_ptr<ASTDeclSeqNode> seq_node)
 {
     while (seq_node != nullptr) {
         typecheck_top(mod, seq_node->getHead());
@@ -349,9 +349,9 @@ void typecheck_tops(
 
 void typecheck_top(
     std::shared_ptr<ModuleInfo> mod,
-    std::shared_ptr<ASTTopNode> node)
+    std::shared_ptr<ASTDeclNode> node)
 {
-    if (std::shared_ptr<ASTFunDefnTop> funDefn = std::dynamic_pointer_cast<ASTFunDefnTop>(node)) {
+    if (std::shared_ptr<ASTFunDecl> funDefn = std::dynamic_pointer_cast<ASTFunDecl>(node)) {
         // Allocate space for information about this function
         std::shared_ptr<FunctionInfo> funInfo = std::make_shared<FunctionInfo>(funDefn->getName(), funDefn->getSignature());
         mod->addFunction(funInfo);
@@ -374,7 +374,7 @@ void typecheck_top(
         // Check the function body, building the local symbol table in the process
         typecheck_stmts(mod, funInfo, decl, def, funDefn->getBody());
     }
-    else if (std::shared_ptr<ASTTypeDefnTop> typeDefn = std::dynamic_pointer_cast<ASTTypeDefnTop>(node)) {
+    else if (std::shared_ptr<ASTTypeDecl> typeDefn = std::dynamic_pointer_cast<ASTTypeDecl>(node)) {
         // Skip it
     }
     else

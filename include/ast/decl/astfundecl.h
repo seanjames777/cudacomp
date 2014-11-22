@@ -1,23 +1,25 @@
 /**
- * @file astfundefntop.h
+ * @file astfundecl.h
  *
- * @brief Function definition top-level abstract syntax tree node
+ * @brief Function declaration/definition top-level abstract syntax tree node
  *
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#ifndef __ASTFUNDEFNTOP_H
-#define __ASTFUNDEFNTOP_H
+#ifndef __ASTFUNDECL_H
+#define __ASTFUNDECL_H
 
-#include <ast/top/asttopnode.h>
+#include <ast/decl/astdeclnode.h>
 #include <ast/stmt/aststmtnode.h>
 #include <ast/type/astargnode.h>
 #include <ast/type/astfuntype.h>
 
 /**
- * @brief Function definition top-level AST node
+ * @brief Function declaration/definition top-level AST node
+ *
+ * TODO: Make body optional to support forward declarations.
  */
-class ASTFunDefnTop : public ASTTopNode {
+class ASTFunDecl : public ASTDeclNode {
 private:
 
     std::string name;
@@ -33,12 +35,12 @@ public:
      * @param[in] sig  Function signature
      * @param[in] body Function body statement sequence
      */
-    ASTFunDefnTop(std::string name, std::shared_ptr<ASTFunType> sig, std::shared_ptr<ASTStmtSeqNode> body);
+    ASTFunDecl(std::string name, std::shared_ptr<ASTFunType> sig, std::shared_ptr<ASTStmtSeqNode> body);
 
     /**
      * @brief Destructor
      */
-    ~ASTFunDefnTop();
+    ~ASTFunDecl();
 
     /**
      * @brief Get function name

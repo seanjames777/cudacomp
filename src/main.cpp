@@ -33,7 +33,7 @@ void parseArgs(int argc, char *argv[]) {
 int main(int argc, char *argv[]) {
     parseArgs(argc, argv);
 
-    std::shared_ptr<ASTTopSeqNode> node;
+    std::shared_ptr<ASTDeclSeqNode> node;
 
     try {
         node = Parser::parse(args.in_file);

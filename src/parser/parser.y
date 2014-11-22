@@ -16,9 +16,9 @@
 #include <ast/stmt/aststmtnode.h>
 #include <ast/stmt/astvardeclstmt.h>
 #include <ast/stmt/astvardefnstmt.h>
-#include <ast/top/astfundefntop.h>
-#include <ast/top/asttopnode.h>
-#include <ast/top/asttypedefntop.h>
+#include <ast/decl/astfundecl.h>
+#include <ast/decl/astdeclnode.h>
+#include <ast/decl/asttypedecl.h>
 #include <ast/type/astargnode.h>
 #include <ast/type/astbooleantype.h>
 #include <ast/type/astfuntype.h>
@@ -37,7 +37,7 @@ int yywrap() {
     return 1;
 }
 
-void yyerror(std::shared_ptr<ASTTopSeqNode> *root, const char *str) {
+void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
     throw new Parser::ParseException(std::string(str));
 }
 
@@ -47,14 +47,14 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 
 // Note: We can't return anything, so we need to use a pointer to a shared
 // pointer. TODO: Could use a reference, but it's not much of an improvement.
-%parse-param { std::shared_ptr<ASTTopSeqNode> *root }
+%parse-param { std::shared_ptr<ASTDeclSeqNode> *root }
 
 // Note: We need to use regular pointers here, because otherwise we can't easily
 // put them in a union. This makes the actual parser code a bit dense/ugly, but
 // the alternative is to not use shared pointers at all.
 %union {
-    ASTTopNode *top;
-    ASTTopSeqNode *top_seq;
+    ASTDeclNode *top;
+    ASTDeclSeqNode *top_seq;
     ASTStmtNode *stmt;
     ASTStmtSeqNode *stmt_seq;
     ASTExpNode *exp;
@@ -114,11 +114,11 @@ top:
 
 top_list:
     /* empty */                       { $$ = nullptr; }
-  | top top_list                      { $$ = new ASTTopSeqNode(std::shared_ptr<ASTTopNode>($1), std::shared_ptr<ASTTopSeqNode>($2)); }
+  | top top_list                      { $$ = new ASTDeclSeqNode(std::shared_ptr<ASTDeclNode>($1), std::shared_ptr<ASTDeclSeqNode>($2)); }
   ;
 
 program:
-    top_list                          { *root = std::shared_ptr<ASTTopSeqNode>($1); }
+    top_list                          { *root = std::shared_ptr<ASTDeclSeqNode>($1); }
   ;
 
 stmt_list:
@@ -201,7 +201,7 @@ typedefn:
     TYPEDEF type IDENT SEMI
     {
         std::string id = std::string($3);
-        $$ = new ASTTypeDefnTop(id, std::shared_ptr<ASTTypeNode>($2));
+        $$ = new ASTTypeDecl(id, std::shared_ptr<ASTTypeNode>($2));
         typedefs[id] = $2;
         free($3);
     }
@@ -209,7 +209,7 @@ typedefn:
 
 fundefn:
     type IDENT LPAREN param_list RPAREN LBRACE stmt_list RBRACE
-    { $$ = new ASTFunDefnTop($2, std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($1), std::shared_ptr<ASTArgSeqNode>($4)), std::shared_ptr<ASTStmtSeqNode>($7)); }
+    { $$ = new ASTFunDecl($2, std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($1), std::shared_ptr<ASTArgSeqNode>($4)), std::shared_ptr<ASTStmtSeqNode>($7)); }
   ;
 
 arg_list_follow:

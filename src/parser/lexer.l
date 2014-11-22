@@ -17,8 +17,8 @@
 #include <ast/stmt/astscopestmt.h>
 #include <ast/expr/astunopexp.h>
 #include <ast/stmt/astifstmt.h>
-#include <ast/top/asttopnode.h>
-#include <ast/top/astfundefntop.h>
+#include <ast/decl/astdeclnode.h>
+#include <ast/decl/astfundecl.h>
 #include <ast/type/astfuntype.h>
 #include <ast/type/astargnode.h>
 

@@ -13,7 +13,7 @@
 #include <statics/functioninfo.h>
 #include <ast/stmt/aststmtnode.h>
 #include <ast/expr/astexpnode.h>
-#include <ast/top/asttopnode.h>
+#include <ast/decl/astdeclnode.h>
 #include <ast/type/asttypenode.h>
 #include <stdexcept>
 
@@ -76,11 +76,11 @@ namespace Statics {
 
     void typecheck_tops(
         std::shared_ptr<ModuleInfo> mod,
-        std::shared_ptr<ASTTopSeqNode> node);
+        std::shared_ptr<ASTDeclSeqNode> node);
 
     void typecheck_top(
         std::shared_ptr<ModuleInfo> mod,
-        std::shared_ptr<ASTTopNode> node);
+        std::shared_ptr<ASTDeclNode> node);
 
 };
 

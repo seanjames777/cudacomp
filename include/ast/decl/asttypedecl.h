@@ -6,18 +6,18 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#ifndef __ASTTYPEDEFNTOP_H
-#define __ASTTYPEDEFNTOP_H
+#ifndef __ASTTYPEDECL_H
+#define __ASTTYPEDECL_H
 
-#include <ast/top/asttopnode.h>
+#include <ast/decl/astdeclnode.h>
 #include <ast/stmt/aststmtnode.h>
 #include <ast/type/astargnode.h>
 #include <ast/type/astfuntype.h>
 
 /**
- * @brief Type definition top-level AST node
+ * @brief Type declaration top-level AST node
  */
-class ASTTypeDefnTop : public ASTTopNode {
+class ASTTypeDecl : public ASTDeclNode {
 private:
 
     std::string name;
@@ -31,12 +31,12 @@ public:
      * @param[in] name Type name
      * @param[in] type Actual type
      */
-    ASTTypeDefnTop(std::string name, std::shared_ptr<ASTTypeNode> type);
+    ASTTypeDecl(std::string name, std::shared_ptr<ASTTypeNode> type);
 
     /**
      * @brief Destructor
      */
-    ~ASTTypeDefnTop();
+    ~ASTTypeDecl();
 
     /**
      * @brief Get type name

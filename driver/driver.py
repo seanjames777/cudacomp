@@ -72,6 +72,7 @@ tests = [
     (SOURCE_DIR + "tests/testTypeDef3.cc", 5),
     (SOURCE_DIR + "tests/testTypeDef4.cc", "parse"),
     (SOURCE_DIR + "tests/testTypeDef5.cc", "parse"),
+    (SOURCE_DIR + "tests/testTypeDef6.cc", 5),
 ]
 
 # TODO: actually test type checking...

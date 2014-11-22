@@ -10,7 +10,7 @@
 #define __PARSE_H
 
 #include <defs.h>
-#include <ast/top/asttopnode.h>
+#include <ast/decl/astdeclnode.h>
 
 namespace Parser {
 
@@ -22,7 +22,7 @@ class ParseException : public std::exception {
         virtual const char *what() const _NOEXCEPT override { return msg.c_str(); }
     };
 
-std::shared_ptr<ASTTopSeqNode> parse(const char *file);
+std::shared_ptr<ASTDeclSeqNode> parse(const char *file);
 
 };
 
