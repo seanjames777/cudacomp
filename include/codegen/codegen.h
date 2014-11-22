@@ -1,7 +1,7 @@
 /**
  * @file codegen.h
  *
- * @brief Code generation
+ * @brief Code generator
  *
  * @author Sean James <seanjames777@gmail.com>
  */
@@ -17,18 +17,30 @@
 #include <ast/top/asttopnode.h>
 #include <ast/top/astfundefntop.h>
 
+/**
+ * @defgroup CodeGen Code Generator
+ *
+ * @brief The code generator consumes ASTs to produce LLVM IR
+ *
+ * @{
+ */
+
 namespace Codegen {
 
-    Value *codegen_exp(CodegenCtx *ctx, std::shared_ptr<ASTExpNode> node);
+    Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node);
 
-    bool codegen_stmts(CodegenCtx *ctx, std::shared_ptr<ASTStmtSeqNode> nodes);
+    bool codegen_stmts(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtSeqNode> nodes);
 
-    bool codegen_stmt(CodegenCtx *ctx, std::shared_ptr<ASTStmtNode> node);
+    bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> node);
 
-    void codegen_top(CodegenCtx *ctx, std::shared_ptr<ASTTopNode> node);
+    void codegen_top(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTTopNode> node);
 
     void codegen_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTopSeqNode> nodes, bool emitDevice, std::ostream & out);
 
 }
+
+/**
+ * @}
+ */
 
 #endif

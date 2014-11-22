@@ -25,7 +25,7 @@
 
 namespace Codegen {
 
-Value *codegen_exp(CodegenCtx *ctx, std::shared_ptr<ASTExpNode> node) {
+Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
     std::shared_ptr<IRBuilder<>> builder = ctx->getBuilder();
 
     // Integer constant
@@ -119,7 +119,7 @@ Value *codegen_exp(CodegenCtx *ctx, std::shared_ptr<ASTExpNode> node) {
     return nullptr;
 }
 
-bool codegen_stmts(CodegenCtx *ctx, std::shared_ptr<ASTStmtSeqNode> seq_node) {
+bool codegen_stmts(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtSeqNode> seq_node) {
     while (seq_node != nullptr) {
         if (!codegen_stmt(ctx, seq_node->getHead()))
             return false;
@@ -129,7 +129,7 @@ bool codegen_stmts(CodegenCtx *ctx, std::shared_ptr<ASTStmtSeqNode> seq_node) {
     return true;
 }
 
-bool codegen_stmt(CodegenCtx *ctx, std::shared_ptr<ASTStmtNode> head) {
+bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> head) {
     std::shared_ptr<IRBuilder<>> builder = ctx->getBuilder();
 
     // Return instruction
@@ -232,7 +232,7 @@ bool codegen_stmt(CodegenCtx *ctx, std::shared_ptr<ASTStmtNode> head) {
 }
 
 void codegen_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTopSeqNode> nodes, bool emitDevice, std::ostream & out) {
-    CodegenCtx ctx(emitDevice, module);
+    std::shared_ptr<CodegenCtx> ctx = std::make_shared<CodegenCtx>(emitDevice, module);
 
     std::shared_ptr<ASTTopSeqNode> node = nodes;
 
@@ -242,7 +242,7 @@ void codegen_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTopSeqN
         // Create LLVM functions for each function
         if (std::shared_ptr<ASTFunDefnTop> funDefn = std::dynamic_pointer_cast<ASTFunDefnTop>(top_node)) {
             std::shared_ptr<FunctionInfo> funInfo = module->getFunction(funDefn->getName());
-            ctx.createFunction(funInfo);
+            ctx->createFunction(funInfo);
         }
 
         node = node->getTail();
@@ -251,14 +251,14 @@ void codegen_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTopSeqN
     node = nodes;
 
     while (node != nullptr) {
-        codegen_top(&ctx, node->getHead());
+        codegen_top(ctx, node->getHead());
         node = node->getTail();
     }
 
-    ctx.emit(out);
+    ctx->emit(out);
 }
 
-void codegen_top(CodegenCtx *ctx, std::shared_ptr<ASTTopNode> node) {
+void codegen_top(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTTopNode> node) {
     if (std::shared_ptr<ASTFunDefnTop> funDefn = std::dynamic_pointer_cast<ASTFunDefnTop>(node)) {
         std::shared_ptr<FunctionInfo> func = ctx->getModuleInfo()->getFunction(funDefn->getName());
 
