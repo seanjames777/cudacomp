@@ -33,10 +33,16 @@ void parseArgs(int argc, char *argv[]) {
 int main(int argc, char *argv[]) {
     parseArgs(argc, argv);
 
-    std::shared_ptr<ASTTopSeqNode> node = Parser::parse(args.in_file);
+    std::shared_ptr<ASTTopSeqNode> node;
 
-    if (!node)
-        return -1;
+    try {
+        node = Parser::parse(args.in_file);
+    }
+    catch (Parser::ParseException *except) {
+        std::cout << "parse" << std::endl;
+        std::cout << except->what() << std::endl;
+        return -2;
+    }
 
     std::shared_ptr<ModuleInfo> moduleInfo;
 

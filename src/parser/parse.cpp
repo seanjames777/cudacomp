@@ -11,6 +11,11 @@ extern FILE *yyin;
 
 namespace Parser {
 
+ParseException::ParseException(std::string msg)
+    : msg(msg)
+{
+}
+
 std::shared_ptr<ASTTopSeqNode> parse(const char *file) {
     FILE *fp = nullptr;
 

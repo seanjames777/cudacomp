@@ -23,6 +23,7 @@
 #include <ast/type/astvoidtype.h>
 #include <ast/type/astptrtype.h>
 #include <ast/stmt/astexprstmt.h>
+#include <ast/top/asttypedefntop.h>
 
 namespace Statics {
 
@@ -372,6 +373,9 @@ void typecheck_top(
 
         // Check the function body, building the local symbol table in the process
         typecheck_stmts(mod, funInfo, decl, def, funDefn->getBody());
+    }
+    else if (std::shared_ptr<ASTTypeDefnTop> typeDefn = std::dynamic_pointer_cast<ASTTypeDefnTop>(node)) {
+        // Skip it
     }
     else
         throw new ASTMalformedException();

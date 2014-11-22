@@ -37,6 +37,11 @@ public:
     std::shared_ptr<ASTTypeNode> getReturnType();
 
     /**
+     * @brief Set return type
+     */
+    void setReturnType(std::shared_ptr<ASTTypeNode> returnType);
+
+    /**
      * @brief Get argument name and types sequence
      */
     std::shared_ptr<ASTArgSeqNode> getArgs();

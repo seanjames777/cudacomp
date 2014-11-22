@@ -14,6 +14,7 @@
 #include <statics/moduleinfo.h>
 #include <statics/typecheck.h>
 #include <statics/returncheck.h>
+#include <statics/typeresolve.h>
 
 namespace Statics {
 

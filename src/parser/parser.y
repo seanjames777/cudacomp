@@ -1,30 +1,33 @@
 %{
 #include <iostream>
 #include <string>
-#include <ast/expr/astexpnode.h>
-#include <ast/stmt/aststmtnode.h>
-#include <ast/expr/astintegerexp.h>
-#include <ast/expr/astidentifierexp.h>
-#include <ast/expr/astbinopexp.h>
 #include <ast/astseqnode.h>
+#include <ast/expr/astbinopexp.h>
+#include <ast/expr/astbooleanexp.h>
+#include <ast/expr/astcallexp.h>
+#include <ast/expr/astexpnode.h>
+#include <ast/expr/astidentifierexp.h>
+#include <ast/expr/astintegerexp.h>
+#include <ast/expr/astunopexp.h>
+#include <ast/stmt/astexprstmt.h>
+#include <ast/stmt/astifstmt.h>
 #include <ast/stmt/astreturnstmt.h>
-#include <ast/type/asttypenode.h>
-#include <ast/type/astintegertype.h>
+#include <ast/stmt/astscopestmt.h>
+#include <ast/stmt/aststmtnode.h>
 #include <ast/stmt/astvardeclstmt.h>
 #include <ast/stmt/astvardefnstmt.h>
-#include <ast/type/astbooleantype.h>
-#include <ast/expr/astbooleanexp.h>
-#include <ast/stmt/astscopestmt.h>
-#include <ast/expr/astunopexp.h>
-#include <ast/stmt/astifstmt.h>
-#include <ast/top/asttopnode.h>
 #include <ast/top/astfundefntop.h>
-#include <ast/type/astfuntype.h>
+#include <ast/top/asttopnode.h>
+#include <ast/top/asttypedefntop.h>
 #include <ast/type/astargnode.h>
-#include <ast/expr/astcallexp.h>
-#include <ast/type/astvoidtype.h>
+#include <ast/type/astbooleantype.h>
+#include <ast/type/astfuntype.h>
+#include <ast/type/astidtype.h>
+#include <ast/type/astintegertype.h>
 #include <ast/type/astptrtype.h>
-#include <ast/stmt/astexprstmt.h>
+#include <ast/type/asttypenode.h>
+#include <ast/type/astvoidtype.h>
+#include <parser/parse.h>
 
 #define YYERROR_VERBOSE
 
@@ -35,8 +38,10 @@ int yywrap() {
 }
 
 void yyerror(std::shared_ptr<ASTTopSeqNode> *root, const char *str) {
-    fprintf(stderr, "Error: %s\n", str);
+    throw new Parser::ParseException(std::string(str));
 }
+
+std::unordered_map<std::string, ASTTypeNode *> typedefs;
 
 %}
 
@@ -63,12 +68,12 @@ void yyerror(std::shared_ptr<ASTTopSeqNode> *root, const char *str) {
 }
 
 %token <number> NUMBER
-%token <string> IDENT
+%token <string> IDENT IDTYPE
 %token <boolean> TRUE FALSE
 %token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR NOT BNOT
 %token ASSIGN SEMI COMMA
 %token INT BOOL VOID
-%token RETURN IF ELSE
+%token RETURN IF ELSE TYPEDEF
 %token LPAREN RPAREN LBRACE RBRACE
 %token EQ NEQ LEQ GEQ LT GT
 
@@ -81,7 +86,7 @@ void yyerror(std::shared_ptr<ASTTopSeqNode> *root, const char *str) {
 %type <arg_seq> param_list param_list_follow
 %type <top> top
 %type <top_seq> top_list
-%type <top> fundefn
+%type <top> fundefn typedefn
 %type <exp_seq> arg_list arg_list_follow
 
 %right ASSIGN
@@ -104,6 +109,7 @@ void yyerror(std::shared_ptr<ASTTopSeqNode> *root, const char *str) {
 
 top:
     fundefn                           { $$ = $1; }
+  | typedefn                          { $$ = $1; }
   ;
 
 top_list:
@@ -154,6 +160,7 @@ type:
     INT                               { $$ = new ASTIntegerType(); }
   | BOOL                              { $$ = new ASTBooleanType(); }
   | VOID                              { $$ = new ASTVoidType(); }
+  | IDTYPE                            { $$ = new ASTIdType(std::string($1)); free($1); }
   ;
 
 simp:
@@ -188,6 +195,16 @@ param_list_follow:
 param_list:
     /* empty */                       { $$ = nullptr; }
   | param param_list_follow           { $$ = new ASTArgSeqNode(std::shared_ptr<ASTArgNode>($1), std::shared_ptr<ASTArgSeqNode>($2)); }
+  ;
+
+typedefn:
+    TYPEDEF type IDENT SEMI
+    {
+        std::string id = std::string($3);
+        $$ = new ASTTypeDefnTop(id, std::shared_ptr<ASTTypeNode>($2));
+        typedefs[id] = $2;
+        free($3);
+    }
   ;
 
 fundefn:

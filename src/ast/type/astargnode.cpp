@@ -16,6 +16,10 @@ std::shared_ptr<ASTTypeNode> ASTArgNode::getType() {
     return type;
 }
 
+void ASTArgNode::setType(std::shared_ptr<ASTTypeNode> type) {
+    this->type = type;
+}
+
 std::string ASTArgNode::getName() {
     return name;
 }

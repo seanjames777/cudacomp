@@ -56,6 +56,11 @@ public:
     std::shared_ptr<ASTTypeNode> getType();
 
     /**
+     * @brief Set variable type
+     */
+    void setType(std::shared_ptr<ASTTypeNode> type);
+
+    /**
      * @copydoc ASTNode::print()
      */
     void print(std::ostream & ss) override;

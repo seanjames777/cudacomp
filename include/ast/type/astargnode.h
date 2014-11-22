@@ -42,6 +42,11 @@ public:
     std::shared_ptr<ASTTypeNode> getType();
 
     /**
+     * @brief Set argument type
+     */
+    void setType(std::shared_ptr<ASTTypeNode> type);
+
+    /**
      * @brief Get argument name
      */
     std::string getName();

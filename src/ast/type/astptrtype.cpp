@@ -15,6 +15,10 @@ std::shared_ptr<ASTTypeNode> ASTPtrType::getToType() {
     return toType;
 }
 
+void ASTPtrType::setToType(std::shared_ptr<ASTTypeNode> toType) {
+    this->toType = toType;
+}
+
 bool ASTPtrType::equal(std::shared_ptr<ASTTypeNode> other) {
     if (!other)
         return false;

@@ -22,6 +22,7 @@
 #include <ast/expr/astcallexp.h>
 #include <ast/type/astvoidtype.h>
 #include <ast/stmt/astexprstmt.h>
+#include <ast/top/asttypedefntop.h>
 
 namespace Codegen {
 
@@ -269,6 +270,9 @@ void codegen_top(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTTopNode> no
             ctx->markKernel(ctx->getFunction(func->getName()));
 
         ctx->finishFunction();
+    }
+    else if (std::shared_ptr<ASTTypeDefnTop> typeDefn = std::dynamic_pointer_cast<ASTTypeDefnTop>(node)) {
+        // Skip it
     }
     else
         throw new ASTMalformedException();

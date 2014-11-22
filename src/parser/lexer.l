@@ -23,6 +23,9 @@
 #include <ast/type/astargnode.h>
 
 #include "parser.hpp"
+
+extern std::unordered_map<std::string, ASTTypeNode *> typedefs;
+
 %}
 
 %%
@@ -35,9 +38,18 @@
 "true"                  { yylval.boolean = true; return TRUE; } // TODO: don't need the boolean
 "false"                 { yylval.boolean = false; return FALSE; }
 "void"                  { return VOID; }
+"typedef"               { return TYPEDEF; }
 
 [0-9]+                  { yylval.number = atoi(yytext); return NUMBER; }
-[_a-zA-Z][_a-zA-Z0-9]*  { yylval.string = strdup(yytext); return IDENT; }
+[_a-zA-Z][_a-zA-Z0-9]*  {
+                            yylval.string = strdup(yytext);
+
+                            if (typedefs.find(std::string(yytext)) != typedefs.end())
+                                return IDTYPE;
+                            else
+                                return IDENT;
+                        }
+
 ","                     { return COMMA; }
 "+"                     { return PLUS; }
 "*"                     { return TIMES; }

@@ -14,6 +14,14 @@
 
 namespace Parser {
 
+class ParseException : public std::exception {
+    private:
+        std::string msg;
+    public:
+        ParseException(std::string msg);
+        virtual const char *what() const _NOEXCEPT override { return msg.c_str(); }
+    };
+
 std::shared_ptr<ASTTopSeqNode> parse(const char *file);
 
 };

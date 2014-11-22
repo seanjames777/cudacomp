@@ -19,3 +19,14 @@ std::shared_ptr<FunctionInfo> ModuleInfo::getFunction(std::string id) {
 
     return functions.get(id);
 }
+
+void ModuleInfo::addType(std::string name, std::shared_ptr<ASTTypeNode> type) {
+    typedefs.set(name, type);
+}
+
+std::shared_ptr<ASTTypeNode> ModuleInfo::getType(std::string id) {
+    if (!typedefs.hasSymbol(id))
+        return nullptr;
+
+    return typedefs.get(id);
+}

@@ -28,6 +28,10 @@ std::shared_ptr<ASTTypeNode> ASTVarDeclStmt::getType() {
     return type;
 }
 
+void ASTVarDeclStmt::setType(std::shared_ptr<ASTTypeNode> type) {
+    this->type = type;
+}
+
 void ASTVarDeclStmt::print(std::ostream & ss) {
     ss << "decl(";
     type->print(ss);

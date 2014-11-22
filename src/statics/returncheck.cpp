@@ -106,8 +106,6 @@ void returncheck_top(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTopN
                 throw new NoReturnException();
         }
     }
-    else
-        throw new ASTMalformedException();
 }
 
 };
