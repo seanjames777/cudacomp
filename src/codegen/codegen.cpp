@@ -26,7 +26,7 @@
 namespace Codegen {
 
 Value *codegen_exp(CodegenCtx *ctx, std::shared_ptr<ASTExpNode> node) {
-    IRBuilder<> *builder = ctx->getBuilder();
+    std::shared_ptr<IRBuilder<>> builder = ctx->getBuilder();
 
     // Integer constant
     if (std::shared_ptr<ASTIntegerExp> int_exp = std::dynamic_pointer_cast<ASTIntegerExp>(node))
@@ -130,7 +130,7 @@ bool codegen_stmts(CodegenCtx *ctx, std::shared_ptr<ASTStmtSeqNode> seq_node) {
 }
 
 bool codegen_stmt(CodegenCtx *ctx, std::shared_ptr<ASTStmtNode> head) {
-    IRBuilder<> *builder = ctx->getBuilder();
+    std::shared_ptr<IRBuilder<>> builder = ctx->getBuilder();
 
     // Return instruction
     if (std::shared_ptr<ASTReturnStmt> ret_node = std::dynamic_pointer_cast<ASTReturnStmt>(head)) {

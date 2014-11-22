@@ -22,14 +22,14 @@ CodegenCtx::CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo)
       funcInfo(nullptr),
       body_builder(nullptr)
 {
-    module = new Module("", context);
+    module = std::make_shared<Module>("", context);
 }
 
 std::shared_ptr<ModuleInfo> CodegenCtx::getModuleInfo() {
     return modInfo;
 }
 
-Module *CodegenCtx::getModule() {
+std::shared_ptr<Module> CodegenCtx::getModule() {
     return module;
 }
 
@@ -100,7 +100,7 @@ Function *CodegenCtx::createFunction(std::shared_ptr<FunctionInfo> funcInfo) {
     else
         ftype = FunctionType::get(returnType, argTypes, false);
 
-    Function *function = Function::Create(ftype, GlobalValue::ExternalLinkage, funcInfo->getName(), module);
+    Function *function = Function::Create(ftype, GlobalValue::ExternalLinkage, funcInfo->getName(), module.get());
     functions.set(funcInfo->getName(), function);
 
     return function;
@@ -112,7 +112,7 @@ void CodegenCtx::startFunction(std::string id) {
     blocks.clear();
 
     def_bblock = BasicBlock::Create(context, "defs", function, nullptr);
-    def_builder = new IRBuilder<>(def_bblock);
+    def_builder = std::make_shared<IRBuilder<>>(def_bblock);
 
     first_bblock = createBlock();
     pushBlock(first_bblock);
@@ -149,13 +149,13 @@ BasicBlock *CodegenCtx::createBlock() {
 
 void CodegenCtx::pushBlock(BasicBlock *block) {
     blocks.push_back(block);
-    this->body_builder = new IRBuilder<>(block);
+    this->body_builder = std::make_shared<IRBuilder<>>(block);
 }
 
 void CodegenCtx::popBlock() {
     blocks.pop_back();
     BasicBlock *block = blocks.back();
-    this->body_builder = new IRBuilder<>(block);
+    this->body_builder = std::make_shared<IRBuilder<>>(block);
 }
 
 void CodegenCtx::markKernel(Function *kernel) {
@@ -200,7 +200,7 @@ void CodegenCtx::finishFunction() {
     }*/
 }
 
-IRBuilder<> *CodegenCtx::getBuilder() {
+std::shared_ptr<IRBuilder<>> CodegenCtx::getBuilder() {
     return body_builder;
 }
 
