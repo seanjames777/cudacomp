@@ -5,33 +5,8 @@
  */
 
 #include <statics/returncheck.h>
-#include <ast/expr/astintegerexp.h>
-#include <ast/expr/astbinopexp.h>
-#include <ast/astseqnode.h>
-#include <ast/stmt/astreturnstmt.h>
-#include <ast/expr/astidentifierexp.h>
-#include <ast/stmt/astvardeclstmt.h>
-#include <ast/stmt/astvardefnstmt.h>
-#include <ast/type/astintegertype.h>
-#include <ast/expr/astunopexp.h>
-#include <ast/type/astbooleantype.h>
-#include <ast/stmt/astscopestmt.h>
-#include <ast/stmt/astifstmt.h>
-#include <ast/expr/astbooleanexp.h>
-#include <ast/decl/astfundecl.h>
-#include <ast/type/astvoidtype.h>
 
 namespace Statics {
-
-NoReturnException::NoReturnException()
-    : runtime_error("Missing return statement")
-{
-}
-
-IllegalReturnTypeException::IllegalReturnTypeException()
-    : runtime_error("Illegal return type")
-{
-}
 
 bool returncheck_stmts(std::shared_ptr<FunctionInfo> func, std::shared_ptr<ASTStmtSeqNode> seq_node) {
     while (seq_node != nullptr) {
@@ -78,13 +53,16 @@ void returncheck_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTDec
 
 void returncheck_top(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTDeclNode> node) {
     if (std::shared_ptr<ASTFunDecl> funDefn = std::dynamic_pointer_cast<ASTFunDecl>(node)) {
+        // Skip empty declarations
+        if (!funDefn->isDefn())
+            return;
+
         bool isVoid = funDefn->getSignature()->getReturnType()->equal(ASTVoidType::get());
 
         std::shared_ptr<FunctionInfo> func = module->getFunction(funDefn->getName());
 
         // Check if all control flow paths return a value
         if (!returncheck_stmts(func, funDefn->getBody())) {
-
             // Void functions do not need to return on every control flow path, but the
             // code generator requires that there be a return statement, so insert one.
             if (isVoid) {
@@ -103,7 +81,7 @@ void returncheck_top(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTDecl
             }
             // The program is legitimately wrong
             else
-                throw new NoReturnException();
+                throw NoReturnException();
         }
     }
 }

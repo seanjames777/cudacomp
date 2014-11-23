@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <sstream>
 #include <memory>
+#include <stdexcept>
 
 // TODO move me
 #include <llvm/IR/Module.h>

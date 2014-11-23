@@ -38,10 +38,9 @@ int main(int argc, char *argv[]) {
     try {
         node = Parser::parse(args.in_file);
     }
-    catch (Parser::ParseException *except) {
-        std::cout << "parse" << std::endl;
-        std::cout << except->what() << std::endl;
-        return -2;
+    catch (Parser::ParseException & except) {
+        std::cout << except.what() << std::endl;
+        return -1;
     }
 
     std::shared_ptr<ModuleInfo> moduleInfo;
@@ -49,30 +48,9 @@ int main(int argc, char *argv[]) {
     try {
         moduleInfo = Statics::run(node);
     }
-    catch (Statics::UndefinedException *except) {
-        std::cout << "undefined" << std::endl;
-        std::cout << except->what() << std::endl;
-        return -2;
-    }
-    catch (Statics::UndeclaredException *except) {
-        std::cout << "undeclared" << std::endl;
-        std::cout << except->what() << std::endl;
-        return -2;
-    }
-    catch (Statics::RedeclaredException *except) {
-        std::cout << "redeclared" << std::endl;
-        std::cout << except->what() << std::endl;
-        return -2;
-    }
-    catch (Statics::IllegalTypeException *except) {
-        std::cout << "illegaltype" << std::endl;
-        std::cout << except->what() << std::endl;
-        return -2;
-    }
-    catch (Statics::NoReturnException *except) {
-        std::cout << "noreturn" << std::endl;
-        std::cout << except->what() << std::endl;
-        return -2;
+    catch (Statics::StaticsException & except) {
+        std::cout << except.what() << std::endl;
+        return -1;
     }
 
     if (args.out_file) {

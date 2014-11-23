@@ -41,9 +41,9 @@ std::shared_ptr<ASTTypeNode> resolveType(std::shared_ptr<ModuleInfo> module, std
     else if (std::shared_ptr<ASTIdType> id_type = std::dynamic_pointer_cast<ASTIdType>(type)) {
         std::shared_ptr<ASTTypeNode> resolved = module->getType(id_type->getId());
 
-        // The type must be defined already. TODO better exception and a test.
+        // The type must be declared already.
         if (!resolved)
-            throw "Undefined";
+            throw UndeclaredTypeException(id_type->getId());
 
         return resolved;
     }
@@ -120,9 +120,9 @@ void typeresolve_top(
     else if (std::shared_ptr<ASTTypeDecl> typeDefn = std::dynamic_pointer_cast<ASTTypeDecl>(node)) {
         // Types must have a new name
         if (mod->getType(typeDefn->getName()) != nullptr)
-            throw "Redeclared"; // TODO better exception and a test.
+            throw RedeclaredTypeException(typeDefn->getName());
 
-        // TODO: test cannot be defined in terms of itself
+        // TODO: type cannot be defined in terms of itself
         // TODO: inconsistency between getName() and getId() all over the place
 
         // Add the new type to the mapping

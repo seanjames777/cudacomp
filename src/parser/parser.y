@@ -1,34 +1,7 @@
 %{
 #include <iostream>
 #include <string>
-#include <ast/astseqnode.h>
-#include <ast/expr/astbinopexp.h>
-#include <ast/expr/astbooleanexp.h>
-#include <ast/expr/astcallexp.h>
-#include <ast/expr/astexpnode.h>
-#include <ast/expr/astidentifierexp.h>
-#include <ast/expr/astintegerexp.h>
-#include <ast/expr/astunopexp.h>
-#include <ast/stmt/astexprstmt.h>
-#include <ast/stmt/astifstmt.h>
-#include <ast/stmt/astreturnstmt.h>
-#include <ast/stmt/astscopestmt.h>
-#include <ast/stmt/aststmtnode.h>
-#include <ast/stmt/astvardeclstmt.h>
-#include <ast/stmt/astvardefnstmt.h>
-#include <ast/decl/astfundecl.h>
-#include <ast/decl/astdeclnode.h>
-#include <ast/decl/asttypedecl.h>
-#include <ast/type/astargnode.h>
-#include <ast/type/astbooleantype.h>
-#include <ast/type/astfuntype.h>
-#include <ast/type/astidtype.h>
-#include <ast/type/astintegertype.h>
-#include <ast/type/astptrtype.h>
-#include <ast/stmt/astexprstmt.h>
-#include <ast/stmt/astwhilestmt.h>
-#include <ast/type/asttypenode.h>
-#include <ast/type/astvoidtype.h>
+#include <ast/ast.h>
 #include <parser/parse.h>
 
 #define YYERROR_VERBOSE
@@ -40,7 +13,7 @@ int yywrap() {
 }
 
 void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
-    throw new Parser::ParseException(std::string(str));
+    throw Parser::ParseException(std::string(str));
 }
 
 std::unordered_map<std::string, ASTTypeNode *> typedefs;
@@ -88,7 +61,7 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %type <arg_seq> param_list param_list_follow
 %type <top> top
 %type <top_seq> top_list
-%type <top> fundefn typedefn
+%type <top> fundecl typedecl
 %type <exp_seq> arg_list arg_list_follow
 
 %right ASSIGN
@@ -110,8 +83,8 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %%
 
 top:
-    fundefn                           { $$ = $1; }
-  | typedefn                          { $$ = $1; }
+    fundecl                           { $$ = $1; }
+  | typedecl                          { $$ = $1; }
   ;
 
 top_list:
@@ -200,7 +173,7 @@ param_list:
   | param param_list_follow           { $$ = new ASTArgSeqNode(std::shared_ptr<ASTArgNode>($1), std::shared_ptr<ASTArgSeqNode>($2)); }
   ;
 
-typedefn:
+typedecl:
     TYPEDEF type IDENT SEMI
     {
         std::string id = std::string($3);
@@ -210,9 +183,11 @@ typedefn:
     }
   ;
 
-fundefn:
+fundecl:
     type IDENT LPAREN param_list RPAREN LBRACE stmt_list RBRACE
-    { $$ = new ASTFunDecl($2, std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($1), std::shared_ptr<ASTArgSeqNode>($4)), std::shared_ptr<ASTStmtSeqNode>($7)); }
+    { $$ = new ASTFunDecl($2, std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($1), std::shared_ptr<ASTArgSeqNode>($4)), true, std::shared_ptr<ASTStmtSeqNode>($7)); }
+  | type IDENT LPAREN param_list RPAREN SEMI
+    { $$ = new ASTFunDecl($2, std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($1), std::shared_ptr<ASTArgSeqNode>($4)), false, nullptr); }
   ;
 
 arg_list_follow:

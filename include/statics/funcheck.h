@@ -1,13 +1,13 @@
 /**
- * @file typeresolve.h
+ * @file funcheck.h
  *
- * @brief Type resolution
+ * @brief Function checking
  *
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#ifndef __TYPERESOLVE_H
-#define __TYPERESOLVE_H
+#ifndef __FUNCHECK_H
+#define __FUNCHECK_H
 
 #include <statics/moduleinfo.h>
 #include <statics/functioninfo.h>
@@ -16,20 +16,31 @@
 
 namespace Statics {
 
-    void typeresolve_stmts(
+    typedef std::unordered_set<std::string> idset;
+
+    void funcheck_exp(
         std::shared_ptr<ModuleInfo> mod,
+        idset & called,
+        std::shared_ptr<ASTExpNode> node);
+
+    void funcheck_stmts(
+        std::shared_ptr<ModuleInfo> mod,
+        idset & called,
         std::shared_ptr<ASTStmtSeqNode> node);
 
-    void typeresolve_stmt(
+    void funcheck_stmt(
         std::shared_ptr<ModuleInfo> mod,
+        idset & called,
         std::shared_ptr<ASTStmtNode> node);
 
-    void typeresolve_tops(
+    void funcheck_tops(
         std::shared_ptr<ModuleInfo> mod,
         std::shared_ptr<ASTDeclSeqNode> node);
 
-    void typeresolve_top(
+    void funcheck_top(
         std::shared_ptr<ModuleInfo> mod,
+        idset & called,
+        idset & defined,
         std::shared_ptr<ASTDeclNode> node);
 
 };
