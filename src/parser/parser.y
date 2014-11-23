@@ -151,7 +151,7 @@ stmt:
   | RETURN SEMI                       { $$ = new ASTReturnStmt(nullptr); }
   | LBRACE stmt_list RBRACE           { $$ = new ASTScopeStmt(std::shared_ptr<ASTStmtSeqNode>($2)); }
   | IF LPAREN exp RPAREN stmt elseopt { $$ = new ASTIfStmt(std::shared_ptr<ASTExpNode>($3), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($5), nullptr), std::shared_ptr<ASTStmtSeqNode>($6)); }
-  | WHILE LPAREN exp RPAREN stmt      { $$ = new ASTWhileStmt(std::shared_ptr<ASTExpNode>($3), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($5), nullptr)) }
+  | WHILE LPAREN exp RPAREN stmt      { $$ = new ASTWhileStmt(std::shared_ptr<ASTExpNode>($3), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($5), nullptr)); }
   ;
 
 elseopt:

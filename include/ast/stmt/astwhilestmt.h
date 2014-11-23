@@ -6,8 +6,8 @@
  * @author Kurt Mueller <kurtmueller42@gmail.com>
  */
 
-#ifndef __ASTWHILESTMTNODE_H
-#define __ASTWHILESTMTNODE_H
+#ifndef __ASTWHILESTMT_H
+#define __ASTWHILESTMT_H
 
 #include <ast/stmt/aststmtnode.h>
 #include <ast/expr/astexpnode.h>
@@ -21,7 +21,7 @@ private:
 public:
 
     /**
-     * Constructor
+     * @brief Constructor
      *
      * @param[in] cond     Loop condition
      * @param[in] bodyStmt Statement sequence to evaluate in a loop while the condition is true
@@ -46,7 +46,7 @@ public:
     /**
      * @copydoc ASTNode::print()
      */
-    void print(std::ostream & ss) override;
+    virtual void print(std::ostream & ss) override;
 
 };
 
