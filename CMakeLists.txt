@@ -65,11 +65,13 @@ add_executable(cc
     src/ast/stmt/astvardeclstmt.cpp
     src/ast/stmt/astvardefnstmt.cpp
     src/ast/stmt/astwhilestmt.cpp
-    src/ast/top/astfundefntop.cpp
-    src/ast/top/asttopnode.cpp
+    src/ast/decl/astfundecl.cpp
+    src/ast/decl/astdeclnode.cpp
+    src/ast/decl/asttypedecl.cpp
     src/ast/type/astargnode.cpp
     src/ast/type/astbooleantype.cpp
     src/ast/type/astfuntype.cpp
+    src/ast/type/astidtype.cpp
     src/ast/type/astintegertype.cpp
     src/ast/type/astptrtype.cpp
     src/ast/type/asttypenode.cpp
@@ -85,6 +87,7 @@ add_executable(cc
     src/statics/statics.cpp
     src/statics/symboltable.cpp
     src/statics/typecheck.cpp
+    src/statics/typeresolve.cpp
     ${BISON_parser_OUTPUTS}
     ${FLEX_lexer_OUTPUTS}
 )

@@ -34,6 +34,11 @@ public:
     std::shared_ptr<ASTTypeNode> getToType();
 
     /**
+     * @brief Set type pointers of this type point to
+     */
+    void setToType(std::shared_ptr<ASTTypeNode> toType);
+
+    /**
      * @copydoc ASTTypeNodeNode::equal()
      */
     virtual bool equal(std::shared_ptr<ASTTypeNode> other) override;

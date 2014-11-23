@@ -11,7 +11,7 @@
 #define __RETURNCHECK_H
 
 #include <ast/stmt/aststmtnode.h>
-#include <ast/top/asttopnode.h>
+#include <ast/decl/astdeclnode.h>
 #include <statics/moduleinfo.h>
 #include <statics/functioninfo.h>
 
@@ -34,9 +34,9 @@ namespace Statics {
 
     bool returncheck_stmt(std::shared_ptr<FunctionInfo> func, std::shared_ptr<ASTStmtNode> node);
 
-    void returncheck_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTopSeqNode> nodes);
+    void returncheck_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTDeclSeqNode> nodes);
 
-    void returncheck_top(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTopNode> node);
+    void returncheck_top(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTDeclNode> node);
 
 };
 

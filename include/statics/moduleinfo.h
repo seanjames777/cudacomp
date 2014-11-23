@@ -20,6 +20,7 @@ class ModuleInfo {
 private:
 
     SymbolTable<std::shared_ptr<FunctionInfo>> functions;
+    SymbolTable<std::shared_ptr<ASTTypeNode>> typedefs;
 
 public:
 
@@ -41,6 +42,21 @@ public:
      * @param[in] id Function name
      */
     std::shared_ptr<FunctionInfo> getFunction(std::string id);
+
+    /**
+     * @brief Add a type to the module
+     *
+     * @param[in] name Name of type
+     * @param[in] type Actual type
+     */
+    void addType(std::string name, std::shared_ptr<ASTTypeNode> type);
+
+    /**
+     * @brief Get the actual type for a type name
+     *
+     * @param[in] name Name of type
+     */
+    std::shared_ptr<ASTTypeNode> getType(std::string id);
 
 };
 

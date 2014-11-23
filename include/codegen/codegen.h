@@ -14,8 +14,8 @@
 #include <ast/stmt/aststmtnode.h>
 #include <statics/moduleinfo.h>
 #include <statics/functioninfo.h>
-#include <ast/top/asttopnode.h>
-#include <ast/top/astfundefntop.h>
+#include <ast/decl/astdeclnode.h>
+#include <ast/decl/astfundecl.h>
 
 /**
  * @defgroup CodeGen Code Generator
@@ -33,9 +33,9 @@ namespace Codegen {
 
     bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> node);
 
-    void codegen_top(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTTopNode> node);
+    void codegen_top(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTDeclNode> node);
 
-    void codegen_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTopSeqNode> nodes, bool emitDevice, std::ostream & out);
+    void codegen_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTDeclSeqNode> nodes, bool emitDevice, std::ostream & out);
 
 }
 

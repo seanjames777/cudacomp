@@ -15,7 +15,8 @@
 
 /**
  * @brief Variable declaration statement AST node. Declares and optionally
- * defines a new local variable in a function body.
+ * defines a new local variable in a function body. Note: not a top-level
+ * declaration, although it would fit the AST's model.
  */
 class ASTVarDeclStmt : public ASTStmtNode {
 private:
@@ -54,6 +55,11 @@ public:
      * @brief Get variable type
      */
     std::shared_ptr<ASTTypeNode> getType();
+
+    /**
+     * @brief Set variable type
+     */
+    void setType(std::shared_ptr<ASTTypeNode> type);
 
     /**
      * @copydoc ASTNode::print()

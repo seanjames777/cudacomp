@@ -14,6 +14,7 @@
 #include <statics/moduleinfo.h>
 #include <statics/typecheck.h>
 #include <statics/returncheck.h>
+#include <statics/typeresolve.h>
 
 namespace Statics {
 
@@ -27,7 +28,7 @@ namespace Statics {
  *
  * @return Output module information
  */
-std::shared_ptr<ModuleInfo> run(std::shared_ptr<ASTTopSeqNode> node);
+std::shared_ptr<ModuleInfo> run(std::shared_ptr<ASTDeclSeqNode> node);
 
 }
 

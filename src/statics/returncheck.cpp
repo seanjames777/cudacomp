@@ -18,7 +18,7 @@
 #include <ast/stmt/astscopestmt.h>
 #include <ast/stmt/astifstmt.h>
 #include <ast/expr/astbooleanexp.h>
-#include <ast/top/astfundefntop.h>
+#include <ast/decl/astfundecl.h>
 #include <ast/type/astvoidtype.h>
 
 namespace Statics {
@@ -67,8 +67,8 @@ bool returncheck_stmt(std::shared_ptr<FunctionInfo> func, std::shared_ptr<ASTStm
     return false;
 }
 
-void returncheck_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTopSeqNode> nodes) {
-    std::shared_ptr<ASTTopSeqNode> seq_node = nodes;
+void returncheck_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTDeclSeqNode> nodes) {
+    std::shared_ptr<ASTDeclSeqNode> seq_node = nodes;
 
     while (seq_node != nullptr) {
         returncheck_top(module, seq_node->getHead());
@@ -76,8 +76,8 @@ void returncheck_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTop
     }
 }
 
-void returncheck_top(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTopNode> node) {
-    if (std::shared_ptr<ASTFunDefnTop> funDefn = std::dynamic_pointer_cast<ASTFunDefnTop>(node)) {
+void returncheck_top(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTDeclNode> node) {
+    if (std::shared_ptr<ASTFunDecl> funDefn = std::dynamic_pointer_cast<ASTFunDecl>(node)) {
         bool isVoid = funDefn->getSignature()->getReturnType()->equal(ASTVoidType::get());
 
         std::shared_ptr<FunctionInfo> func = module->getFunction(funDefn->getName());
@@ -106,8 +106,6 @@ void returncheck_top(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTopN
                 throw new NoReturnException();
         }
     }
-    else
-        throw new ASTMalformedException();
 }
 
 };

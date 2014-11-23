@@ -16,6 +16,10 @@ std::shared_ptr<ASTTypeNode> ASTFunType::getReturnType() {
     return returnType;
 }
 
+void ASTFunType::setReturnType(std::shared_ptr<ASTTypeNode> returnType) {
+    this->returnType = returnType;
+}
+
 std::shared_ptr<ASTArgSeqNode> ASTFunType::getArgs() {
     return args;
 }

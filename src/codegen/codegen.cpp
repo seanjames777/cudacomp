@@ -23,6 +23,7 @@
 #include <ast/type/astvoidtype.h>
 #include <ast/stmt/astexprstmt.h>
 #include <ast/stmt/astwhilestmt.h>
+#include <ast/decl/asttypedecl.h>
 
 namespace Codegen {
 
@@ -259,16 +260,16 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
     return true;
 }
 
-void codegen_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTopSeqNode> nodes, bool emitDevice, std::ostream & out) {
+void codegen_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTDeclSeqNode> nodes, bool emitDevice, std::ostream & out) {
     std::shared_ptr<CodegenCtx> ctx = std::make_shared<CodegenCtx>(emitDevice, module);
 
-    std::shared_ptr<ASTTopSeqNode> node = nodes;
+    std::shared_ptr<ASTDeclSeqNode> node = nodes;
 
     while (node != nullptr) {
-        std::shared_ptr<ASTTopNode> top_node = node->getHead();
+        std::shared_ptr<ASTDeclNode> top_node = node->getHead();
 
         // Create LLVM functions for each function
-        if (std::shared_ptr<ASTFunDefnTop> funDefn = std::dynamic_pointer_cast<ASTFunDefnTop>(top_node)) {
+        if (std::shared_ptr<ASTFunDecl> funDefn = std::dynamic_pointer_cast<ASTFunDecl>(top_node)) {
             std::shared_ptr<FunctionInfo> funInfo = module->getFunction(funDefn->getName());
             ctx->createFunction(funInfo);
         }
@@ -286,8 +287,8 @@ void codegen_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTopSeqN
     ctx->emit(out);
 }
 
-void codegen_top(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTTopNode> node) {
-    if (std::shared_ptr<ASTFunDefnTop> funDefn = std::dynamic_pointer_cast<ASTFunDefnTop>(node)) {
+void codegen_top(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTDeclNode> node) {
+    if (std::shared_ptr<ASTFunDecl> funDefn = std::dynamic_pointer_cast<ASTFunDecl>(node)) {
         std::shared_ptr<FunctionInfo> func = ctx->getModuleInfo()->getFunction(funDefn->getName());
 
         ctx->startFunction(func->getName());
@@ -297,6 +298,9 @@ void codegen_top(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTTopNode> no
             ctx->markKernel(ctx->getFunction(func->getName()));
 
         ctx->finishFunction();
+    }
+    else if (std::shared_ptr<ASTTypeDecl> typeDefn = std::dynamic_pointer_cast<ASTTypeDecl>(node)) {
+        // Skip it
     }
     else
         throw new ASTMalformedException();
