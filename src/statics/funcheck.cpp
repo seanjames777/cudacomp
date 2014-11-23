@@ -83,7 +83,16 @@ void funcheck_tops(
         seq_node = seq_node->getTail();
     }
 
-    // Make sure all called functions were defined
+    // Find the functions which were called but never defined
+    idset undef;
+
+    std::set_difference(
+        called.begin(), called.end(),
+        defined.begin(), defined.end(),
+        std::inserter(undef, undef.end()));
+
+    for (auto id : undef)
+        throw UndefinedFunctionException(id);
 }
 
 void funcheck_top(
