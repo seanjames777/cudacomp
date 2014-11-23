@@ -29,6 +29,7 @@
 #include <ast/stmt/aststmtnode.h>
 #include <ast/stmt/astvardeclstmt.h>
 #include <ast/stmt/astvardefnstmt.h>
+#include <ast/stmt/astwhilestmt.h>
 #include <ast/type/astargnode.h>
 #include <ast/type/astbooleantype.h>
 #include <ast/type/astfuntype.h>

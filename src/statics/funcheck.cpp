@@ -55,10 +55,15 @@ void funcheck_stmt(
             funcheck_stmts(mod, called, scope_node->getBody());
     }
     else if (std::shared_ptr<ASTIfStmt> if_node = std::dynamic_pointer_cast<ASTIfStmt>(head)) {
+        funcheck_exp(mod, called, if_node->getCond());
         funcheck_stmts(mod, called, if_node->getTrueStmt());
 
         if (if_node->getFalseStmt())
             funcheck_stmts(mod, called, if_node->getFalseStmt());
+    }
+    else if (std::shared_ptr<ASTWhileStmt> while_node = std::dynamic_pointer_cast<ASTWhileStmt>(head)) {
+        funcheck_exp(mod, called, while_node->getCond());
+        funcheck_stmts(mod, called, while_node->getBodyStmt());
     }
     else if (std::shared_ptr<ASTExprStmt> exp_stmt = std::dynamic_pointer_cast<ASTExprStmt>(head))
         funcheck_exp(mod, called, exp_stmt->getExp());

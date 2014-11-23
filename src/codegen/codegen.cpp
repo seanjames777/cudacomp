@@ -22,6 +22,7 @@
 #include <ast/expr/astcallexp.h>
 #include <ast/type/astvoidtype.h>
 #include <ast/stmt/astexprstmt.h>
+#include <ast/stmt/astwhilestmt.h>
 #include <ast/decl/asttypedecl.h>
 
 namespace Codegen {
@@ -222,6 +223,33 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
         // If both branches return, the caller should stop, or we'll end up
         // creating a block with no predecessors
         return leftContinue || rightContinue;
+    }
+    // While statement
+    else if (std::shared_ptr<ASTWhileStmt> while_node = std::dynamic_pointer_cast<ASTWhileStmt>(head)) {
+        Value *cond = codegen_exp(ctx, while_node->getCond());
+
+        BasicBlock *bodyBlock = ctx->createBlock();
+        BasicBlock *doneBlock = ctx->createBlock();
+
+        // Generate conditional jump
+        ctx->getBuilder()->CreateCondBr(cond, bodyBlock, doneBlock);
+
+        // Generate while's 'body' branch
+        ctx->pushBlock(bodyBlock);
+
+        // Whether the body of the while loop returns
+        bool bodyContinue;
+
+        // Only need to insert looping conditional jump if body didn't return
+        if ((bodyContinue = codegen_stmts(ctx, while_node->getBodyStmt()))) {
+            Value *body_cond = codegen_exp(ctx, while_node->getCond());
+            ctx->getBuilder()->CreateCondBr(body_cond, bodyBlock, doneBlock);
+        }
+        // 'doneBlock' remains on the stack
+        ctx->pushBlock(doneBlock);
+
+        return true;
+
     }
     // Expression statement
     else if (std::shared_ptr<ASTExprStmt> exp_stmt = std::dynamic_pointer_cast<ASTExprStmt>(head))

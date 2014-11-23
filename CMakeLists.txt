@@ -65,6 +65,7 @@ add_executable(cc
     src/ast/stmt/aststmtnode.cpp
     src/ast/stmt/astvardeclstmt.cpp
     src/ast/stmt/astvardefnstmt.cpp
+    src/ast/stmt/astwhilestmt.cpp
     src/ast/decl/astfundecl.cpp
     src/ast/decl/astdeclnode.cpp
     src/ast/decl/asttypedecl.cpp

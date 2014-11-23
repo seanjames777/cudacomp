@@ -12,6 +12,7 @@ extern std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %%
 
 "return"                { return RETURN; }
+"while"                 { return WHILE; }
 "int"                   { return INT; }
 "bool"                  { return BOOL; }
 "if"                    { return IF; }
