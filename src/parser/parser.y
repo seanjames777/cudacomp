@@ -83,8 +83,14 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %%
 
 top:
+<<<<<<< Updated upstream
     fundecl                           { $$ = $1; }
   | typedecl                          { $$ = $1; }
+=======
+    fundefn                           { $$ = $1; }
+  | typedefn                          { $$ = $1; }
+  | structdecl                        { $$ = $1; }
+>>>>>>> Stashed changes
   ;
 
 top_list:
@@ -198,4 +204,30 @@ arg_list_follow:
 arg_list:
     /* empty */                       { $$ = nullptr; }
   | exp arg_list_follow               { $$ = new ASTExpSeqNode(std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpSeqNode>($2)); }
+  ;
+
+structdecl:
+    STRUCT IDENT field_list SEMI
+    { $$ = new ASTRecordDecl(std::string($2), std::make_shared<ASTRecordType>(std::shared_ptr<ASTArgSeqNode>($4))); free($2); }
+  | STRUCT IDTYPE field_list SEMI
+    { $$ = new ASTRecordDecl(std::string($2), std::make_shared<ASTRecordType>(std::shared_ptr<ASTArgSeqNode>($4))); free($2); }
+  | STRUCT IDENT SEMI
+    { $$ = new ASTRecordDecl(std::string($2), nullptr); free($2); }
+  | STRUCT IDTYPE SEMI
+    { $$ = new ASTRecordDecl(std::string($2), nullptr); free($2); }
+  ;
+
+field:
+    type IDENT SEMI            { $$ = new ASTArgNode(std::shared_ptr<ASTTypeNode>($1), std::string($2)); free($2); }
+  | type IDTYPE SEMI           { $$ = new ASTArgNode(std::shared_ptr<ASTTypeNode>($1), std::string($2)); free($2); }
+  ;
+
+
+field_list_follow:
+    /* empty */                { $$ = nullptr; }
+  | field field_list_follow    { $$ = new ASTArgSeqNode(std::shared_ptr<ASTArgNode>($1), std::shared_ptr<ASTArgSeqNode>($2)); }
+  ;
+
+field_list:
+    LBRACE field_list_follow RBRACE     { $$ = $2 }
   ;
