@@ -1,5 +1,5 @@
 extern "C"
 __device__
-void rt_add(int *result, int x, int y) {
-    *result = x + y;
+int rt_add(int x, int y) {
+    return x + y;
 }

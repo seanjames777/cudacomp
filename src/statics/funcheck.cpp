@@ -137,7 +137,8 @@ void funcheck_top(
         else {
             // Add the new function to the module
             funInfo = std::make_shared<FunctionInfo>(funDefn->getName(),
-                funDefn->getSignature(), funDefn->getLinkage());
+                funDefn->getSignature(), funDefn->getLinkage(),
+                funDefn->getName() == "_cc_main");
             mod->addFunction(funInfo);
         }
 

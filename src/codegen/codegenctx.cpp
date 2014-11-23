@@ -85,8 +85,10 @@ Function *CodegenCtx::createFunction(std::shared_ptr<FunctionInfo> funcInfo) {
 
     bool isVoid = sig->getReturnType()->equal(ASTVoidType::get());
 
-    if (emit_device && !isVoid)
+    if (emit_device && funcInfo->isCudaGlobal() && !isVoid) {
         argTypes.push_back(PointerType::getUnqual(returnType));
+        returnType = Type::getVoidTy(context);
+    }
 
     // Add arguments to LLVM function type
     while (args != nullptr) {
@@ -95,10 +97,7 @@ Function *CodegenCtx::createFunction(std::shared_ptr<FunctionInfo> funcInfo) {
         args = args->getTail();
     }
 
-    if (emit_device)
-        ftype = FunctionType::get(Type::getVoidTy(context), argTypes, false);
-    else
-        ftype = FunctionType::get(returnType, argTypes, false);
+    ftype = FunctionType::get(returnType, argTypes, false);
 
     Function *function = Function::Create(ftype, GlobalValue::ExternalLinkage, funcInfo->getName(), module.get());
     functions.set(funcInfo->getName(), function);
@@ -117,13 +116,13 @@ void CodegenCtx::startFunction(std::string id) {
     first_bblock = createBlock();
     pushBlock(first_bblock);
 
-    funcInfo = modInfo->getFunction(id);
+    this->funcInfo = modInfo->getFunction(id);
     std::shared_ptr<ASTFunType> sig = funcInfo->getSignature();
 
     std::shared_ptr<ASTArgSeqNode> args = sig->getArgs();
     auto arg_iter = function->arg_begin();
 
-    if (emit_device && !sig->getReturnType()->equal(ASTVoidType::get()))
+    if (emit_device && funcInfo->isCudaGlobal() && !sig->getReturnType()->equal(ASTVoidType::get()))
         arg_iter++;
 
     // Map arguments to symbol table. Move arguments into alloca's functions

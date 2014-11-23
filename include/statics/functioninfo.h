@@ -25,6 +25,7 @@ private:
     SymbolTable<std::shared_ptr<ASTTypeNode>> locals; // including arguments
     std::string name;
     enum ASTDeclNode::Linkage linkage;
+    bool cudaGlobal;
 
 public:
 
@@ -36,7 +37,7 @@ public:
      * @param[in] linkage   Function linkage
      */
     FunctionInfo(std::string name, std::shared_ptr<ASTFunType> signature,
-        enum ASTDeclNode::Linkage linkage);
+        enum ASTDeclNode::Linkage linkage, bool cudaGlobal = false);
 
     /**
      * @brief Get function signature
@@ -60,6 +61,11 @@ public:
      * @param[in] type Symbol type
      */
     void addLocal(std::string id, std::shared_ptr<ASTTypeNode> type);
+
+    /**
+     * @brief Get whether this is a CUDA kernel
+     */
+    bool isCudaGlobal();
 
     /**
      * @brief Get the type of a symbol in the function's body

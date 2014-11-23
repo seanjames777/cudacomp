@@ -83,13 +83,14 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
 
         Value *ret_val = nullptr;
 
-        std::shared_ptr<ASTFunType> funDefn = ctx->getModuleInfo()->getFunction(call_exp->getId())->getSignature();
-        bool isVoid = funDefn->getReturnType()->equal(ASTVoidType::get());
+        std::shared_ptr<FunctionInfo> funcInfo = ctx->getModuleInfo()->getFunction(call_exp->getId());
+        std::shared_ptr<ASTFunType> sig = funcInfo->getSignature();
+        bool isVoid = sig->getReturnType()->equal(ASTVoidType::get());
 
         // In device mode, add a pointer to a new temp to get the return value
-        if (ctx->getEmitDevice() && !isVoid) {
+        if (ctx->getEmitDevice() && funcInfo->isCudaGlobal() && !isVoid) {
             // TODO use an address of instead maybe
-            ret_val = ctx->createTemp(convertType(funDefn->getReturnType()));
+            ret_val = ctx->createTemp(convertType(sig->getReturnType()));
             args.push_back(ret_val);
         }
 
@@ -104,7 +105,7 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
 
         Value *call = builder->CreateCall(ctx->getFunction(call_exp->getId()), args);
 
-        if (!ctx->getEmitDevice())
+        if (!ctx->getEmitDevice() || !funcInfo->isCudaGlobal())
             ret_val = call;
         else if (!isVoid) {
             ret_val = builder->CreateLoad(ret_val);
@@ -144,7 +145,7 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
 
             // In device mode, have to move into return value argument because kernels
             // must return void
-            if (ctx->getEmitDevice()) {
+            if (ctx->getEmitDevice() && ctx->getCurrentFunctionInfo()->isCudaGlobal()) {
                 Value *out_arg = ctx->getCurrentFunction()->arg_begin();
 
                 builder->CreateStore(ret_val, out_arg);
@@ -301,7 +302,7 @@ void codegen_top(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTDeclNode> n
         ctx->startFunction(func->getName());
         codegen_stmts(ctx, funDefn->getBody());
 
-        if (ctx->getEmitDevice() && func->getName() == "_cc_main") // TODO require this function
+        if (ctx->getEmitDevice() && func->isCudaGlobal()) // TODO require this function
             ctx->markKernel(ctx->getFunction(func->getName()));
 
         ctx->finishFunction();

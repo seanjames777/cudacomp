@@ -7,10 +7,11 @@
 #include <statics/functioninfo.h>
 
 FunctionInfo::FunctionInfo(std::string name, std::shared_ptr<ASTFunType> signature,
-    enum ASTDeclNode::Linkage linkage)
+    enum ASTDeclNode::Linkage linkage, bool cudaGlobal)
     : name(name),
       signature(signature),
-      linkage(linkage)
+      linkage(linkage),
+      cudaGlobal(cudaGlobal)
 {
     std::shared_ptr<ASTArgSeqNode> args = signature->getArgs();
 
@@ -35,6 +36,10 @@ std::shared_ptr<ASTFunType> FunctionInfo::getSignature() {
 
 std::shared_ptr<ASTTypeNode> FunctionInfo::getLocalType(std::string id) {
     return locals.get(id);
+}
+
+bool FunctionInfo::isCudaGlobal() {
+    return cudaGlobal;
 }
 
 void FunctionInfo::addLocal(std::string id, std::shared_ptr<ASTTypeNode> type) {
