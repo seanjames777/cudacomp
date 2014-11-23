@@ -32,6 +32,7 @@
 #include <ast/stmt/astwhilestmt.h>
 #include <ast/type/astargnode.h>
 #include <ast/type/astbooleantype.h>
+#include <ast/type/astarrtype.h>
 #include <ast/type/astfuntype.h>
 #include <ast/type/astidtype.h>
 #include <ast/type/astintegertype.h>

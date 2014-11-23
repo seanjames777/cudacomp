@@ -25,6 +25,7 @@ private:
     std::string name;
     std::shared_ptr<ASTFunType> sig;
     bool defn;
+    enum Linkage linkage;
     std::shared_ptr<ASTStmtSeqNode> body;
 
 public:
@@ -37,7 +38,8 @@ public:
      * @param[in] defn Whether this is a definition as well as a declaration
      * @param[in] body Function body statement sequence. Only valid if 'defn' is true.
      */
-    ASTFunDecl(std::string name, std::shared_ptr<ASTFunType> sig, bool defn, std::shared_ptr<ASTStmtSeqNode> body);
+    ASTFunDecl(std::string name, std::shared_ptr<ASTFunType> sig, bool defn,
+        enum ASTDeclNode::Linkage linkage, std::shared_ptr<ASTStmtSeqNode> body);
 
     /**
      * @brief Destructor
@@ -63,6 +65,11 @@ public:
      * @brief Get function body statement sequence
      */
     std::shared_ptr<ASTStmtSeqNode> getBody();
+
+    /**
+     * @brief Get the linkage
+     */
+    enum ASTDeclNode::Linkage getLinkage();
 
     /**
      * @brief Set the function body statement sequence

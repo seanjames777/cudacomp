@@ -12,6 +12,7 @@
 #include <statics/symboltable.h>
 #include <ast/type/asttypenode.h>
 #include <ast/type/astfuntype.h>
+#include <ast/decl/astdeclnode.h>
 
 /**
  * @brief Information about a function, including its name, signature, and
@@ -23,6 +24,7 @@ private:
     std::shared_ptr<ASTFunType> signature;
     SymbolTable<std::shared_ptr<ASTTypeNode>> locals; // including arguments
     std::string name;
+    enum ASTDeclNode::Linkage linkage;
 
 public:
 
@@ -31,8 +33,10 @@ public:
      *
      * @param[in] name      Function name
      * @param[in] signature Function signature
+     * @param[in] linkage   Function linkage
      */
-    FunctionInfo(std::string name, std::shared_ptr<ASTFunType> signature);
+    FunctionInfo(std::string name, std::shared_ptr<ASTFunType> signature,
+        enum ASTDeclNode::Linkage linkage);
 
     /**
      * @brief Get function signature
@@ -43,6 +47,11 @@ public:
      * @brief Get function name
      */
     std::string getName();
+
+    /**
+     * @brief Get function linkage
+     */
+     enum ASTDeclNode::Linkage getLinkage();
 
     /**
      * @brief Add a local symbol to the function

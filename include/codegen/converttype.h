@@ -9,7 +9,7 @@
 #ifndef __CONVERTTYPE_H
 #define __CONVERTTYPE_H
 
-#include <ast/type/asttypenode.h>
+#include <ast/ast.h>
 
 // TODO
 #include <llvm/IR/Module.h>

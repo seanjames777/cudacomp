@@ -123,7 +123,7 @@ void CodegenCtx::startFunction(std::string id) {
     std::shared_ptr<ASTArgSeqNode> args = sig->getArgs();
     auto arg_iter = function->arg_begin();
 
-    if (emit_device)
+    if (emit_device && !sig->getReturnType()->equal(ASTVoidType::get()))
         arg_iter++;
 
     // Map arguments to symbol table. Move arguments into alloca's functions
@@ -137,6 +137,7 @@ void CodegenCtx::startFunction(std::string id) {
         symbols.set(arg->getName(), toVal);
 
         Value *argVal = arg_iter++;
+
         def_builder->CreateStore(argVal, toVal);
 
         args = args->getTail();
@@ -169,35 +170,8 @@ void CodegenCtx::markKernel(Function *kernel) {
     cat->addOperand(node);
 }
 
-void CodegenCtx::insertMissingReturns(std::unordered_set<BasicBlock *> & visited, BasicBlock *bblock) {
-    // Skip if we have already checked this block
-    if (visited.find(bblock) != visited.end())
-        return;
-
-    // Mark as visited
-    visited.insert(bblock);
-
-    // Get the terminator instruction
-    TerminatorInst *term = bblock->getTerminator();
-
-    // The case we're interested in: insert a return
-    if (!term)
-        ReturnInst::Create(context, nullptr, bblock);
-    // Otherwise, it's either a jump or return instruction, so we can just
-    // check each successor.
-    else
-        for (unsigned int i = 0; i < term->getNumSuccessors(); i++)
-            insertMissingReturns(visited, term->getSuccessor(i));
-}
-
 void CodegenCtx::finishFunction() {
     def_builder->CreateBr(first_bblock);
-
-    // Insert a return if one is missing and this is a void function
-    /*if (funcInfo->getSignature()->getReturnType()->equal(ASTVoidType::get())) {
-        std::unordered_set<BasicBlock *> visited;
-        insertMissingReturns(visited, first_bblock);
-    }*/
 }
 
 std::shared_ptr<IRBuilder<>> CodegenCtx::getBuilder() {

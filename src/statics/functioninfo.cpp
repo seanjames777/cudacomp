@@ -6,9 +6,11 @@
 
 #include <statics/functioninfo.h>
 
-FunctionInfo::FunctionInfo(std::string name, std::shared_ptr<ASTFunType> signature)
+FunctionInfo::FunctionInfo(std::string name, std::shared_ptr<ASTFunType> signature,
+    enum ASTDeclNode::Linkage linkage)
     : name(name),
-      signature(signature)
+      signature(signature),
+      linkage(linkage)
 {
     std::shared_ptr<ASTArgSeqNode> args = signature->getArgs();
 
@@ -21,6 +23,10 @@ FunctionInfo::FunctionInfo(std::string name, std::shared_ptr<ASTFunType> signatu
 
 std::string FunctionInfo::getName() {
     return name;
+}
+
+enum ASTDeclNode::Linkage FunctionInfo::getLinkage() {
+    return linkage;
 }
 
 std::shared_ptr<ASTFunType> FunctionInfo::getSignature() {

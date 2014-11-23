@@ -70,6 +70,7 @@ add_executable(cc
     src/ast/decl/astdeclnode.cpp
     src/ast/decl/asttypedecl.cpp
     src/ast/type/astargnode.cpp
+    src/ast/type/astarrtype.cpp
     src/ast/type/astbooleantype.cpp
     src/ast/type/astfuntype.cpp
     src/ast/type/astidtype.cpp
@@ -116,6 +117,16 @@ if ("${PTX_BACKEND}" MATCHES "TRUE")
 add_library(device_rt
     driver/device_rt.c
 )
+
+add_custom_command(
+    OUTPUT device_rt_kernel.cubin
+    COMMAND nvcc -arch=sm_30 -cubin -dc -o device_rt_kernel.cubin ${CMAKE_CURRENT_SOURCE_DIR}/driver/device_rt_kernel.cu
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    DEPENDS driver/device_rt_kernel.cu
+    COMMENT "Building device runtime kernels" VERBATIM)
+
+add_custom_target(device_rt_kernel DEPENDS device_rt_kernel.cubin)
+add_dependencies(device_rt device_rt_kernel)
 endif ("${PTX_BACKEND}" MATCHES "TRUE")
 
 # Configure documentation

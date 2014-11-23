@@ -5,9 +5,6 @@
  */
 
 #include <codegen/converttype.h>
-#include <ast/type/astintegertype.h>
-#include <ast/type/astbooleantype.h>
-#include <ast/type/astvoidtype.h>
 
 namespace Codegen {
 
@@ -20,6 +17,10 @@ Type *convertType(std::shared_ptr<ASTTypeNode> type) {
         return Type::getInt1Ty(ctx);
     else if (std::shared_ptr<ASTVoidType> void_type = std::dynamic_pointer_cast<ASTVoidType>(type))
         return Type::getVoidTy(ctx);
+    else if (std::shared_ptr<ASTPtrType> ptr_type = std::dynamic_pointer_cast<ASTPtrType>(type))
+        return PointerType::getUnqual(convertType(ptr_type->getToType()));
+    else if (std::shared_ptr<ASTArrType> arr_type = std::dynamic_pointer_cast<ASTArrType>(type))
+        return PointerType::getUnqual(convertType(arr_type->getElemType()));
     else
         throw new ASTMalformedException();
 

@@ -6,10 +6,12 @@
 
 #include <ast/decl/astfundecl.h>
 
-ASTFunDecl::ASTFunDecl(std::string name, std::shared_ptr<ASTFunType> sig, bool defn, std::shared_ptr<ASTStmtSeqNode> body)
+ASTFunDecl::ASTFunDecl(std::string name, std::shared_ptr<ASTFunType> sig,
+    bool defn, enum ASTDeclNode::Linkage linkage, std::shared_ptr<ASTStmtSeqNode> body)
     : name(name),
       sig(sig),
       defn(defn),
+      linkage(linkage),
       body(body)
 {
 }
@@ -31,6 +33,10 @@ std::shared_ptr<ASTFunType> ASTFunDecl::getSignature() {
 
 std::shared_ptr<ASTStmtSeqNode> ASTFunDecl::getBody() {
     return body;
+}
+
+enum ASTDeclNode::Linkage ASTFunDecl::getLinkage() {
+    return linkage;
 }
 
 void ASTFunDecl::setBody(std::shared_ptr<ASTStmtSeqNode> body) {

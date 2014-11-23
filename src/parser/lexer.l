@@ -21,6 +21,7 @@ extern std::unordered_map<std::string, ASTTypeNode *> typedefs;
 "false"                 { yylval.boolean = false; return FALSE; }
 "void"                  { return VOID; }
 "typedef"               { return TYPEDEF; }
+"extern"                { return EXTERN; }
 
 [0-9]+                  { yylval.number = atoi(yytext); return NUMBER; }
 [_a-zA-Z][_a-zA-Z0-9]*  {
@@ -59,6 +60,7 @@ extern std::unordered_map<std::string, ASTTypeNode *> typedefs;
 ")"                     { return RPAREN; }
 "{"                     { return LBRACE; }
 "}"                     { return RBRACE; }
+"[]"                    { return ARRBRACES; }
 
 [ \r\n\t]+              /* ignore whitespace */
 

@@ -37,6 +37,7 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
     ASTTypeNode *type;
     ASTArgNode *arg;
     ASTArgSeqNode *arg_seq;
+    enum ASTDeclNode::Linkage linkage;
     int number;
     char *string;
     bool boolean;
@@ -46,9 +47,9 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %token <string> IDENT IDTYPE
 %token <boolean> TRUE FALSE
 %token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR NOT BNOT
-%token ASSIGN SEMI COMMA
+%token ASSIGN SEMI COMMA ARRBRACES
 %token INT BOOL VOID
-%token RETURN IF ELSE TYPEDEF WHILE
+%token RETURN IF ELSE TYPEDEF WHILE EXTERN
 %token LPAREN RPAREN LBRACE RBRACE
 %token EQ NEQ LEQ GEQ LT GT
 
@@ -63,6 +64,7 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %type <top_seq> top_list
 %type <top> fundecl typedecl
 %type <exp_seq> arg_list arg_list_follow
+%type <linkage> linkage
 
 %right ASSIGN
 %left OR
@@ -136,6 +138,7 @@ type:
   | BOOL                              { $$ = new ASTBooleanType(); }
   | VOID                              { $$ = new ASTVoidType(); }
   | IDTYPE                            { $$ = new ASTIdType(std::string($1)); free($1); }
+  | type ARRBRACES                    { $$ = new ASTArrType(std::shared_ptr<ASTTypeNode>($1)); }
   ;
 
 simp:
@@ -183,11 +186,16 @@ typedecl:
     }
   ;
 
+linkage:
+    /* empty */                       { $$ = ASTDeclNode::Internal; }
+  | EXTERN                            { $$ = ASTDeclNode::External; }
+  ;
+
 fundecl:
-    type IDENT LPAREN param_list RPAREN LBRACE stmt_list RBRACE
-    { $$ = new ASTFunDecl($2, std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($1), std::shared_ptr<ASTArgSeqNode>($4)), true, std::shared_ptr<ASTStmtSeqNode>($7)); }
-  | type IDENT LPAREN param_list RPAREN SEMI
-    { $$ = new ASTFunDecl($2, std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($1), std::shared_ptr<ASTArgSeqNode>($4)), false, nullptr); }
+    linkage type IDENT LPAREN param_list RPAREN LBRACE stmt_list RBRACE
+    { $$ = new ASTFunDecl($3, std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($2), std::shared_ptr<ASTArgSeqNode>($5)), true, $1, std::shared_ptr<ASTStmtSeqNode>($8)); }
+  | linkage type IDENT LPAREN param_list RPAREN SEMI
+    { $$ = new ASTFunDecl($3, std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($2), std::shared_ptr<ASTArgSeqNode>($5)), false, $1, nullptr); }
   ;
 
 arg_list_follow:

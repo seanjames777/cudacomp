@@ -271,7 +271,7 @@ void codegen_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTDeclSeq
         // Create LLVM functions for each function
         if (std::shared_ptr<ASTFunDecl> funDefn = std::dynamic_pointer_cast<ASTFunDecl>(top_node)) {
             // Skip declarations that don't define bodies
-            if (funDefn->isDefn()) {
+            if (funDefn->isDefn() || funDefn->getLinkage() == ASTDeclNode::External) {
                 std::shared_ptr<FunctionInfo> funInfo = module->getFunction(funDefn->getName());
                 ctx->createFunction(funInfo);
             }
