@@ -1,6 +1,7 @@
-AUTHOR:
+AUTHORS:
 
     Sean James <seanjames777@gmail.com>
+    Kurt Mueller <kurtmueller42@gmail.com>
 
 BUILD:
 
