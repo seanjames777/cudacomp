@@ -10,25 +10,15 @@
 #ifndef __RETURNCHECK_H
 #define __RETURNCHECK_H
 
-#include <ast/stmt/aststmtnode.h>
-#include <ast/decl/astdeclnode.h>
 #include <statics/moduleinfo.h>
 #include <statics/functioninfo.h>
+#include <ast/ast.h>
+#include <statics/exceptions.h>
 
 // TODO: Void functions don't require returns
 // TODO: Returns must match function declaration
 
 namespace Statics {
-
-    class NoReturnException : public std::runtime_error {
-    public:
-        NoReturnException();
-    };
-
-    class IllegalReturnTypeException : public std::runtime_error {
-    public:
-        IllegalReturnTypeException();
-    };
 
     bool returncheck_stmts(std::shared_ptr<FunctionInfo> func, std::shared_ptr<ASTStmtSeqNode> nodes);
 

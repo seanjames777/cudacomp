@@ -11,45 +11,10 @@
 
 #include <statics/moduleinfo.h>
 #include <statics/functioninfo.h>
-#include <ast/stmt/aststmtnode.h>
-#include <ast/expr/astexpnode.h>
-#include <ast/decl/astdeclnode.h>
-#include <ast/type/asttypenode.h>
-#include <stdexcept>
+#include <ast/ast.h>
+#include <statics/exceptions.h>
 
 namespace Statics {
-
-    class UndefinedException : public std::exception {
-    private:
-        std::string msg;
-    public:
-        UndefinedException(std::string id);
-        virtual const char *what() const _NOEXCEPT override { return msg.c_str(); }
-    };
-
-    class UndeclaredException : public std::exception {
-    private:
-        std::string msg;
-    public:
-        UndeclaredException(std::string id);
-        virtual const char *what() const _NOEXCEPT override { return msg.c_str(); }
-    };
-
-    class RedeclaredException : public std::exception {
-    private:
-        std::string msg;
-    public:
-        RedeclaredException(std::string id);
-        virtual const char *what() const _NOEXCEPT override { return msg.c_str(); }
-    };
-
-    class IllegalTypeException : public std::exception {
-    private:
-        std::string msg;
-    public:
-        IllegalTypeException();
-        virtual const char *what() const _NOEXCEPT override { return msg.c_str(); }
-    };
 
     typedef std::unordered_set<std::string> idset;
 

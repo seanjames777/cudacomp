@@ -1,26 +1,7 @@
 %{
 #include <iostream>
 #include <string>
-#include <ast/expr/astexpnode.h>
-#include <ast/stmt/aststmtnode.h>
-#include <ast/expr/astintegerexp.h>
-#include <ast/expr/astidentifierexp.h>
-#include <ast/expr/astbinopexp.h>
-#include <ast/astseqnode.h>
-#include <ast/stmt/astreturnstmt.h>
-#include <ast/type/asttypenode.h>
-#include <ast/type/astintegertype.h>
-#include <ast/stmt/astvardeclstmt.h>
-#include <ast/stmt/astvardefnstmt.h>
-#include <ast/type/astbooleantype.h>
-#include <ast/expr/astbooleanexp.h>
-#include <ast/stmt/astscopestmt.h>
-#include <ast/expr/astunopexp.h>
-#include <ast/stmt/astifstmt.h>
-#include <ast/decl/astdeclnode.h>
-#include <ast/decl/astfundecl.h>
-#include <ast/type/astfuntype.h>
-#include <ast/type/astargnode.h>
+#include <ast/ast.h>
 
 #include "parser.hpp"
 

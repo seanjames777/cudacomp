@@ -242,8 +242,11 @@ void codegen_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTDeclSeq
 
         // Create LLVM functions for each function
         if (std::shared_ptr<ASTFunDecl> funDefn = std::dynamic_pointer_cast<ASTFunDecl>(top_node)) {
-            std::shared_ptr<FunctionInfo> funInfo = module->getFunction(funDefn->getName());
-            ctx->createFunction(funInfo);
+            // Skip declarations that don't define bodies
+            if (funDefn->isDefn()) {
+                std::shared_ptr<FunctionInfo> funInfo = module->getFunction(funDefn->getName());
+                ctx->createFunction(funInfo);
+            }
         }
 
         node = node->getTail();
@@ -261,6 +264,10 @@ void codegen_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTDeclSeq
 
 void codegen_top(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTDeclNode> node) {
     if (std::shared_ptr<ASTFunDecl> funDefn = std::dynamic_pointer_cast<ASTFunDecl>(node)) {
+        // Skip declarations that don't define bodies
+        if (!funDefn->isDefn())
+            return;
+
         std::shared_ptr<FunctionInfo> func = ctx->getModuleInfo()->getFunction(funDefn->getName());
 
         ctx->startFunction(func->getName());

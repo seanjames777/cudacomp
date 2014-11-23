@@ -27,28 +27,6 @@
 
 namespace Statics {
 
-UndefinedException::UndefinedException(std::string id) {
-    std::stringstream ss;
-    ss << "Undefined symbol '" << id << "'";
-    msg = ss.str();
-}
-
-UndeclaredException::UndeclaredException(std::string id) {
-    std::stringstream ss;
-    ss << "Undeclared symbol '" << id << "'";
-    msg = ss.str();
-}
-
-RedeclaredException::RedeclaredException(std::string id) {
-    std::stringstream ss;
-    ss << "Variable '" << id << "' already declared";
-    msg = ss.str();
-}
-
-IllegalTypeException::IllegalTypeException() {
-    msg = "Illegal type";
-}
-
 std::shared_ptr<ASTTypeNode> typecheck_exp(
     std::shared_ptr<ModuleInfo> mod,
     std::shared_ptr<FunctionInfo> func,
@@ -59,17 +37,18 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
     // Integer constant
     if (std::shared_ptr<ASTIntegerExp> int_exp = std::dynamic_pointer_cast<ASTIntegerExp>(node))
         return ASTIntegerType::get();
+    // Boolean constant
     else if (std::shared_ptr<ASTBooleanExp> bool_exp = std::dynamic_pointer_cast<ASTBooleanExp>(node))
         return ASTBooleanType::get();
     // Variable reference
     else if (std::shared_ptr<ASTIdentifierExp> id_exp = std::dynamic_pointer_cast<ASTIdentifierExp>(node)) {
         // Must be declared
         if (decl.find(id_exp->getId()) == decl.end())
-            throw new UndeclaredException(id_exp->getId());
+            throw UndeclaredIdentifierException(id_exp->getId());
 
         // Must be defined
         if (def.find(id_exp->getId()) == def.end())
-            throw new UndefinedException(id_exp->getId());
+            throw UndefinedIdentifierException(id_exp->getId());
 
         // Just look up type
         return func->getLocalType(id_exp->getId());
@@ -83,13 +62,13 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         switch(unop_exp->getOp()) {
         case ASTUnopExp::NOT:
             if (!t->equal(ASTBooleanType::get()))
-                throw new IllegalTypeException();
+                throw IllegalTypeException();
             return t;
             break;
         case ASTUnopExp::BNOT:
         case ASTUnopExp::NEG:
             if (!t->equal(ASTIntegerType::get()))
-                throw new IllegalTypeException();
+                throw IllegalTypeException();
             return t;
             break;
         }
@@ -113,38 +92,35 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         case ASTBinopExp::BOR:
         case ASTBinopExp::BXOR:
             if (!t1->equal(ASTIntegerType::get()) || !t2->equal(ASTIntegerType::get()))
-                throw new IllegalTypeException();
+                throw IllegalTypeException();
             return ASTIntegerType::get();
         case ASTBinopExp::OR:
         case ASTBinopExp::AND:
             if (!t1->equal(ASTBooleanType::get()) || !t2->equal(ASTBooleanType::get()))
-                throw new IllegalTypeException();
+                throw IllegalTypeException();
             return ASTBooleanType::get();
         case ASTBinopExp::LEQ:
         case ASTBinopExp::GEQ:
         case ASTBinopExp::LT:
         case ASTBinopExp::GT:
             if (!t1->equal(ASTIntegerType::get()) || !t2->equal(ASTIntegerType::get()))
-                throw new IllegalTypeException();
+                throw IllegalTypeException();
             return ASTBooleanType::get();
         case ASTBinopExp::EQ:
         case ASTBinopExp::NEQ:
             if (!t1->equal(t2) || (!t1->equal(ASTIntegerType::get()) && !t1->equal(ASTBooleanType::get())))
-                throw new IllegalTypeException();
+                throw IllegalTypeException();
             return ASTBooleanType::get();
         }
     }
     else if (std::shared_ptr<ASTCallExp> call_exp = std::dynamic_pointer_cast<ASTCallExp>(node)) {
+        // The function checker guarantees that this exists
         std::shared_ptr<FunctionInfo> call_func = mod->getFunction(call_exp->getId());
-
-        // Function must have been declared
-        if (!call_func)
-            throw new UndeclaredException(call_exp->getId());
 
         // Function must not have been shadowed by a variable. This leaves room for function
         // pointers.
         if (func->hasLocal(call_exp->getId()))
-            throw new IllegalTypeException(); // TODO
+            throw IllegalTypeException(); // TODO
 
         // TODO: make sure it is eventually defined
         // TODO: make sure any other declarations/definitions match
@@ -158,7 +134,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         while (true) {
             // Make sure the argument counts match
             if ((args == nullptr || exprs == nullptr) && (args != nullptr || exprs != nullptr))
-                throw new IllegalTypeException(); // TODO maybe a different exception
+                throw IllegalTypeException(); // TODO maybe a different exception
             else if (args == nullptr && exprs == nullptr)
                 break;
 
@@ -168,7 +144,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             // TODO: test for void argument
 
             if (!exp_type->equal(arg_type))
-                throw new IllegalTypeException();
+                throw IllegalTypeException();
 
             args = args->getTail();
             exprs = exprs->getTail();
@@ -180,7 +156,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         return sig->getReturnType();
     }
     else
-        throw new ASTMalformedException();
+        throw ASTMalformedException();
 }
 
 void typecheck_stmts(
@@ -214,7 +190,7 @@ void typecheck_stmt(
 
         // Must not be declared yet
         if (decl.find(decl_stmt->getId()) != decl.end())
-            throw new RedeclaredException(decl_stmt->getId());
+            throw RedeclaredIdentifierException(decl_stmt->getId());
 
         std::shared_ptr<ASTExpNode> decl_exp = decl_stmt->getExp();
 
@@ -223,7 +199,7 @@ void typecheck_stmt(
             std::shared_ptr<ASTTypeNode> exp_type = typecheck_exp(mod, func, decl, def, decl_exp);
 
             if (!exp_type->equal(decl_type))
-                throw new IllegalTypeException();
+                throw IllegalTypeException();
 
             def.insert(decl_stmt->getId());
         }
@@ -236,13 +212,13 @@ void typecheck_stmt(
     else if (std::shared_ptr<ASTVarDefnStmt> defn_stmt = std::dynamic_pointer_cast<ASTVarDefnStmt>(head)) {
         // Must be declared
         if (decl.find(defn_stmt->getId()) == decl.end())
-            throw new UndeclaredException(defn_stmt->getId());
+            throw UndeclaredIdentifierException(defn_stmt->getId());
 
         std::shared_ptr<ASTTypeNode> decl_type = func->getLocalType(defn_stmt->getId());
         std::shared_ptr<ASTTypeNode> exp_type = typecheck_exp(mod, func, decl, def, defn_stmt->getExp());
 
         if (!exp_type->equal(decl_type))
-            throw new IllegalTypeException();
+            throw IllegalTypeException();
 
         if (def.find(defn_stmt->getId()) == def.end())
             def.insert(defn_stmt->getId());
@@ -255,18 +231,18 @@ void typecheck_stmt(
 
         // Should not return anything in a void function
         if (isVoid && ret_node->getExp())
-            throw new IllegalTypeException(); // TODO better exception
+            throw IllegalTypeException(); // TODO better exception
 
         // Must return something in a non-void function
         if (!ret_node->getExp() && !isVoid)
-            throw new IllegalTypeException(); // TODO better exception
+            throw IllegalTypeException(); // TODO better exception
 
         // Must return the correct type in a non-void function
         if (ret_node->getExp()) {
             std::shared_ptr<ASTTypeNode> exp_type = typecheck_exp(mod, func, decl, def, ret_node->getExp());
 
             if (!exp_type->equal(expected))
-                throw new IllegalTypeException();
+                throw IllegalTypeException();
         }
 
         // Return statements need to define any variables that have been
@@ -301,7 +277,7 @@ void typecheck_stmt(
         std::shared_ptr<ASTTypeNode> cond_type = typecheck_exp(mod, func, decl, def, if_node->getCond());
 
         if (!cond_type->equal(ASTBooleanType::get()))
-            throw new IllegalTypeException();
+            throw IllegalTypeException();
 
         // Treat branches as scopes
         idset scope_decl_left = decl;
@@ -334,7 +310,7 @@ void typecheck_stmt(
     else if (std::shared_ptr<ASTExprStmt> exp_stmt = std::dynamic_pointer_cast<ASTExprStmt>(head))
         typecheck_exp(mod, func, decl, def, exp_stmt->getExp());
     else
-        throw new ASTMalformedException();
+        throw ASTMalformedException();
 }
 
 void typecheck_tops(
@@ -352,14 +328,16 @@ void typecheck_top(
     std::shared_ptr<ASTDeclNode> node)
 {
     if (std::shared_ptr<ASTFunDecl> funDefn = std::dynamic_pointer_cast<ASTFunDecl>(node)) {
-        // Allocate space for information about this function
-        std::shared_ptr<FunctionInfo> funInfo = std::make_shared<FunctionInfo>(funDefn->getName(), funDefn->getSignature());
-        mod->addFunction(funInfo);
+        // Skip empty declarations
+        if (!funDefn->isDefn())
+            return;
+
+        // The function checker has already allocated FunctionInfo's for us
+        std::shared_ptr<FunctionInfo> funInfo = mod->getFunction(funDefn->getName());
 
         idset decl, def;
 
-        // Add all arguments to the local symbol table and mark them as declared
-        // and defined.
+        // Mark all arguments as declared and defined.
         std::shared_ptr<ASTArgSeqNode> args = funDefn->getSignature()->getArgs();
 
         while (args != nullptr) {
@@ -374,11 +352,11 @@ void typecheck_top(
         // Check the function body, building the local symbol table in the process
         typecheck_stmts(mod, funInfo, decl, def, funDefn->getBody());
     }
-    else if (std::shared_ptr<ASTTypeDecl> typeDefn = std::dynamic_pointer_cast<ASTTypeDecl>(node)) {
-        // Skip it
-    }
+    // Skip
+    else if (std::shared_ptr<ASTTypeDecl> typeDefn = std::dynamic_pointer_cast<ASTTypeDecl>(node))
+        return;
     else
-        throw new ASTMalformedException();
+        throw ASTMalformedException();
 }
 
 };

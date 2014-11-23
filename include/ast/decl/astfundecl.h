@@ -24,6 +24,7 @@ private:
 
     std::string name;
     std::shared_ptr<ASTFunType> sig;
+    bool defn;
     std::shared_ptr<ASTStmtSeqNode> body;
 
 public:
@@ -33,9 +34,10 @@ public:
      *
      * @param[in] name Function name
      * @param[in] sig  Function signature
-     * @param[in] body Function body statement sequence
+     * @param[in] defn Whether this is a definition as well as a declaration
+     * @param[in] body Function body statement sequence. Only valid if 'defn' is true.
      */
-    ASTFunDecl(std::string name, std::shared_ptr<ASTFunType> sig, std::shared_ptr<ASTStmtSeqNode> body);
+    ASTFunDecl(std::string name, std::shared_ptr<ASTFunType> sig, bool defn, std::shared_ptr<ASTStmtSeqNode> body);
 
     /**
      * @brief Destructor
@@ -46,6 +48,11 @@ public:
      * @brief Get function name
      */
     std::string getName();
+
+    /**
+     * @brief Get whether this is a definition
+     */
+    bool isDefn();
 
     /**
      * @brief Get function type/signature

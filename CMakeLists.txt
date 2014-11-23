@@ -50,6 +50,7 @@ endif ("${PTX_BACKEND}" MATCHES "TRUE")
 add_executable(cc
     src/ast/astnode.cpp
     src/ast/astseqnode.cpp
+    src/ast/astvisitor.cpp
     src/ast/expr/astbinopexp.cpp
     src/ast/expr/astbooleanexp.cpp
     src/ast/expr/astcallexp.cpp
@@ -87,6 +88,8 @@ add_executable(cc
     src/statics/symboltable.cpp
     src/statics/typecheck.cpp
     src/statics/typeresolve.cpp
+    src/statics/funcheck.cpp
+    src/statics/exceptions.cpp
     ${BISON_parser_OUTPUTS}
     ${FLEX_lexer_OUTPUTS}
 )
