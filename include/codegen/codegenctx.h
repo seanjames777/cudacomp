@@ -14,6 +14,24 @@
 #include <statics/functioninfo.h>
 #include <statics/moduleinfo.h>
 
+#include <llvm/IR/Module.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Value.h>
+#include <llvm/IR/Constants.h>
+#include <llvm/IR/Type.h>
+#include <llvm/IR/Function.h>
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/Instructions.h>
+#include <llvm/PassManager.h>
+#include <llvm/Support/raw_ostream.h>
+#include <llvm/IR/IRPrintingPasses.h>
+#include <llvm/ADT/Triple.h>
+#include <llvm/Support/raw_os_ostream.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/Transforms/Scalar.h>
+
+using namespace llvm;
+
 namespace Codegen {
 
 class CodegenCtx {
@@ -25,6 +43,7 @@ private:
     bool                           emit_device;  // Should we emit GPU code
     SymbolTable<Function *>        functions;    // Mapping from function names to LLVM functions
     std::shared_ptr<ModuleInfo>    modInfo;      // Information about module
+    Function                      *alloc_array;  // Runtime alloc_array function
 
     // Current function
     BasicBlock                    *def_bblock;   // Locals definition block, assists with SSA
@@ -38,17 +57,6 @@ private:
     // Current basic block
     std::shared_ptr<IRBuilder<>>   body_builder; // IRBuilder for current block
 
-    /**
-     * @brief Insert return instructions in basic blocks that are missing a terminator.
-     * We know that the function is well-formed due to the statics checks, so the only possibility
-     * is that the (void) function did not have an explicit return statement. In the
-     * latter case, insert an empty return statement. Also checks any successor blocks.
-     *
-     * @param[inout] visited Set of blocks already visited
-     * @param[in]    bblock  Block to visit
-     */
-    void insertMissingReturns(std::unordered_set<BasicBlock *> & visited, BasicBlock *bblock);
-
 public:
 
     /**
@@ -58,6 +66,11 @@ public:
      * @param[in] modInfo     Module information
      */
     CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo);
+
+    /**
+     * @brief Get the 'alloc_array' runtime function
+     */
+    Function *getAllocArray();
 
     /**
      * @brief Get module information

@@ -1,6 +1,7 @@
-AUTHOR:
+AUTHORS:
 
     Sean James <seanjames777@gmail.com>
+    Kurt Mueller <kurtmueller42@gmail.com>
 
 BUILD:
 
@@ -11,9 +12,10 @@ BUILD:
     - Install LLVM, and tell the build system which LLVM to use. For example,
       if the 'llc' command is available on your path as "llc-mp-3.5", then you
       would configure CMake as follows.
-
-    To support a CUDA backend, define "PTX_BACKEND" and set the path to CUDA.
-    Otherwise, omit these options.
+    - The driver requires Python
+    - The CUDA backend requires that CUDA is installed. To support a CUDA
+      backend, define "PTX_BACKEND" and set the path to CUDA. Otherwise, omit
+      these options.
 
     Then, create a build directory, configure CMake, and build:
 

@@ -72,7 +72,7 @@ public:
     VISIT_HDR(ReturnStmt, node)
     VISIT_HDR(ScopeStmt, node)
     VISIT_HDR(VarDeclStmt, node)
-    VISIT_HDR(VarDefnStmt, node)
+    VISIT_HDR(AssignStmt, node)
     VISIT_HDR(ArgNode, node)
     VISIT_HDR(ArgSeqNode, node)
     VISIT_HDR(TypeNode, node)

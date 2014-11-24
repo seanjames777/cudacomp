@@ -70,3 +70,7 @@ void ASTFunType::print(std::ostream & ss) {
 
     ss << ")";
 }
+
+int ASTFunType::getSize() {
+    throw std::runtime_error("Funtion types do not have a size");
+}

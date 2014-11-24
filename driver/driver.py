@@ -13,7 +13,8 @@ run_list = []
 dump_temp = False
 
 SOURCE_DIR = "@CMAKE_CURRENT_SOURCE_DIR@/"
-BINARY_DIR = "@CMAKE_INSTALL_PREFIX@/"
+BINARY_DIR = "@CMAKE_CURRENT_BINARY_DIR@/"
+INSTALL_DIR = "@CMAKE_INSTALL_PREFIX@/"
 LLC = "@LLVM_LLC@"
 
 tests = [
@@ -71,7 +72,8 @@ tests = [
     (SOURCE_DIR + "tests/testWhile2.cc", 55),
     (SOURCE_DIR + "tests/testWhile3.cc", 1000),
     (SOURCE_DIR + "tests/testWhile4.cc", "error"),
-    (SOURCE_DIR + "tests/testWhile5.cc", "error"), 
+    (SOURCE_DIR + "tests/testWhile5.cc", "error"),
+    (SOURCE_DIR + "tests/testWhile6.cc", "error"),
     (SOURCE_DIR + "tests/testTypeDef1.cc", 5),
     (SOURCE_DIR + "tests/testTypeDef2.cc", "error"),
     (SOURCE_DIR + "tests/testTypeDef3.cc", 5),
@@ -84,6 +86,19 @@ tests = [
     (SOURCE_DIR + "tests/testFunDecl4.cc", "error"),
     (SOURCE_DIR + "tests/testFunDecl5.cc", "error"),
     (SOURCE_DIR + "tests/testFunDecl6.cc", "error"),
+    (SOURCE_DIR + "tests/testFunDecl7.cc", "error"),
+    (SOURCE_DIR + "tests/testFunDecl8.cc", "error"),
+    (SOURCE_DIR + "tests/testFunDecl9.cc", 5),
+    (SOURCE_DIR + "tests/testArr1.cc", 5),
+    (SOURCE_DIR + "tests/testArr2.cc", 0),
+    (SOURCE_DIR + "tests/testArr3.cc", 5),
+    (SOURCE_DIR + "tests/testArr4.cc", 19),
+    (SOURCE_DIR + "tests/testArr5.cc", 10),
+    (SOURCE_DIR + "tests/testArr6.cc", 5),
+    (SOURCE_DIR + "tests/testArr7.cc", "error"),
+    (SOURCE_DIR + "tests/testArr8.cc", "error"),
+    (SOURCE_DIR + "tests/testArr9.cc", "error"),
+    (SOURCE_DIR + "tests/testLValue1.cc", "error"),
 ]
 
 # TODO: actually test type checking...
@@ -154,20 +169,21 @@ for (name, expected) in tests:
     output = []
 
     if target == "host":
-        (cc_stat, cc_out) = run_shell([ BINARY_DIR + "bin/cc", "-o", temp + "_host.ll", name ])
+        (cc_stat, cc_out) = run_shell([ INSTALL_DIR + "bin/cc", "-o", temp + "_host.ll", name ])
         if cc_stat == 0:
             run_shell([ LLC, "-o", temp + "_host.o", "-filetype=obj", temp + "_host.ll" ])
-            run_shell([ "clang", "-o", temp + "_host", temp + "_host.o", BINARY_DIR + "lib/libhost_rt.a" ])
+            run_shell([ "clang", "-o", temp + "_host", temp + "_host.o", INSTALL_DIR + "lib/libhost_rt.a" ])
             (stat, output) = run_shell([ temp + "_host" ])
         else:
             (stat, output) = (cc_stat, cc_out)
     else:
-        (cc_stat, cc_out) = run_shell([ BINARY_DIR + "bin/cc", "-o", temp + "_device.ll", "--emit-device", name ])
+        (cc_stat, cc_out) = run_shell([ INSTALL_DIR + "bin/cc", "-o", temp + "_device.ll", "--emit-device", name ])
         if cc_stat == 0:
             run_shell([ LLC, "-o", temp + "_device.ptx", temp + "_device.ll" ])
-            run_shell([ "nvcc", "-fatbin", "-o", temp + "_device.cubin", temp + "_device.ptx" ])
-            run_shell([ "clang", "-o", temp + "_device", BINARY_DIR + "lib/libdevice_rt.a", "-framework", "CUDA",
-                "-sectcreate", "__TEXT", "__kernels", temp + "_device.cubin",
+            run_shell([ "nvcc", "-arch=sm_30", "-cubin", "-dc", "-o", temp + "_device.cubin", temp + "_device.ptx" ])
+            run_shell([ "nvcc", "-arch=sm_30", "-cubin", "-dlink", "-o", temp + "_link.cubin", temp + "_device.cubin", BINARY_DIR + "device_rt_kernel.cubin" ])
+            run_shell([ "clang", "-o", temp + "_device", INSTALL_DIR + "lib/libdevice_rt.a", "-framework", "CUDA",
+                "-sectcreate", "__TEXT", "__kernels", temp + "_link.cubin",
                 "-sectalign", "__TEXT", "__kernels", "8" ])
             (stat, output) = run_shell([ temp + "_device" ])
         else:

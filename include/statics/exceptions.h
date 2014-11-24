@@ -137,11 +137,35 @@ public:
 };
 
 /**
- * @brief An operation was performed on an illegal type
+ * @brief A function was declared more than once with different signatures
  */
 class IncorrectSignatureException : public StaticsException {
 public:
     IncorrectSignatureException(std::string id);
+};
+
+/**
+ * @brief A function was declared more than once with different linkage
+ */
+class IncorrectLinkageException : public StaticsException {
+public:
+    IncorrectLinkageException(std::string id);
+};
+
+/**
+ * @brief An external function was defined
+ */
+class ExternalFunctionDefinedException : public StaticsException {
+public:
+    ExternalFunctionDefinedException(std::string id);
+};
+
+/**
+ * @brief Attempted to assign to an illegal lvalue
+ */
+class IllegalLValueException : public StaticsException {
+public:
+    IllegalLValueException();
 };
 
 }

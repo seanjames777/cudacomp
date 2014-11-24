@@ -12,6 +12,7 @@
 #include <statics/symboltable.h>
 #include <ast/type/asttypenode.h>
 #include <ast/type/astfuntype.h>
+#include <ast/decl/astdeclnode.h>
 
 /**
  * @brief Information about a function, including its name, signature, and
@@ -23,6 +24,8 @@ private:
     std::shared_ptr<ASTFunType> signature;
     SymbolTable<std::shared_ptr<ASTTypeNode>> locals; // including arguments
     std::string name;
+    enum ASTDeclNode::Linkage linkage;
+    bool cudaGlobal;
 
 public:
 
@@ -31,8 +34,10 @@ public:
      *
      * @param[in] name      Function name
      * @param[in] signature Function signature
+     * @param[in] linkage   Function linkage
      */
-    FunctionInfo(std::string name, std::shared_ptr<ASTFunType> signature);
+    FunctionInfo(std::string name, std::shared_ptr<ASTFunType> signature,
+        enum ASTDeclNode::Linkage linkage, bool cudaGlobal = false);
 
     /**
      * @brief Get function signature
@@ -45,12 +50,22 @@ public:
     std::string getName();
 
     /**
+     * @brief Get function linkage
+     */
+     enum ASTDeclNode::Linkage getLinkage();
+
+    /**
      * @brief Add a local symbol to the function
      *
      * @param[in] id   Symbol name
      * @param[in] type Symbol type
      */
     void addLocal(std::string id, std::shared_ptr<ASTTypeNode> type);
+
+    /**
+     * @brief Get whether this is a CUDA kernel
+     */
+    bool isCudaGlobal();
 
     /**
      * @brief Get the type of a symbol in the function's body

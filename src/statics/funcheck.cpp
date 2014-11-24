@@ -20,8 +20,12 @@ void funcheck_exp(
         if (!call_func)
             throw UndeclaredFunctionException(call_exp->getId());
 
-        called.insert(call_exp->getId());
+        // Don't require definitions for externally defined functions
+        if (call_func->getLinkage() == ASTDeclNode::Internal)
+            called.insert(call_exp->getId());
     }
+
+    // TODO: We actually need to do the whole traversal here to catch calls in subexpressions
 }
 
 void funcheck_stmts(
@@ -44,7 +48,7 @@ void funcheck_stmt(
         if (decl_stmt->getExp())
             funcheck_exp(mod, called, decl_stmt->getExp());
     }
-    else if (std::shared_ptr<ASTVarDefnStmt> defn_stmt = std::dynamic_pointer_cast<ASTVarDefnStmt>(head))
+    else if (std::shared_ptr<ASTAssignStmt> defn_stmt = std::dynamic_pointer_cast<ASTAssignStmt>(head))
         funcheck_exp(mod, called, defn_stmt->getExp());
     else if (std::shared_ptr<ASTReturnStmt> ret_node = std::dynamic_pointer_cast<ASTReturnStmt>(head)) {
         if (ret_node->getExp())
@@ -63,7 +67,7 @@ void funcheck_stmt(
     }
     else if (std::shared_ptr<ASTWhileStmt> while_node = std::dynamic_pointer_cast<ASTWhileStmt>(head)) {
         funcheck_exp(mod, called, while_node->getCond());
-        funcheck_stmts(mod, called, while_node->getBodyStmt());
+        funcheck_stmts(mod, called, while_node->getBody());
     }
     else if (std::shared_ptr<ASTExprStmt> exp_stmt = std::dynamic_pointer_cast<ASTExprStmt>(head))
         funcheck_exp(mod, called, exp_stmt->getExp());
@@ -103,13 +107,19 @@ void funcheck_top(
 {
     if (std::shared_ptr<ASTFunDecl> funDefn = std::dynamic_pointer_cast<ASTFunDecl>(node)) {
         // Rules:
-        //   - Functions may be declared more than once, but may only be defined once
+        //   - Functions may be declared more than once
+        //   - All declarations of a function must have the same signature and linkage
+        //   - Internal functions may only be defined once
+        //   - External functions may not be defined
         //   - Functions must be declared before they can be called
-        //   - Any function that is called must be defined
-        //   - All declarations of a function must have the same signature
+        //   - Any internal function that is called must be defined
 
         // Check for an existing declaration
         std::shared_ptr<FunctionInfo> funInfo = mod->getFunction(funDefn->getName());
+
+        // Make sure external functions are not defined
+        if (funDefn->getLinkage() == ASTDeclNode::External && funDefn->isDefn())
+            throw ExternalFunctionDefinedException(funDefn->getName());
 
         if (funInfo) {
             std::shared_ptr<ASTFunType> curr_sig = funInfo->getSignature();
@@ -119,19 +129,24 @@ void funcheck_top(
             if (!curr_sig->equal(new_sig))
                 throw IncorrectSignatureException(funDefn->getName());
 
+            if (funInfo->getLinkage() != funDefn->getLinkage())
+                throw IncorrectLinkageException(funDefn->getName());
+
             // If there is a definition, the function may not be defined already
-            if (funDefn->getBody() && defined.find(funDefn->getName()) != defined.end())
+            if (funDefn->isDefn() && defined.find(funDefn->getName()) != defined.end())
                 throw RedefinedFunctionException(funDefn->getName());
         }
         else {
             // Add the new function to the module
-            funInfo = std::make_shared<FunctionInfo>(funDefn->getName(), funDefn->getSignature());
+            funInfo = std::make_shared<FunctionInfo>(funDefn->getName(),
+                funDefn->getSignature(), funDefn->getLinkage(),
+                funDefn->getName() == "_cc_main");
             mod->addFunction(funInfo);
         }
 
         // If there is a body, mark the function as defined and collect function calls from the
         // body.
-        if (funDefn->getBody()) {
+        if (funDefn->isDefn()) {
             defined.insert(funDefn->getName());
             funcheck_stmts(mod, called, funDefn->getBody());
         }

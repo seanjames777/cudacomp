@@ -20,6 +20,17 @@ class ASTDeclNode : public ASTNode {
 public:
 
     /**
+     * @brief Function linkage options
+     *
+     * Currently this is only used for function declarations, but it could be
+     * extended to structs, global variables, etc.
+     */
+    enum Linkage {
+        Internal,  //!< Defined in the current module
+        External   //!< Defined outside the current module
+    };
+
+    /**
      * @brief Constructor
      */
     ASTDeclNode();

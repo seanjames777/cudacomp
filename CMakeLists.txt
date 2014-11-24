@@ -35,7 +35,7 @@ include_directories(include)
 find_package(FLEX)
 find_package(BISON)
 
-BISON_TARGET(parser src/parser/parser.y ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp)
+BISON_TARGET(parser src/parser/parser.y ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp VERBOSE parser.txt)
 FLEX_TARGET(lexer src/parser/lexer.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cpp)
 ADD_FLEX_BISON_DEPENDENCY(lexer parser)
 
@@ -51,25 +51,28 @@ add_executable(cc
     src/ast/astnode.cpp
     src/ast/astseqnode.cpp
     src/ast/astvisitor.cpp
+    src/ast/expr/astallocarrayexp.cpp
     src/ast/expr/astbinopexp.cpp
     src/ast/expr/astbooleanexp.cpp
     src/ast/expr/astcallexp.cpp
     src/ast/expr/astexpnode.cpp
     src/ast/expr/astidentifierexp.cpp
+    src/ast/expr/astindexexp.cpp
     src/ast/expr/astintegerexp.cpp
     src/ast/expr/astunopexp.cpp
+    src/ast/stmt/astassignstmt.cpp
     src/ast/stmt/astexprstmt.cpp
     src/ast/stmt/astifstmt.cpp
     src/ast/stmt/astreturnstmt.cpp
     src/ast/stmt/astscopestmt.cpp
     src/ast/stmt/aststmtnode.cpp
     src/ast/stmt/astvardeclstmt.cpp
-    src/ast/stmt/astvardefnstmt.cpp
     src/ast/stmt/astwhilestmt.cpp
     src/ast/decl/astfundecl.cpp
     src/ast/decl/astdeclnode.cpp
     src/ast/decl/asttypedecl.cpp
     src/ast/type/astargnode.cpp
+    src/ast/type/astarrtype.cpp
     src/ast/type/astbooleantype.cpp
     src/ast/type/astfuntype.cpp
     src/ast/type/astidtype.cpp
@@ -116,6 +119,16 @@ if ("${PTX_BACKEND}" MATCHES "TRUE")
 add_library(device_rt
     driver/device_rt.c
 )
+
+add_custom_command(
+    OUTPUT device_rt_kernel.cubin
+    COMMAND nvcc -arch=sm_30 -cubin -dc -o device_rt_kernel.cubin ${CMAKE_CURRENT_SOURCE_DIR}/driver/device_rt_kernel.cu
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    DEPENDS driver/device_rt_kernel.cu
+    COMMENT "Building device runtime kernels" VERBATIM)
+
+add_custom_target(device_rt_kernel DEPENDS device_rt_kernel.cubin)
+add_dependencies(device_rt device_rt_kernel)
 endif ("${PTX_BACKEND}" MATCHES "TRUE")
 
 # Configure documentation

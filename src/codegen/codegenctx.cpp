@@ -23,6 +23,18 @@ CodegenCtx::CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo)
       body_builder(nullptr)
 {
     module = std::make_shared<Module>("", context);
+
+    // Construct a declaration of the runtime's alloc_array function
+    std::vector<Type *> argTypes;
+    argTypes.push_back(Type::getInt32Ty(context));
+    argTypes.push_back(Type::getInt32Ty(context));
+
+    FunctionType *ftype = FunctionType::get(PointerType::getUnqual(Type::getInt8Ty(context)), argTypes, false);
+    alloc_array = Function::Create(ftype, GlobalValue::ExternalLinkage, "_rt_alloc_array", module.get());
+}
+
+Function *CodegenCtx::getAllocArray() {
+    return alloc_array;
 }
 
 std::shared_ptr<ModuleInfo> CodegenCtx::getModuleInfo() {
@@ -85,8 +97,10 @@ Function *CodegenCtx::createFunction(std::shared_ptr<FunctionInfo> funcInfo) {
 
     bool isVoid = sig->getReturnType()->equal(ASTVoidType::get());
 
-    if (emit_device && !isVoid)
+    if (emit_device && funcInfo->isCudaGlobal() && !isVoid) {
         argTypes.push_back(PointerType::getUnqual(returnType));
+        returnType = Type::getVoidTy(context);
+    }
 
     // Add arguments to LLVM function type
     while (args != nullptr) {
@@ -95,10 +109,7 @@ Function *CodegenCtx::createFunction(std::shared_ptr<FunctionInfo> funcInfo) {
         args = args->getTail();
     }
 
-    if (emit_device)
-        ftype = FunctionType::get(Type::getVoidTy(context), argTypes, false);
-    else
-        ftype = FunctionType::get(returnType, argTypes, false);
+    ftype = FunctionType::get(returnType, argTypes, false);
 
     Function *function = Function::Create(ftype, GlobalValue::ExternalLinkage, funcInfo->getName(), module.get());
     functions.set(funcInfo->getName(), function);
@@ -117,13 +128,13 @@ void CodegenCtx::startFunction(std::string id) {
     first_bblock = createBlock();
     pushBlock(first_bblock);
 
-    funcInfo = modInfo->getFunction(id);
+    this->funcInfo = modInfo->getFunction(id);
     std::shared_ptr<ASTFunType> sig = funcInfo->getSignature();
 
     std::shared_ptr<ASTArgSeqNode> args = sig->getArgs();
     auto arg_iter = function->arg_begin();
 
-    if (emit_device)
+    if (emit_device && funcInfo->isCudaGlobal() && !sig->getReturnType()->equal(ASTVoidType::get()))
         arg_iter++;
 
     // Map arguments to symbol table. Move arguments into alloca's functions
@@ -137,6 +148,7 @@ void CodegenCtx::startFunction(std::string id) {
         symbols.set(arg->getName(), toVal);
 
         Value *argVal = arg_iter++;
+
         def_builder->CreateStore(argVal, toVal);
 
         args = args->getTail();
@@ -169,35 +181,8 @@ void CodegenCtx::markKernel(Function *kernel) {
     cat->addOperand(node);
 }
 
-void CodegenCtx::insertMissingReturns(std::unordered_set<BasicBlock *> & visited, BasicBlock *bblock) {
-    // Skip if we have already checked this block
-    if (visited.find(bblock) != visited.end())
-        return;
-
-    // Mark as visited
-    visited.insert(bblock);
-
-    // Get the terminator instruction
-    TerminatorInst *term = bblock->getTerminator();
-
-    // The case we're interested in: insert a return
-    if (!term)
-        ReturnInst::Create(context, nullptr, bblock);
-    // Otherwise, it's either a jump or return instruction, so we can just
-    // check each successor.
-    else
-        for (unsigned int i = 0; i < term->getNumSuccessors(); i++)
-            insertMissingReturns(visited, term->getSuccessor(i));
-}
-
 void CodegenCtx::finishFunction() {
     def_builder->CreateBr(first_bblock);
-
-    // Insert a return if one is missing and this is a void function
-    /*if (funcInfo->getSignature()->getReturnType()->equal(ASTVoidType::get())) {
-        std::unordered_set<BasicBlock *> visited;
-        insertMissingReturns(visited, first_bblock);
-    }*/
 }
 
 std::shared_ptr<IRBuilder<>> CodegenCtx::getBuilder() {

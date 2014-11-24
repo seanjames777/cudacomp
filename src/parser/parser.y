@@ -19,7 +19,7 @@ void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
 std::unordered_map<std::string, ASTTypeNode *> typedefs;
 
 %}
-
+;
 // Note: We can't return anything, so we need to use a pointer to a shared
 // pointer. TODO: Could use a reference, but it's not much of an improvement.
 %parse-param { std::shared_ptr<ASTDeclSeqNode> *root }
@@ -37,6 +37,7 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
     ASTTypeNode *type;
     ASTArgNode *arg;
     ASTArgSeqNode *arg_seq;
+    enum ASTDeclNode::Linkage linkage;
     int number;
     char *string;
     bool boolean;
@@ -46,9 +47,9 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %token <string> IDENT IDTYPE
 %token <boolean> TRUE FALSE
 %token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR NOT BNOT
-%token ASSIGN SEMI COMMA
+%token ASSIGN SEMI COMMA LBRACKET RBRACKET
 %token INT BOOL VOID
-%token RETURN IF ELSE TYPEDEF WHILE
+%token RETURN IF ELSE TYPEDEF WHILE EXTERN ALLOC_ARRAY
 %token LPAREN RPAREN LBRACE RBRACE
 %token EQ NEQ LEQ GEQ LT GT
 
@@ -63,6 +64,7 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %type <top_seq> top_list
 %type <top> fundecl typedecl
 %type <exp_seq> arg_list arg_list_follow
+%type <linkage> linkage
 
 %right ASSIGN
 %left OR
@@ -111,7 +113,6 @@ exp:
     NUMBER                            { $$ = new ASTIntegerExp($1); }
   | TRUE                              { $$ = new ASTBooleanExp(true); }
   | FALSE                             { $$ = new ASTBooleanExp(false); }
-  | IDENT                             { $$ = new ASTIdentifierExp(std::string($1)); free($1); }
   | exp PLUS exp                      { $$ = new ASTBinopExp(ASTBinopExp::ADD, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp MINUS exp                     { $$ = new ASTBinopExp(ASTBinopExp::SUB, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp DIV exp                       { $$ = new ASTBinopExp(ASTBinopExp::DIV, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
@@ -133,8 +134,12 @@ exp:
   | NOT exp                           { $$ = new ASTUnopExp(ASTUnopExp::NOT, std::shared_ptr<ASTExpNode>($2)); }
   | BNOT exp                          { $$ = new ASTUnopExp(ASTUnopExp::BNOT, std::shared_ptr<ASTExpNode>($2)); }
   | MINUS exp %prec UMINUS            { $$ = new ASTUnopExp(ASTUnopExp::NEG, std::shared_ptr<ASTExpNode>($2)); }
-  | LPAREN exp RPAREN                 { $$ = $2; }
   | IDENT LPAREN arg_list RPAREN      { $$ = new ASTCallExp($1, std::shared_ptr<ASTExpSeqNode>($3)); }
+  | IDENT                             { $$ = new ASTIdentifierExp(std::string($1)); free($1); }
+  | LPAREN exp RPAREN                 { $$ = $2; }
+  | exp LBRACKET exp RBRACKET         { $$ = new ASTIndexExp(std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | ALLOC_ARRAY LPAREN type COMMA exp RPAREN
+    { $$ = new ASTAllocArrayExp(std::shared_ptr<ASTTypeNode>($3), std::shared_ptr<ASTExpNode>($5)); }
   ;
 
 type:
@@ -142,12 +147,13 @@ type:
   | BOOL                              { $$ = new ASTBooleanType(); }
   | VOID                              { $$ = new ASTVoidType(); }
   | IDTYPE                            { $$ = new ASTIdType(std::string($1)); free($1); }
+  | type LBRACKET RBRACKET            { $$ = new ASTArrType(std::shared_ptr<ASTTypeNode>($1)); }
   ;
 
 simp:
     type IDENT                        { $$ = new ASTVarDeclStmt(std::shared_ptr<ASTTypeNode>($1), std::string($2), nullptr); free($2); }
   | type IDENT ASSIGN exp             { $$ = new ASTVarDeclStmt(std::shared_ptr<ASTTypeNode>($1), std::string($2), std::shared_ptr<ASTExpNode>($4)); free($2); }
-  | IDENT ASSIGN exp                  { $$ = new ASTVarDefnStmt(std::string($1), std::shared_ptr<ASTExpNode>($3)); free($1); } // TODO free
+  | exp ASSIGN exp                    { $$ = new ASTAssignStmt(std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp                               { $$ = new ASTExprStmt(std::shared_ptr<ASTExpNode>($1)); }
   ;
 
@@ -157,7 +163,7 @@ stmt:
   | RETURN SEMI                       { $$ = new ASTReturnStmt(nullptr); }
   | LBRACE stmt_list RBRACE           { $$ = new ASTScopeStmt(std::shared_ptr<ASTStmtSeqNode>($2)); }
   | IF LPAREN exp RPAREN stmt elseopt { $$ = new ASTIfStmt(std::shared_ptr<ASTExpNode>($3), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($5), nullptr), std::shared_ptr<ASTStmtSeqNode>($6)); }
-  | WHILE LPAREN exp RPAREN stmt      { $$ = new ASTWhileStmt(std::shared_ptr<ASTExpNode>($3), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($5), nullptr)) }
+  | WHILE LPAREN exp RPAREN stmt      { $$ = new ASTWhileStmt(std::shared_ptr<ASTExpNode>($3), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($5), nullptr)); }
   ;
 
 elseopt:
@@ -189,11 +195,16 @@ typedecl:
     }
   ;
 
+linkage:
+    /* empty */                       { $$ = ASTDeclNode::Internal; }
+  | EXTERN                            { $$ = ASTDeclNode::External; }
+  ;
+
 fundecl:
-    type IDENT LPAREN param_list RPAREN LBRACE stmt_list RBRACE
-    { $$ = new ASTFunDecl($2, std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($1), std::shared_ptr<ASTArgSeqNode>($4)), true, std::shared_ptr<ASTStmtSeqNode>($7)); }
-  | type IDENT LPAREN param_list RPAREN SEMI
-    { $$ = new ASTFunDecl($2, std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($1), std::shared_ptr<ASTArgSeqNode>($4)), false, nullptr); }
+    linkage type IDENT LPAREN param_list RPAREN LBRACE stmt_list RBRACE
+    { $$ = new ASTFunDecl($3, std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($2), std::shared_ptr<ASTArgSeqNode>($5)), true, $1, std::shared_ptr<ASTStmtSeqNode>($8)); }
+  | linkage type IDENT LPAREN param_list RPAREN SEMI
+    { $$ = new ASTFunDecl($3, std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($2), std::shared_ptr<ASTArgSeqNode>($5)), false, $1, nullptr); }
   ;
 
 arg_list_follow:

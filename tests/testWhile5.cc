@@ -1,4 +1,4 @@
-int _cc_main(){
-	if (true)
-		return 0;
+int _cc_main() {
+    while (true)
+        return 0;
 }

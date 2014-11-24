@@ -90,11 +90,26 @@ RedeclaredTypeException::RedeclaredTypeException(std::string id) {
 
 IncorrectSignatureException::IncorrectSignatureException(std::string id) {
     std::stringstream ss;
-    ss << "Declaration of function '" << id << "' did not match earlier " <<
+    ss << "Signature of function '" << id << "' did not match earlier " <<
           "declaration";
     setMsg(ss.str());
 }
 
-// TODO: and that thing with clang
+IncorrectLinkageException::IncorrectLinkageException(std::string id) {
+    std::stringstream ss;
+    ss << "Linkage of function '" << id << "' did not match earlier " <<
+          "declaration";
+    setMsg(ss.str());
+}
+
+ExternalFunctionDefinedException::ExternalFunctionDefinedException(std::string id) {
+    std::stringstream ss;
+    ss << "Function '" << id << "' was marked external then defined";
+    setMsg(ss.str());
+}
+
+IllegalLValueException::IllegalLValueException() {
+    setMsg("Attempted to assign to an illegal lvalue");
+}
 
 }

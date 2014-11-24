@@ -11,7 +11,7 @@
 #include <ast/astseqnode.h>
 #include <ast/stmt/astreturnstmt.h>
 #include <ast/stmt/astvardeclstmt.h>
-#include <ast/stmt/astvardefnstmt.h>
+#include <ast/stmt/astassignstmt.h>
 #include <ast/expr/astunopexp.h>
 #include <ast/stmt/astscopestmt.h>
 #include <ast/stmt/astifstmt.h>
@@ -26,6 +26,27 @@
 #include <ast/decl/asttypedecl.h>
 
 namespace Codegen {
+
+Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
+    std::shared_ptr<IRBuilder<>> builder = ctx->getBuilder();
+
+    // Identifier reference
+    if (std::shared_ptr<ASTIdentifierExp> id_exp = std::dynamic_pointer_cast<ASTIdentifierExp>(node)) {
+        Value *id_ptr = ctx->getOrCreateSymbol(id_exp->getId());
+        return id_ptr;
+    }
+    // Array subscript
+    else if (std::shared_ptr<ASTIndexExp> idx_exp = std::dynamic_pointer_cast<ASTIndexExp>(node)) {
+        Value *lhs = codegen_exp(ctx, idx_exp->getLValue());
+        Value *sub = codegen_exp(ctx, idx_exp->getSubscript());
+
+        return builder->CreateGEP(lhs, sub);
+    }
+    else
+        throw new ASTMalformedException();
+
+    return nullptr;
+}
 
 Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
     std::shared_ptr<IRBuilder<>> builder = ctx->getBuilder();
@@ -72,24 +93,20 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         case ASTBinopExp::GT:   return builder->CreateICmpSGT(v1, v2);
         }
     }
-    // Identifier reference
-    else if (std::shared_ptr<ASTIdentifierExp> id_exp = std::dynamic_pointer_cast<ASTIdentifierExp>(node)) {
-        Value *id_ptr = ctx->getOrCreateSymbol(id_exp->getId());
-        return builder->CreateLoad(id_ptr);
-    }
     // Function call
     else if (std::shared_ptr<ASTCallExp> call_exp = std::dynamic_pointer_cast<ASTCallExp>(node)) {
         std::vector<Value *> args;
 
         Value *ret_val = nullptr;
 
-        std::shared_ptr<ASTFunType> funDefn = ctx->getModuleInfo()->getFunction(call_exp->getId())->getSignature();
-        bool isVoid = funDefn->getReturnType()->equal(ASTVoidType::get());
+        std::shared_ptr<FunctionInfo> funcInfo = ctx->getModuleInfo()->getFunction(call_exp->getId());
+        std::shared_ptr<ASTFunType> sig = funcInfo->getSignature();
+        bool isVoid = sig->getReturnType()->equal(ASTVoidType::get());
 
         // In device mode, add a pointer to a new temp to get the return value
-        if (ctx->getEmitDevice() && !isVoid) {
+        if (ctx->getEmitDevice() && funcInfo->isCudaGlobal() && !isVoid) {
             // TODO use an address of instead maybe
-            ret_val = ctx->createTemp(convertType(funDefn->getReturnType()));
+            ret_val = ctx->createTemp(convertType(sig->getReturnType()));
             args.push_back(ret_val);
         }
 
@@ -104,7 +121,7 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
 
         Value *call = builder->CreateCall(ctx->getFunction(call_exp->getId()), args);
 
-        if (!ctx->getEmitDevice())
+        if (!ctx->getEmitDevice() || !funcInfo->isCudaGlobal())
             ret_val = call;
         else if (!isVoid) {
             ret_val = builder->CreateLoad(ret_val);
@@ -115,10 +132,31 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         // type of lvalue.
         return ret_val;
     }
-    else
-        throw new ASTMalformedException();
+    // Array allocation
+    else if (std::shared_ptr<ASTAllocArrayExp> alloc_exp = std::dynamic_pointer_cast<ASTAllocArrayExp>(node)) {
+        // Element size constant
+        Value *elemSize = ConstantInt::get(convertType(ASTIntegerType::get()),
+            alloc_exp->getElemType()->getSize());
 
-    return nullptr;
+        // Array length
+        Value *length = codegen_exp(ctx, alloc_exp->getLength());
+
+        // Call into runtime allocator
+        std::vector<Value *> args;
+        args.push_back(elemSize);
+        args.push_back(length);
+
+        Value *buff = builder->CreateCall(ctx->getAllocArray(), args);
+
+        // Cast the result to the right type
+        return builder->CreatePointerCast(buff,
+            PointerType::getUnqual(convertType(alloc_exp->getElemType())));
+    }
+    // Otherwise, it's an lvalue. Get the address and dereference it.
+    else {
+        Value *lval_ptr = codegen_lvalue(ctx, node);
+        return builder->CreateLoad(lval_ptr);
+    }
 }
 
 bool codegen_stmts(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtSeqNode> seq_node) {
@@ -144,7 +182,7 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
 
             // In device mode, have to move into return value argument because kernels
             // must return void
-            if (ctx->getEmitDevice()) {
+            if (ctx->getEmitDevice() && ctx->getCurrentFunctionInfo()->isCudaGlobal()) {
                 Value *out_arg = ctx->getCurrentFunction()->arg_begin();
 
                 builder->CreateStore(ret_val, out_arg);
@@ -170,11 +208,12 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
             builder->CreateStore(exp_val, mem);
         }
     }
-    // Variable definution
-    else if (std::shared_ptr<ASTVarDefnStmt> decl_stmt = std::dynamic_pointer_cast<ASTVarDefnStmt>(head)) {
-        Value *mem = ctx->getOrCreateSymbol(decl_stmt->getId());
+    // Assignment to an lvalue. Get the address and write to it. Note that this works for
+    // local variables as well because they are stack allocated until conversion to SSA.
+    else if (std::shared_ptr<ASTAssignStmt> decl_stmt = std::dynamic_pointer_cast<ASTAssignStmt>(head)) {
+        Value *lval = codegen_lvalue(ctx, decl_stmt->getLValue());
         Value *exp_val = codegen_exp(ctx, decl_stmt->getExp());
-        builder->CreateStore(exp_val, mem);
+        builder->CreateStore(exp_val, lval);
     }
     // Scope
     else if (std::shared_ptr<ASTScopeStmt> scope_stmt = std::dynamic_pointer_cast<ASTScopeStmt>(head)) {
@@ -241,7 +280,7 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
         bool bodyContinue;
 
         // Only need to insert looping conditional jump if body didn't return
-        if ((bodyContinue = codegen_stmts(ctx, while_node->getBodyStmt()))) {
+        if ((bodyContinue = codegen_stmts(ctx, while_node->getBody()))) {
             Value *body_cond = codegen_exp(ctx, while_node->getCond());
             ctx->getBuilder()->CreateCondBr(body_cond, bodyBlock, doneBlock);
         }
@@ -271,7 +310,7 @@ void codegen_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTDeclSeq
         // Create LLVM functions for each function
         if (std::shared_ptr<ASTFunDecl> funDefn = std::dynamic_pointer_cast<ASTFunDecl>(top_node)) {
             // Skip declarations that don't define bodies
-            if (funDefn->isDefn()) {
+            if (funDefn->isDefn() || funDefn->getLinkage() == ASTDeclNode::External) {
                 std::shared_ptr<FunctionInfo> funInfo = module->getFunction(funDefn->getName());
                 ctx->createFunction(funInfo);
             }
@@ -301,7 +340,7 @@ void codegen_top(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTDeclNode> n
         ctx->startFunction(func->getName());
         codegen_stmts(ctx, funDefn->getBody());
 
-        if (ctx->getEmitDevice() && func->getName() == "_cc_main") // TODO require this function
+        if (ctx->getEmitDevice() && func->isCudaGlobal()) // TODO require this function
             ctx->markKernel(ctx->getFunction(func->getName()));
 
         ctx->finishFunction();

@@ -11,7 +11,7 @@
 #include <ast/stmt/astreturnstmt.h>
 #include <ast/expr/astidentifierexp.h>
 #include <ast/stmt/astvardeclstmt.h>
-#include <ast/stmt/astvardefnstmt.h>
+#include <ast/stmt/astassignstmt.h>
 #include <ast/type/astintegertype.h>
 #include <ast/expr/astunopexp.h>
 #include <ast/type/astbooleantype.h>
@@ -54,6 +54,23 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         // Just look up type
         return func->getLocalType(id_exp->getId());
     }
+    // Array subscript
+    else if (std::shared_ptr<ASTIndexExp> idx_exp = std::dynamic_pointer_cast<ASTIndexExp>(node)) {
+        std::shared_ptr<ASTTypeNode> lhs_type = typecheck_exp(mod, func, decl, def, idx_exp->getLValue());
+        std::shared_ptr<ASTTypeNode> sub_type = typecheck_exp(mod, func, decl, def, idx_exp->getSubscript());
+
+        // TODO test the following cases:
+
+        // Right hand side must be an integer
+        if (!sub_type->equal(ASTIntegerType::get()))
+            throw IllegalTypeException();
+
+        // Left hand side must be an array
+        if (std::shared_ptr<ASTArrType> lhs_arr = std::dynamic_pointer_cast<ASTArrType>(lhs_type))
+            return lhs_arr->getElemType();
+        else
+            throw IllegalTypeException();
+    }
     // Unary operator
     else if (std::shared_ptr<ASTUnopExp> unop_exp = std::dynamic_pointer_cast<ASTUnopExp>(node)) {
         // Get operand types
@@ -78,7 +95,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
     else if (std::shared_ptr<ASTBinopExp> binop_exp = std::dynamic_pointer_cast<ASTBinopExp>(node)) {
         // Get operand types
         std::shared_ptr<ASTTypeNode> t1 = typecheck_exp(mod, func, decl, def, binop_exp->getE1());
-        std::shared_ptr<ASTTypeNode> t2 = typecheck_exp(mod, func, decl, def, binop_exp->getE1());
+        std::shared_ptr<ASTTypeNode> t2 = typecheck_exp(mod, func, decl, def, binop_exp->getE2());
 
         // Types must be appropriate for operation
         switch(binop_exp->getOp()) {
@@ -109,11 +126,22 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             return ASTBooleanType::get();
         case ASTBinopExp::EQ:
         case ASTBinopExp::NEQ:
-            if (!t1->equal(t2) || (!t1->equal(ASTIntegerType::get()) && !t1->equal(ASTBooleanType::get())))
+            // Must have the same type
+            if (!t1->equal(t2))
                 throw IllegalTypeException();
+
+            // Must be an 'equality type'
+            std::shared_ptr<ASTArrType> arrType = std::dynamic_pointer_cast<ASTArrType>(t1);
+
+            if (!t1->equal(ASTIntegerType::get()) &&
+                !t1->equal(ASTBooleanType::get()) &&
+                !arrType)
+                throw IllegalTypeException();
+
             return ASTBooleanType::get();
         }
     }
+    // Function call
     else if (std::shared_ptr<ASTCallExp> call_exp = std::dynamic_pointer_cast<ASTCallExp>(node)) {
         // The function checker guarantees that this exists
         std::shared_ptr<FunctionInfo> call_func = mod->getFunction(call_exp->getId());
@@ -121,10 +149,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         // Function must not have been shadowed by a variable. This leaves room for function
         // pointers.
         if (func->hasLocal(call_exp->getId()))
-            throw IllegalTypeException(); // TODO
-
-        // TODO: make sure it is eventually defined
-        // TODO: make sure any other declarations/definitions match
+            throw IllegalTypeException();
 
         std::shared_ptr<ASTFunType> sig = call_func->getSignature();
 
@@ -143,6 +168,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             std::shared_ptr<ASTTypeNode> arg_type = args->getHead()->getType();
 
             // TODO: test for void argument
+            // TODO: test for void alloc_array
 
             if (!exp_type->equal(arg_type))
                 throw IllegalTypeException();
@@ -155,6 +181,19 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         // TODO: actually check that stuff here
 
         return sig->getReturnType();
+    }
+    // Array allocation
+    else if (std::shared_ptr<ASTAllocArrayExp> alloc_exp = std::dynamic_pointer_cast<ASTAllocArrayExp>(node)) {
+        std::shared_ptr<ASTTypeNode> elemType = alloc_exp->getElemType();
+
+        // Size must be an integer
+        std::shared_ptr<ASTTypeNode> sizeType = typecheck_exp(mod, func, decl, def, alloc_exp->getLength());
+
+        if (!sizeType->equal(ASTIntegerType::get()))
+            throw new IllegalTypeException();
+
+        // Returns an array of elemTypes
+        return std::make_shared<ASTArrType>(elemType);
     }
     else
         throw ASTMalformedException();
@@ -209,20 +248,34 @@ void typecheck_stmt(
         decl.insert(decl_stmt->getId());
         func->addLocal(decl_stmt->getId(), decl_type); // TODO declareSymbol
     }
-    // Variable assignment. Mark as defined and check the rest of the code
-    else if (std::shared_ptr<ASTVarDefnStmt> defn_stmt = std::dynamic_pointer_cast<ASTVarDefnStmt>(head)) {
-        // Must be declared
-        if (decl.find(defn_stmt->getId()) == decl.end())
-            throw UndeclaredIdentifierException(defn_stmt->getId());
+    // Assignment. Mark as defined and check the rest of the code
+    else if (std::shared_ptr<ASTAssignStmt> defn_stmt = std::dynamic_pointer_cast<ASTAssignStmt>(head)) {
+        // Simple variable
+        if (std::shared_ptr<ASTIdentifierExp> id_exp = std::dynamic_pointer_cast<ASTIdentifierExp>(defn_stmt->getLValue())) {
+            // Must be declared
+            if (decl.find(id_exp->getId()) == decl.end())
+                throw UndeclaredIdentifierException(id_exp->getId());
 
-        std::shared_ptr<ASTTypeNode> decl_type = func->getLocalType(defn_stmt->getId());
-        std::shared_ptr<ASTTypeNode> exp_type = typecheck_exp(mod, func, decl, def, defn_stmt->getExp());
+            std::shared_ptr<ASTTypeNode> decl_type = func->getLocalType(id_exp->getId());
+            std::shared_ptr<ASTTypeNode> exp_type = typecheck_exp(mod, func, decl, def, defn_stmt->getExp());
 
-        if (!exp_type->equal(decl_type))
-            throw IllegalTypeException();
+            // Must assign the same type
+            if (!exp_type->equal(decl_type))
+                throw IllegalTypeException();
 
-        if (def.find(defn_stmt->getId()) == def.end())
-            def.insert(defn_stmt->getId());
+            if (def.find(id_exp->getId()) == def.end())
+                def.insert(id_exp->getId());
+        }
+        // Array subscript
+        else if (std::shared_ptr<ASTIndexExp> idx_exp = std::dynamic_pointer_cast<ASTIndexExp>(defn_stmt->getLValue())) {
+            std::shared_ptr<ASTTypeNode> lhs_type = typecheck_exp(mod, func, decl, def, idx_exp);
+            std::shared_ptr<ASTTypeNode> rhs_type = typecheck_exp(mod, func, decl, def, defn_stmt->getExp());
+
+            // Must assign the same type
+            if (!lhs_type->equal(rhs_type))
+                throw IllegalTypeException();
+        }
+        else throw IllegalLValueException();
     }
     // Return statement
     else if (std::shared_ptr<ASTReturnStmt> ret_node = std::dynamic_pointer_cast<ASTReturnStmt>(head)) {
@@ -319,7 +372,7 @@ void typecheck_stmt(
         idset scope_decl_body = decl;
         idset scope_def_body = def;
 
-        typecheck_stmts(mod, func, scope_decl_body, scope_def_body, while_node->getBodyStmt());
+        typecheck_stmts(mod, func, scope_decl_body, scope_def_body, while_node->getBody());
 
         // Definitions and declarations inside the body of the loop do NOT propagate out
 

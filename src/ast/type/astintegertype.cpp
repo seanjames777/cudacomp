@@ -25,3 +25,7 @@ bool ASTIntegerType::equal(std::shared_ptr<ASTTypeNode> other) {
 void ASTIntegerType::print(std::ostream & ss) {
     ss << "int";
 }
+
+int ASTIntegerType::getSize() {
+    return 4;
+}

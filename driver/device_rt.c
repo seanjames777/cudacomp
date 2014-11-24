@@ -11,9 +11,10 @@
 #include <mach-o/getsect.h>
 #include <mach-o/dyld.h>
 #include <string.h>
-#include "device_errors.h"
 
 //#define DEBUG
+
+#include "device_errors.h"
 
 #ifdef DEBUG
 
@@ -83,10 +84,9 @@ int main(int argc, char *argv[]) {
 
     // TODO: for now copy the whole thing just because we want to null terminate it. There is
     // probably a nicer way.
-    //char *kernel = malloc(size + 1);
-    //memcpy(kernel, kernel_src, size);
-    //kernel[size] = 0; // null terminate
-    char *kernel = kernel_src;
+    char *kernel = malloc(size + 1);
+    memcpy(kernel, kernel_src, size);
+    kernel[size] = 0; // null terminate
 
     #define LOG_SZ 1024
     char *errors = malloc(LOG_SZ + LOG_SZ);
@@ -103,16 +103,20 @@ int main(int argc, char *argv[]) {
     options[nOptions]  = CU_JIT_INFO_LOG_BUFFER_SIZE_BYTES;
     values[nOptions++] = (void *)LOG_SZ;
     options[nOptions]  = CU_JIT_INFO_LOG_BUFFER;
-    values[nOptions++] = errors;
+    values[nOptions++] = info;
 
     CUresult err = cuModuleLoadDataEx(&cudaModule, kernel, nOptions, options, values);
     if (err != CUDA_SUCCESS) {
-        printf("JIT failed:%s\n%s\n", info, errors);
+#ifdef DEBUG
+        printf("JIT failed:%s\n%s\n%s\n", getErrorString(err), info, errors);
+#else
+        printf("JIT failed\n");
+#endif
         exit(-1);
     }
 
     free(errors);
-    //free(kernel);
+    free(kernel);
 
     checkCudaErrors(cuModuleGetFunction(&function, cudaModule, "_cc_main"));
 
