@@ -78,7 +78,7 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %left PLUS MINUS
 %left STAR DIV MOD
 %right NOT BNOT UMINUS UNARY
-%nonassoc LPAREN RPAREN
+%nonassoc LPAREN RPAREN LBRACKET RBRACKET
 
 %start program
 
