@@ -6,8 +6,13 @@ int rt_add(int x, int y) {
 
 extern "C"
 __device__
-int *rt_calloc(int count, int size) {
-    int *buff = (int *)malloc(count * size);
-    memset(buff, 0, count * size);
-    return buff;
+void *_rt_alloc_array(int elemSize, int length) {
+    int buffSz = elemSize * length + 8;
+    char *buff = (char *)malloc(buffSz);
+    memset(buff, 0, buffSz);
+
+    *((int *)&buff[0]) = length;
+    *((int *)&buff[4]) = elemSize;
+
+    return (void *)&buff[8];
 }

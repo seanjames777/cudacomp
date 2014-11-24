@@ -19,7 +19,7 @@ std::shared_ptr<ASTExpNode> ASTWhileStmt::getCond() {
     return cond;
 }
 
-std::shared_ptr<ASTStmtSeqNode> ASTWhileStmt::getBodyStmt() {
+std::shared_ptr<ASTStmtSeqNode> ASTWhileStmt::getBody() {
     return bodyStmt;
 }
 

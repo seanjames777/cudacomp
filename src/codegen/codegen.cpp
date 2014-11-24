@@ -132,6 +132,26 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         // type of lvalue.
         return ret_val;
     }
+    // Array allocation
+    else if (std::shared_ptr<ASTAllocArrayExp> alloc_exp = std::dynamic_pointer_cast<ASTAllocArrayExp>(node)) {
+        // Element size constant
+        Value *elemSize = ConstantInt::get(convertType(ASTIntegerType::get()),
+            alloc_exp->getElemType()->getSize());
+
+        // Array length
+        Value *length = codegen_exp(ctx, alloc_exp->getLength());
+
+        // Call into runtime allocator
+        std::vector<Value *> args;
+        args.push_back(elemSize);
+        args.push_back(length);
+
+        Value *buff = builder->CreateCall(ctx->getAllocArray(), args);
+
+        // Cast the result to the right type
+        return builder->CreatePointerCast(buff,
+            PointerType::getUnqual(convertType(alloc_exp->getElemType())));
+    }
     // Otherwise, it's an lvalue. Get the address and dereference it.
     else {
         Value *lval_ptr = codegen_lvalue(ctx, node);
@@ -260,7 +280,7 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
         bool bodyContinue;
 
         // Only need to insert looping conditional jump if body didn't return
-        if ((bodyContinue = codegen_stmts(ctx, while_node->getBodyStmt()))) {
+        if ((bodyContinue = codegen_stmts(ctx, while_node->getBody()))) {
             Value *body_cond = codegen_exp(ctx, while_node->getCond());
             ctx->getBuilder()->CreateCondBr(body_cond, bodyBlock, doneBlock);
         }

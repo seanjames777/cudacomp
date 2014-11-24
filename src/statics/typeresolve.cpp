@@ -37,6 +37,11 @@ std::shared_ptr<ASTTypeNode> resolveType(std::shared_ptr<ModuleInfo> module, std
         ptr_type->setToType(resolveType(module, ptr_type->getToType()));
         return ptr_type;
     }
+    // Resolve the element type for arrays. TODO: test this
+    else if (std::shared_ptr<ASTArrType> arr_type = std::dynamic_pointer_cast<ASTArrType>(type)) {
+        arr_type->setElemType(resolveType(module, arr_type->getElemType()));
+        return arr_type;
+    }
     // ID type. Look up the type, which should already be resolved.
     else if (std::shared_ptr<ASTIdType> id_type = std::dynamic_pointer_cast<ASTIdType>(type)) {
         std::shared_ptr<ASTTypeNode> resolved = module->getType(id_type->getId());
@@ -81,6 +86,12 @@ void typeresolve_stmt(
         if (if_node->getFalseStmt())
             typeresolve_stmts(mod, if_node->getFalseStmt());
     }
+    // While statement. Resolve body.
+    else if (std::shared_ptr<ASTWhileStmt> while_node = std::dynamic_pointer_cast<ASTWhileStmt>(head)) {
+        typeresolve_stmts(mod, while_node->getBody());
+    }
+
+    // TODO: need to handle expressions now for alloc_array
 }
 
 void typeresolve_tops(

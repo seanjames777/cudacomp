@@ -1,7 +1,5 @@
-extern int[] rt_calloc(int num, int size);
-
 int _cc_main() {
-    int[] arr = rt_calloc(4, 4);
+    int[] arr = alloc_array(int, 4);
 
     arr[0] = 5;
     arr[1] = 3;

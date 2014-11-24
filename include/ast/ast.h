@@ -15,6 +15,7 @@
 #include <ast/decl/astdeclnode.h>
 #include <ast/decl/astfundecl.h>
 #include <ast/decl/asttypedecl.h>
+#include <ast/expr/astallocarrayexp.h>
 #include <ast/expr/astbinopexp.h>
 #include <ast/expr/astbooleanexp.h>
 #include <ast/expr/astcallexp.h>

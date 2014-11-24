@@ -25,8 +25,8 @@ public:
     /**
      * @brief Constructor
      *
-     * @param[in] lvalue
-     * @param[in] subscript
+     * @param[in] lvalue    LValue to assign to
+     * @param[in] subscript Array index to assign to
      */
     ASTIndexExp(std::shared_ptr<ASTExpNode> lvalue, std::shared_ptr<ASTExpNode> subscript);
 

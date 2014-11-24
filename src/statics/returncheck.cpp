@@ -39,6 +39,8 @@ bool returncheck_stmt(std::shared_ptr<FunctionInfo> func, std::shared_ptr<ASTStm
         }
     }
 
+    // While loops might never be executed
+
     return false;
 }
 

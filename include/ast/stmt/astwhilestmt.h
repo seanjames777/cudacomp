@@ -41,7 +41,7 @@ public:
     /**
      * @brief Get statement sequence to evaluate in a loop while the condition is true
      */
-    std::shared_ptr<ASTStmtSeqNode> getBodyStmt();
+    std::shared_ptr<ASTStmtSeqNode> getBody();
 
     /**
      * @copydoc ASTNode::print()

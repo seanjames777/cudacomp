@@ -34,3 +34,7 @@ void ASTPtrType::print(std::ostream & ss) {
     toType->print(ss);
     std::cout << ")";
 }
+
+int ASTPtrType::getSize() {
+    return 8;
+}

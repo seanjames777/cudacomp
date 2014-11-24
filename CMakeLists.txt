@@ -35,7 +35,7 @@ include_directories(include)
 find_package(FLEX)
 find_package(BISON)
 
-BISON_TARGET(parser src/parser/parser.y ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp)
+BISON_TARGET(parser src/parser/parser.y ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp VERBOSE parser.txt)
 FLEX_TARGET(lexer src/parser/lexer.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cpp)
 ADD_FLEX_BISON_DEPENDENCY(lexer parser)
 
@@ -51,6 +51,7 @@ add_executable(cc
     src/ast/astnode.cpp
     src/ast/astseqnode.cpp
     src/ast/astvisitor.cpp
+    src/ast/expr/astallocarrayexp.cpp
     src/ast/expr/astbinopexp.cpp
     src/ast/expr/astbooleanexp.cpp
     src/ast/expr/astcallexp.cpp

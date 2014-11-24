@@ -29,6 +29,11 @@ public:
      */
     virtual bool equal(std::shared_ptr<ASTTypeNode> other) = 0;
 
+    /**
+     * @brief Get the size of the type, in bytes
+     */
+    virtual int getSize() = 0;
+
 };
 
 #endif

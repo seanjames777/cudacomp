@@ -34,3 +34,8 @@ void ASTArrType::print(std::ostream & ss) {
     elemType->print(ss);
     ss << ")";
 }
+
+int ASTArrType::getSize() {
+    // Pointers as far as the compiler is concerned
+    return 8;
+}

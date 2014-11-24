@@ -43,6 +43,7 @@ private:
     bool                           emit_device;  // Should we emit GPU code
     SymbolTable<Function *>        functions;    // Mapping from function names to LLVM functions
     std::shared_ptr<ModuleInfo>    modInfo;      // Information about module
+    Function                      *alloc_array;  // Runtime alloc_array function
 
     // Current function
     BasicBlock                    *def_bblock;   // Locals definition block, assists with SSA
@@ -65,6 +66,11 @@ public:
      * @param[in] modInfo     Module information
      */
     CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo);
+
+    /**
+     * @brief Get the 'alloc_array' runtime function
+     */
+    Function *getAllocArray();
 
     /**
      * @brief Get module information

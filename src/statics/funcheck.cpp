@@ -24,6 +24,8 @@ void funcheck_exp(
         if (call_func->getLinkage() == ASTDeclNode::Internal)
             called.insert(call_exp->getId());
     }
+
+    // TODO: We actually need to do the whole traversal here to catch calls in subexpressions
 }
 
 void funcheck_stmts(
@@ -65,7 +67,7 @@ void funcheck_stmt(
     }
     else if (std::shared_ptr<ASTWhileStmt> while_node = std::dynamic_pointer_cast<ASTWhileStmt>(head)) {
         funcheck_exp(mod, called, while_node->getCond());
-        funcheck_stmts(mod, called, while_node->getBodyStmt());
+        funcheck_stmts(mod, called, while_node->getBody());
     }
     else if (std::shared_ptr<ASTExprStmt> exp_stmt = std::dynamic_pointer_cast<ASTExprStmt>(head))
         funcheck_exp(mod, called, exp_stmt->getExp());

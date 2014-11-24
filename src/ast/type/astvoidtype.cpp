@@ -25,3 +25,7 @@ bool ASTVoidType::equal(std::shared_ptr<ASTTypeNode> other) {
 void ASTVoidType::print(std::ostream & ss) {
     ss << "void";
 }
+
+int ASTVoidType::getSize() {
+    throw std::runtime_error("Void types do not have a size");
+}

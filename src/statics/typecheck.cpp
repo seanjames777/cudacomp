@@ -141,6 +141,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             return ASTBooleanType::get();
         }
     }
+    // Function call
     else if (std::shared_ptr<ASTCallExp> call_exp = std::dynamic_pointer_cast<ASTCallExp>(node)) {
         // The function checker guarantees that this exists
         std::shared_ptr<FunctionInfo> call_func = mod->getFunction(call_exp->getId());
@@ -167,6 +168,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             std::shared_ptr<ASTTypeNode> arg_type = args->getHead()->getType();
 
             // TODO: test for void argument
+            // TODO: test for void alloc_array
 
             if (!exp_type->equal(arg_type))
                 throw IllegalTypeException();
@@ -179,6 +181,19 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         // TODO: actually check that stuff here
 
         return sig->getReturnType();
+    }
+    // Array allocation
+    else if (std::shared_ptr<ASTAllocArrayExp> alloc_exp = std::dynamic_pointer_cast<ASTAllocArrayExp>(node)) {
+        std::shared_ptr<ASTTypeNode> elemType = alloc_exp->getElemType();
+
+        // Size must be an integer
+        std::shared_ptr<ASTTypeNode> sizeType = typecheck_exp(mod, func, decl, def, alloc_exp->getLength());
+
+        if (!sizeType->equal(ASTIntegerType::get()))
+            throw new IllegalTypeException();
+
+        // Returns an array of elemTypes
+        return std::make_shared<ASTArrType>(elemType);
     }
     else
         throw ASTMalformedException();
@@ -357,7 +372,7 @@ void typecheck_stmt(
         idset scope_decl_body = decl;
         idset scope_def_body = def;
 
-        typecheck_stmts(mod, func, scope_decl_body, scope_def_body, while_node->getBodyStmt());
+        typecheck_stmts(mod, func, scope_decl_body, scope_def_body, while_node->getBody());
 
         // Definitions and declarations inside the body of the loop do NOT propagate out
 

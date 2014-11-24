@@ -3,8 +3,13 @@
 
 extern int _cc_main();
 
-int *rt_calloc(int num, int size) {
-    return calloc(num, size);
+void *_rt_alloc_array(int elemSize, int length) {
+    char *buff = (char *)calloc(1, elemSize * length + 8);
+
+    *((int *)&buff[0]) = length;
+    *((int *)&buff[4]) = elemSize;
+
+    return (void *)&buff[8];
 }
 
 int rt_add(int x, int y) {
