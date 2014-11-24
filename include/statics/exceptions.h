@@ -160,6 +160,14 @@ public:
     ExternalFunctionDefinedException(std::string id);
 };
 
+/**
+ * @brief Attempted to assign to an illegal lvalue
+ */
+class IllegalLValueException : public StaticsException {
+public:
+    IllegalLValueException();
+};
+
 }
 
 #endif

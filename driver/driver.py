@@ -90,6 +90,15 @@ tests = [
     (SOURCE_DIR + "tests/testFunDecl8.cc", "error"),
     (SOURCE_DIR + "tests/testFunDecl9.cc", 5),
     (SOURCE_DIR + "tests/testArr1.cc", 5),
+    (SOURCE_DIR + "tests/testArr2.cc", 0),
+    (SOURCE_DIR + "tests/testArr3.cc", 5),
+    (SOURCE_DIR + "tests/testArr4.cc", 19),
+    (SOURCE_DIR + "tests/testArr5.cc", 10),
+    (SOURCE_DIR + "tests/testArr6.cc", 5),
+    (SOURCE_DIR + "tests/testArr7.cc", "error"),
+    (SOURCE_DIR + "tests/testArr8.cc", "error"),
+    (SOURCE_DIR + "tests/testArr9.cc", "error"),
+    (SOURCE_DIR + "tests/testLValue1.cc", "error"),
 ]
 
 # TODO: actually test type checking...

@@ -60,7 +60,8 @@ extern std::unordered_map<std::string, ASTTypeNode *> typedefs;
 ")"                     { return RPAREN; }
 "{"                     { return LBRACE; }
 "}"                     { return RBRACE; }
-"[]"                    { return ARRBRACES; }
+"["                     { return LBRACKET; }
+"]"                     { return RBRACKET; }
 
 [ \r\n\t]+              /* ignore whitespace */
 

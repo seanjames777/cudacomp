@@ -108,4 +108,8 @@ ExternalFunctionDefinedException::ExternalFunctionDefinedException(std::string i
     setMsg(ss.str());
 }
 
+IllegalLValueException::IllegalLValueException() {
+    setMsg("Attempted to assign to an illegal lvalue");
+}
+
 }

@@ -11,7 +11,7 @@
 #include <ast/astseqnode.h>
 #include <ast/stmt/astreturnstmt.h>
 #include <ast/stmt/astvardeclstmt.h>
-#include <ast/stmt/astvardefnstmt.h>
+#include <ast/stmt/astassignstmt.h>
 #include <ast/expr/astunopexp.h>
 #include <ast/stmt/astscopestmt.h>
 #include <ast/stmt/astifstmt.h>
@@ -26,6 +26,27 @@
 #include <ast/decl/asttypedecl.h>
 
 namespace Codegen {
+
+Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
+    std::shared_ptr<IRBuilder<>> builder = ctx->getBuilder();
+
+    // Identifier reference
+    if (std::shared_ptr<ASTIdentifierExp> id_exp = std::dynamic_pointer_cast<ASTIdentifierExp>(node)) {
+        Value *id_ptr = ctx->getOrCreateSymbol(id_exp->getId());
+        return id_ptr;
+    }
+    // Array subscript
+    else if (std::shared_ptr<ASTIndexExp> idx_exp = std::dynamic_pointer_cast<ASTIndexExp>(node)) {
+        Value *lhs = codegen_exp(ctx, idx_exp->getLValue());
+        Value *sub = codegen_exp(ctx, idx_exp->getSubscript());
+
+        return builder->CreateGEP(lhs, sub);
+    }
+    else
+        throw new ASTMalformedException();
+
+    return nullptr;
+}
 
 Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
     std::shared_ptr<IRBuilder<>> builder = ctx->getBuilder();
@@ -72,11 +93,6 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         case ASTBinopExp::GT:   return builder->CreateICmpSGT(v1, v2);
         }
     }
-    // Identifier reference
-    else if (std::shared_ptr<ASTIdentifierExp> id_exp = std::dynamic_pointer_cast<ASTIdentifierExp>(node)) {
-        Value *id_ptr = ctx->getOrCreateSymbol(id_exp->getId());
-        return builder->CreateLoad(id_ptr);
-    }
     // Function call
     else if (std::shared_ptr<ASTCallExp> call_exp = std::dynamic_pointer_cast<ASTCallExp>(node)) {
         std::vector<Value *> args;
@@ -116,10 +132,11 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         // type of lvalue.
         return ret_val;
     }
-    else
-        throw new ASTMalformedException();
-
-    return nullptr;
+    // Otherwise, it's an lvalue. Get the address and dereference it.
+    else {
+        Value *lval_ptr = codegen_lvalue(ctx, node);
+        return builder->CreateLoad(lval_ptr);
+    }
 }
 
 bool codegen_stmts(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtSeqNode> seq_node) {
@@ -171,11 +188,12 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
             builder->CreateStore(exp_val, mem);
         }
     }
-    // Variable definution
-    else if (std::shared_ptr<ASTVarDefnStmt> decl_stmt = std::dynamic_pointer_cast<ASTVarDefnStmt>(head)) {
-        Value *mem = ctx->getOrCreateSymbol(decl_stmt->getId());
+    // Assignment to an lvalue. Get the address and write to it. Note that this works for
+    // local variables as well because they are stack allocated until conversion to SSA.
+    else if (std::shared_ptr<ASTAssignStmt> decl_stmt = std::dynamic_pointer_cast<ASTAssignStmt>(head)) {
+        Value *lval = codegen_lvalue(ctx, decl_stmt->getLValue());
         Value *exp_val = codegen_exp(ctx, decl_stmt->getExp());
-        builder->CreateStore(exp_val, mem);
+        builder->CreateStore(exp_val, lval);
     }
     // Scope
     else if (std::shared_ptr<ASTScopeStmt> scope_stmt = std::dynamic_pointer_cast<ASTScopeStmt>(head)) {

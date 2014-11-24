@@ -1,25 +1,25 @@
 /**
- * @file astvardefnstmt.h
+ * @file astassignstmt.h
  *
- * @brief Abstract syntax tree variable definition statement node.
+ * @brief Abstract syntax tree assignment statement node.
  *
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#ifndef __ASTVARDEFNSTMT_H
-#define __ASTVARDEFNSTMT_H
+#ifndef __ASTASSIGNSTMT_H
+#define __ASTASSIGNSTMT_H
 
 #include <ast/stmt/aststmtnode.h>
 #include <ast/expr/astexpnode.h>
 
 /**
- * @brief Variable definition statement AST node. Assigns a new value to an
- * existing variable.
+ * @brief Assignment statement AST node. Assigns a new value to an lvalue, where
+ * an lvalue may be a variable, an array element, etc.
  */
-class ASTVarDefnStmt : public ASTStmtNode {
+class ASTAssignStmt : public ASTStmtNode {
 private:
 
-    std::string id;
+    std::shared_ptr<ASTExpNode> lvalue;
     std::shared_ptr<ASTExpNode> exp;
 
 public:
@@ -30,17 +30,17 @@ public:
      * @param[in] id  Variable name
      * @param[in] exp New value expression
      */
-    ASTVarDefnStmt(std::string id, std::shared_ptr<ASTExpNode> exp);
+    ASTAssignStmt(std::shared_ptr<ASTExpNode> lvalue, std::shared_ptr<ASTExpNode> exp);
 
     /**
      * @brief Destructor
      */
-    ~ASTVarDefnStmt();
+    ~ASTAssignStmt();
 
     /**
-     * @brief Get variable name to assign to
+     * @brief Get lvalue to assign to
      */
-    std::string getId();
+    std::shared_ptr<ASTExpNode> getLValue();
 
     /**
      * @brief Get expression to assign value from

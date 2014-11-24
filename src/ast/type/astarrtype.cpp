@@ -30,5 +30,7 @@ bool ASTArrType::equal(std::shared_ptr<ASTTypeNode> other) {
 }
 
 void ASTArrType::print(std::ostream & ss) {
-    // TODO
+    ss << "array(";
+    elemType->print(ss);
+    ss << ")";
 }

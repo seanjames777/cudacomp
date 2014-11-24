@@ -1,11 +1,11 @@
 extern int[] calloc(int num, int size);
 
-void func(int[] arr) {
-}
-
 int _cc_main() {
     int[] arr = calloc(4, 4);
-    func(arr);
 
-    return 5;
+    arr[0] = 5;
+    arr[1] = 3;
+    arr[2] = 4;
+
+    return arr[0] * arr[1] + arr[2];
 }

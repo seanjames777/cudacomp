@@ -20,5 +20,7 @@ bool ASTIdType::equal(std::shared_ptr<ASTTypeNode> other_type) {
 }
 
 void ASTIdType::print(std::ostream & ss) {
-    // TODO
+    ss << "id(";
+    ss << id;
+    ss << ")";
 }

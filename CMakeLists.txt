@@ -56,15 +56,16 @@ add_executable(cc
     src/ast/expr/astcallexp.cpp
     src/ast/expr/astexpnode.cpp
     src/ast/expr/astidentifierexp.cpp
+    src/ast/expr/astindexexp.cpp
     src/ast/expr/astintegerexp.cpp
     src/ast/expr/astunopexp.cpp
+    src/ast/stmt/astassignstmt.cpp
     src/ast/stmt/astexprstmt.cpp
     src/ast/stmt/astifstmt.cpp
     src/ast/stmt/astreturnstmt.cpp
     src/ast/stmt/astscopestmt.cpp
     src/ast/stmt/aststmtnode.cpp
     src/ast/stmt/astvardeclstmt.cpp
-    src/ast/stmt/astvardefnstmt.cpp
     src/ast/stmt/astwhilestmt.cpp
     src/ast/decl/astfundecl.cpp
     src/ast/decl/astdeclnode.cpp

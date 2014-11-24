@@ -11,7 +11,7 @@
 #include <ast/stmt/astreturnstmt.h>
 #include <ast/expr/astidentifierexp.h>
 #include <ast/stmt/astvardeclstmt.h>
-#include <ast/stmt/astvardefnstmt.h>
+#include <ast/stmt/astassignstmt.h>
 #include <ast/type/astintegertype.h>
 #include <ast/expr/astunopexp.h>
 #include <ast/type/astbooleantype.h>

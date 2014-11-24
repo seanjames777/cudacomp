@@ -166,7 +166,7 @@ VISIT_IMPL(VarDeclStmt, node) {
     return true;
 }
 
-VISIT_IMPL(VarDefnStmt, node) {
+VISIT_IMPL(AssignStmt, node) {
     if (!VISIT_CALL(ExpNode, node->getExp()))
         return false;
 

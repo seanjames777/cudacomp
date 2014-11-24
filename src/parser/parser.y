@@ -47,7 +47,7 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %token <string> IDENT IDTYPE
 %token <boolean> TRUE FALSE
 %token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR NOT BNOT
-%token ASSIGN SEMI COMMA ARRBRACES
+%token ASSIGN SEMI COMMA LBRACKET RBRACKET
 %token INT BOOL VOID
 %token RETURN IF ELSE TYPEDEF WHILE EXTERN
 %token LPAREN RPAREN LBRACE RBRACE
@@ -107,7 +107,6 @@ exp:
     NUMBER                            { $$ = new ASTIntegerExp($1); }
   | TRUE                              { $$ = new ASTBooleanExp(true); }
   | FALSE                             { $$ = new ASTBooleanExp(false); }
-  | IDENT                             { $$ = new ASTIdentifierExp(std::string($1)); free($1); }
   | exp PLUS exp                      { $$ = new ASTBinopExp(ASTBinopExp::ADD, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp MINUS exp                     { $$ = new ASTBinopExp(ASTBinopExp::SUB, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp DIV exp                       { $$ = new ASTBinopExp(ASTBinopExp::DIV, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
@@ -129,8 +128,10 @@ exp:
   | NOT exp                           { $$ = new ASTUnopExp(ASTUnopExp::NOT, std::shared_ptr<ASTExpNode>($2)); }
   | BNOT exp                          { $$ = new ASTUnopExp(ASTUnopExp::BNOT, std::shared_ptr<ASTExpNode>($2)); }
   | MINUS exp %prec UMINUS            { $$ = new ASTUnopExp(ASTUnopExp::NEG, std::shared_ptr<ASTExpNode>($2)); }
-  | LPAREN exp RPAREN                 { $$ = $2; }
   | IDENT LPAREN arg_list RPAREN      { $$ = new ASTCallExp($1, std::shared_ptr<ASTExpSeqNode>($3)); }
+  | IDENT                             { $$ = new ASTIdentifierExp(std::string($1)); free($1); }
+  | LPAREN exp RPAREN                 { $$ = $2; }
+  | exp LBRACKET exp RBRACKET         { $$ = new ASTIndexExp(std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   ;
 
 type:
@@ -138,13 +139,13 @@ type:
   | BOOL                              { $$ = new ASTBooleanType(); }
   | VOID                              { $$ = new ASTVoidType(); }
   | IDTYPE                            { $$ = new ASTIdType(std::string($1)); free($1); }
-  | type ARRBRACES                    { $$ = new ASTArrType(std::shared_ptr<ASTTypeNode>($1)); }
+  | type LBRACKET RBRACKET            { $$ = new ASTArrType(std::shared_ptr<ASTTypeNode>($1)); }
   ;
 
 simp:
     type IDENT                        { $$ = new ASTVarDeclStmt(std::shared_ptr<ASTTypeNode>($1), std::string($2), nullptr); free($2); }
   | type IDENT ASSIGN exp             { $$ = new ASTVarDeclStmt(std::shared_ptr<ASTTypeNode>($1), std::string($2), std::shared_ptr<ASTExpNode>($4)); free($2); }
-  | IDENT ASSIGN exp                  { $$ = new ASTVarDefnStmt(std::string($1), std::shared_ptr<ASTExpNode>($3)); free($1); } // TODO free
+  | exp ASSIGN exp                    { $$ = new ASTAssignStmt(std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp                               { $$ = new ASTExprStmt(std::shared_ptr<ASTExpNode>($1)); }
   ;
 

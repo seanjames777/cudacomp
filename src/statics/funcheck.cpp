@@ -46,7 +46,7 @@ void funcheck_stmt(
         if (decl_stmt->getExp())
             funcheck_exp(mod, called, decl_stmt->getExp());
     }
-    else if (std::shared_ptr<ASTVarDefnStmt> defn_stmt = std::dynamic_pointer_cast<ASTVarDefnStmt>(head))
+    else if (std::shared_ptr<ASTAssignStmt> defn_stmt = std::dynamic_pointer_cast<ASTAssignStmt>(head))
         funcheck_exp(mod, called, defn_stmt->getExp());
     else if (std::shared_ptr<ASTReturnStmt> ret_node = std::dynamic_pointer_cast<ASTReturnStmt>(head)) {
         if (ret_node->getExp())
