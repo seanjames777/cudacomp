@@ -46,10 +46,10 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %token <number> NUMBER
 %token <string> IDENT IDTYPE
 %token <boolean> TRUE FALSE
-%token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR NOT BNOT
+%token PLUS MINUS DIV STAR MOD SHL SHR AND OR BAND BOR BXOR NOT BNOT UNARY
 %token ASSIGN SEMI COMMA LBRACKET RBRACKET
 %token INT BOOL VOID
-%token RETURN IF ELSE TYPEDEF WHILE EXTERN ALLOC_ARRAY
+%token RETURN IF ELSE TYPEDEF WHILE EXTERN ALLOC_ARRAY ALLOC
 %token LPAREN RPAREN LBRACE RBRACE
 %token EQ NEQ LEQ GEQ LT GT
 
@@ -76,8 +76,8 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %left LEQ GEQ LT GT
 %left SHL SHR
 %left PLUS MINUS
-%left TIMES DIV MOD
-%right NOT BNOT UMINUS
+%left STAR DIV MOD
+%right NOT BNOT UMINUS UNARY
 %nonassoc LPAREN RPAREN
 
 %start program
@@ -85,14 +85,9 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %%
 
 top:
-<<<<<<< Updated upstream
     fundecl                           { $$ = $1; }
   | typedecl                          { $$ = $1; }
-=======
-    fundefn                           { $$ = $1; }
-  | typedefn                          { $$ = $1; }
   | structdecl                        { $$ = $1; }
->>>>>>> Stashed changes
   ;
 
 top_list:
@@ -116,7 +111,7 @@ exp:
   | exp PLUS exp                      { $$ = new ASTBinopExp(ASTBinopExp::ADD, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp MINUS exp                     { $$ = new ASTBinopExp(ASTBinopExp::SUB, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp DIV exp                       { $$ = new ASTBinopExp(ASTBinopExp::DIV, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
-  | exp TIMES exp                     { $$ = new ASTBinopExp(ASTBinopExp::MUL, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp STAR exp                     { $$ = new ASTBinopExp(ASTBinopExp::MUL, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp MOD exp                       { $$ = new ASTBinopExp(ASTBinopExp::MOD, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp SHL exp                       { $$ = new ASTBinopExp(ASTBinopExp::SHL, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp SHR exp                       { $$ = new ASTBinopExp(ASTBinopExp::SHR, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
@@ -140,6 +135,10 @@ exp:
   | exp LBRACKET exp RBRACKET         { $$ = new ASTIndexExp(std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | ALLOC_ARRAY LPAREN type COMMA exp RPAREN
     { $$ = new ASTAllocArrayExp(std::shared_ptr<ASTTypeNode>($3), std::shared_ptr<ASTExpNode>($5)); }
+  | ALLOC LPAREN type RPAREN
+    { $$ = // TODO }
+  | STAR exp %prec UNARY
+    { $$ = // TODO }
   ;
 
 type:
@@ -148,6 +147,7 @@ type:
   | VOID                              { $$ = new ASTVoidType(); }
   | IDTYPE                            { $$ = new ASTIdType(std::string($1)); free($1); }
   | type LBRACKET RBRACKET            { $$ = new ASTArrType(std::shared_ptr<ASTTypeNode>($1)); }
+  | type STAR                         { $$ = // TODO }
   ;
 
 simp:

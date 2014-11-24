@@ -1,0 +1,44 @@
+/**
+ * @file astallocexp.h
+ *
+ * @brief Pointer allocation expression
+ *
+ * @author Kurt Mueller <kurtmueller42@gmail.com>
+ */
+
+#ifndef __ASTALLOCEXP_H
+#define __ASTALLOCEXP_H
+
+#include <ast/expr/astexpnode.h>
+#include <ast/type/asttypenode.h>
+
+/**
+ * @brief Pointer allocation AST expression node
+ */
+class ASTAllocArrayExp : public ASTExpNode {
+private:
+
+    std::shared_ptr<ASTTypeNode> type;
+
+public:
+
+    /**
+     * @brief Constructor
+     *
+     * @param[in] type   Pointer element type
+     */
+    ASTAllocArrayExp(std::shared_ptr<ASTTypeNode> type);
+
+    /**
+     * @brief Get pointer element type
+     */
+    std::shared_ptr<ASTTypeNode> getElemType();
+
+    /**
+     * @copydoc ASTNode::print()
+     */
+    virtual void print(std::ostream & ss) override;
+
+};
+
+#endif
