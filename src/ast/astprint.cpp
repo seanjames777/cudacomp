@@ -66,7 +66,7 @@ bool ASTPrint::visitDeclSeqNode(std::shared_ptr<ASTDeclSeqNode> node) {
 }
 
 bool ASTPrint::visitFunDecl(std::shared_ptr<ASTFunDecl> node) {
-    enter("ASTFunDecl", node);
+    enter("FunDecl", node);
     ASTVisitor::visitFunDecl(node);
     leave();
 
@@ -74,7 +74,7 @@ bool ASTPrint::visitFunDecl(std::shared_ptr<ASTFunDecl> node) {
 }
 
 bool ASTPrint::visitTypeDecl(std::shared_ptr<ASTTypeDecl> node) {
-    enter("ASTTypeDecl", node);
+    enter("TypeDecl", node);
     ASTVisitor::visitTypeDecl(node);
     leave();
 
@@ -92,7 +92,7 @@ bool ASTPrint::visitExpSeqNode(std::shared_ptr<ASTExpSeqNode> node) {
 }
 
 bool ASTPrint::visitAllocArrayExp(std::shared_ptr<ASTAllocArrayExp> node) {
-    enter("ASTAllocArrayExp", node);
+    enter("AllocArrayExp", node);
     ASTVisitor::visitAllocArrayExp(node);
     leave();
 
@@ -100,7 +100,7 @@ bool ASTPrint::visitAllocArrayExp(std::shared_ptr<ASTAllocArrayExp> node) {
 }
 
 bool ASTPrint::visitBinopExp(std::shared_ptr<ASTBinopExp> node) {
-    enter("ASTBinopExp", node);
+    enter("BinopExp", node);
     ASTVisitor::visitBinopExp(node);
     leave();
 
@@ -108,7 +108,7 @@ bool ASTPrint::visitBinopExp(std::shared_ptr<ASTBinopExp> node) {
 }
 
 bool ASTPrint::visitBooleanExp(std::shared_ptr<ASTBooleanExp> node) {
-    enter("ASTBooleanExp", node);
+    enter("BooleanExp", node);
     ASTVisitor::visitBooleanExp(node);
     leave();
 
@@ -116,7 +116,7 @@ bool ASTPrint::visitBooleanExp(std::shared_ptr<ASTBooleanExp> node) {
 }
 
 bool ASTPrint::visitCallExp(std::shared_ptr<ASTCallExp> node) {
-    enter("ASTCallExp", node);
+    enter("CallExp", node);
     ASTVisitor::visitCallExp(node);
     leave();
 
@@ -124,7 +124,7 @@ bool ASTPrint::visitCallExp(std::shared_ptr<ASTCallExp> node) {
 }
 
 bool ASTPrint::visitIdentifierExp(std::shared_ptr<ASTIdentifierExp> node) {
-    enter("ASTIdentifierExp", node);
+    enter("IdentifierExp", node);
     ASTVisitor::visitIdentifierExp(node);
     leave();
 
@@ -132,7 +132,7 @@ bool ASTPrint::visitIdentifierExp(std::shared_ptr<ASTIdentifierExp> node) {
 }
 
 bool ASTPrint::visitIndexExp(std::shared_ptr<ASTIndexExp> node) {
-    enter("ASTIndexExp", node);
+    enter("IndexExp", node);
     ASTVisitor::visitIndexExp(node);
     leave();
 
@@ -140,7 +140,7 @@ bool ASTPrint::visitIndexExp(std::shared_ptr<ASTIndexExp> node) {
 }
 
 bool ASTPrint::visitIntegerExp(std::shared_ptr<ASTIntegerExp> node) {
-    enter("ASTIntegerExp", node);
+    enter("IntegerExp", node);
     ASTVisitor::visitIntegerExp(node);
     leave();
 
@@ -148,7 +148,7 @@ bool ASTPrint::visitIntegerExp(std::shared_ptr<ASTIntegerExp> node) {
 }
 
 bool ASTPrint::visitUnopExp(std::shared_ptr<ASTUnopExp> node) {
-    enter("ASTUnopExp", node);
+    enter("UnopExp", node);
     ASTVisitor::visitUnopExp(node);
     leave();
 
@@ -166,7 +166,7 @@ bool ASTPrint::visitStmtSeqNode(std::shared_ptr<ASTStmtSeqNode> node) {
 }
 
 bool ASTPrint::visitAssignStmt(std::shared_ptr<ASTAssignStmt> node) {
-    enter("ASTAssignStmt", node);
+    enter("AssignStmt", node);
     ASTVisitor::visitAssignStmt(node);
     leave();
 
@@ -174,7 +174,7 @@ bool ASTPrint::visitAssignStmt(std::shared_ptr<ASTAssignStmt> node) {
 }
 
 bool ASTPrint::visitExprStmt(std::shared_ptr<ASTExprStmt> node) {
-    enter("ASTExprStmt", node);
+    enter("ExprStmt", node);
     ASTVisitor::visitExprStmt(node);
     leave();
 
@@ -182,7 +182,7 @@ bool ASTPrint::visitExprStmt(std::shared_ptr<ASTExprStmt> node) {
 }
 
 bool ASTPrint::visitIfStmt(std::shared_ptr<ASTIfStmt> node) {
-    enter("ASTIfStmt", node);
+    enter("IfStmt", node);
     ASTVisitor::visitIfStmt(node);
     leave();
 
@@ -190,7 +190,7 @@ bool ASTPrint::visitIfStmt(std::shared_ptr<ASTIfStmt> node) {
 }
 
 bool ASTPrint::visitReturnStmt(std::shared_ptr<ASTReturnStmt> node) {
-    enter("ASTReturnStmt", node);
+    enter("ReturnStmt", node);
     ASTVisitor::visitReturnStmt(node);
     leave();
 
@@ -198,7 +198,7 @@ bool ASTPrint::visitReturnStmt(std::shared_ptr<ASTReturnStmt> node) {
 }
 
 bool ASTPrint::visitScopeStmt(std::shared_ptr<ASTScopeStmt> node) {
-    enter("ASTScopeStmt", node);
+    enter("ScopeStmt", node);
     ASTVisitor::visitScopeStmt(node);
     leave();
 
@@ -206,7 +206,7 @@ bool ASTPrint::visitScopeStmt(std::shared_ptr<ASTScopeStmt> node) {
 }
 
 bool ASTPrint::visitVarDeclStmt(std::shared_ptr<ASTVarDeclStmt> node) {
-    enter("ASTVarDeclStmt", node);
+    enter("VarDeclStmt", node);
     ASTVisitor::visitVarDeclStmt(node);
     leave();
 
@@ -214,7 +214,7 @@ bool ASTPrint::visitVarDeclStmt(std::shared_ptr<ASTVarDeclStmt> node) {
 }
 
 bool ASTPrint::visitWhileStmt(std::shared_ptr<ASTWhileStmt> node) {
-    enter("ASTWhileStmt", node);
+    enter("WhileStmt", node);
     ASTVisitor::visitWhileStmt(node);
     leave();
 
@@ -222,7 +222,7 @@ bool ASTPrint::visitWhileStmt(std::shared_ptr<ASTWhileStmt> node) {
 }
 
 bool ASTPrint::visitArgNode(std::shared_ptr<ASTArgNode> node) {
-    enter("ASTArgNode", node);
+    enter("ArgNode", node);
     ASTVisitor::visitArgNode(node);
     leave();
 
@@ -240,7 +240,7 @@ bool ASTPrint::visitTypeNode(std::shared_ptr<ASTTypeNode> node) {
 }
 
 bool ASTPrint::visitArrType(std::shared_ptr<ASTArrType> node) {
-    enter("ASTArrType", node);
+    enter("ArrType", node);
     ASTVisitor::visitArrType(node);
     leave();
 
@@ -248,7 +248,7 @@ bool ASTPrint::visitArrType(std::shared_ptr<ASTArrType> node) {
 }
 
 bool ASTPrint::visitBooleanType(std::shared_ptr<ASTBooleanType> node) {
-    enter("ASTBooleanType", node);
+    enter("BooleanType", node);
     ASTVisitor::visitBooleanType(node);
     leave();
 
@@ -256,7 +256,7 @@ bool ASTPrint::visitBooleanType(std::shared_ptr<ASTBooleanType> node) {
 }
 
 bool ASTPrint::visitFunType(std::shared_ptr<ASTFunType> node) {
-    enter("ASTFunType", node);
+    enter("FunType", node);
     ASTVisitor::visitFunType(node);
     leave();
 
@@ -264,7 +264,7 @@ bool ASTPrint::visitFunType(std::shared_ptr<ASTFunType> node) {
 }
 
 bool ASTPrint::visitIdType(std::shared_ptr<ASTIdType> node) {
-    enter("ASTIdType", node);
+    enter("IdType", node);
     ASTVisitor::visitIdType(node);
     leave();
 
@@ -272,7 +272,7 @@ bool ASTPrint::visitIdType(std::shared_ptr<ASTIdType> node) {
 }
 
 bool ASTPrint::visitIntegerType(std::shared_ptr<ASTIntegerType> node) {
-    enter("ASTIntegerType", node);
+    enter("IntegerType", node);
     ASTVisitor::visitIntegerType(node);
     leave();
 
@@ -280,7 +280,7 @@ bool ASTPrint::visitIntegerType(std::shared_ptr<ASTIntegerType> node) {
 }
 
 bool ASTPrint::visitPtrType(std::shared_ptr<ASTPtrType> node) {
-    enter("ASTPtrType", node);
+    enter("PtrType", node);
     ASTVisitor::visitPtrType(node);
     leave();
 
@@ -288,7 +288,7 @@ bool ASTPrint::visitPtrType(std::shared_ptr<ASTPtrType> node) {
 }
 
 bool ASTPrint::visitVoidType(std::shared_ptr<ASTVoidType> node) {
-    enter("ASTVoidType", node);
+    enter("VoidType", node);
     ASTVisitor::visitVoidType(node);
     leave();
 
