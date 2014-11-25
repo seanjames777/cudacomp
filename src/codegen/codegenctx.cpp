@@ -20,20 +20,24 @@ CodegenCtx::CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo)
       def_builder(nullptr),
       function(nullptr),
       funcInfo(nullptr),
-      body_builder(nullptr)
+      body_builder(nullptr),
+      alloc_array(nullptr)
 {
     module = std::make_shared<Module>("", context);
-
-    // Construct a declaration of the runtime's alloc_array function
-    std::vector<Type *> argTypes;
-    argTypes.push_back(Type::getInt32Ty(context));
-    argTypes.push_back(Type::getInt32Ty(context));
-
-    FunctionType *ftype = FunctionType::get(PointerType::getUnqual(Type::getInt8Ty(context)), argTypes, false);
-    alloc_array = Function::Create(ftype, GlobalValue::ExternalLinkage, "_rt_alloc_array", module.get());
 }
 
 Function *CodegenCtx::getAllocArray() {
+    // Only declare it if it's used, to make small programs simpler
+    if (!alloc_array) {
+        // Construct a declaration of the runtime's alloc_array function
+        std::vector<Type *> argTypes;
+        argTypes.push_back(Type::getInt32Ty(context));
+        argTypes.push_back(Type::getInt32Ty(context));
+
+        FunctionType *ftype = FunctionType::get(PointerType::getUnqual(Type::getInt8Ty(context)), argTypes, false);
+        alloc_array = Function::Create(ftype, GlobalValue::ExternalLinkage, "_rt_alloc_array", module.get());
+    }
+
     return alloc_array;
 }
 
