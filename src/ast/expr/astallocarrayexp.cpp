@@ -25,5 +25,4 @@ std::shared_ptr<ASTExpNode> ASTAllocArrayExp::getLength() {
 }
 
 void ASTAllocArrayExp::print(std::ostream & ss) {
-    ss << type;
 }

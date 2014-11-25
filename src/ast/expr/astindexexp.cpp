@@ -21,5 +21,4 @@ std::shared_ptr<ASTExpNode> ASTIndexExp::getSubscript() {
 }
 
 void ASTIndexExp::print(std::ostream & ss) {
-    ss << subscript;
 }
