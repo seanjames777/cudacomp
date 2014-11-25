@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (args.print_ast) {
-        ASTPrint print(std::cout);
+        ASTPrint print(std::cout, true);
         print.run(node);
     }
 

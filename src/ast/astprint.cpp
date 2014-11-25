@@ -6,17 +6,24 @@
 
 #include <ast/astprint.h>
 
-ASTPrint::ASTPrint(std::ostream & out)
+ASTPrint::ASTPrint(std::ostream & out, bool colorize)
     : tabDepth(0),
-      out(out)
+      out(out),
+      colorize(colorize)
 {
 }
 
 void ASTPrint::color(int color) {
+    if (!colorize)
+        return;
+
     out << "\033[" << (30 + color) << ";1m";
 }
 
 void ASTPrint::uncolor() {
+    if (!colorize)
+        return;
+
     out << "\033[0m";
 }
 

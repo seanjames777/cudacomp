@@ -20,6 +20,7 @@ private:
 
     int tabDepth;
     std::ostream & out;
+    bool colorize;
 
     void enter(std::string nodeName, std::shared_ptr<ASTNode> node);
 
@@ -31,7 +32,7 @@ private:
 
 public:
 
-    ASTPrint(std::ostream & out);
+    ASTPrint(std::ostream & out, bool colorize);
 
     void run(std::shared_ptr<ASTDeclSeqNode> ast);
 
