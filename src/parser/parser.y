@@ -128,7 +128,7 @@ exp:
   | NOT exp                           { $$ = new ASTUnopExp(ASTUnopExp::NOT, std::shared_ptr<ASTExpNode>($2)); }
   | BNOT exp                          { $$ = new ASTUnopExp(ASTUnopExp::BNOT, std::shared_ptr<ASTExpNode>($2)); }
   | MINUS exp %prec UMINUS            { $$ = new ASTUnopExp(ASTUnopExp::NEG, std::shared_ptr<ASTExpNode>($2)); }
-  | IDENT LPAREN arg_list RPAREN      { $$ = new ASTCallExp($1, std::shared_ptr<ASTExpSeqNode>($3)); }
+  | IDENT LPAREN arg_list RPAREN      { $$ = new ASTCallExp(std::string($1), std::shared_ptr<ASTExpSeqNode>($3)); free($1); }
   | IDENT                             { $$ = new ASTIdentifierExp(std::string($1)); free($1); }
   | LPAREN exp RPAREN                 { $$ = $2; }
   | exp LBRACKET exp RBRACKET         { $$ = new ASTIndexExp(std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
@@ -196,9 +196,9 @@ linkage:
 
 fundecl:
     linkage type IDENT LPAREN param_list RPAREN LBRACE stmt_list RBRACE
-    { $$ = new ASTFunDecl($3, std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($2), std::shared_ptr<ASTArgSeqNode>($5)), true, $1, std::shared_ptr<ASTStmtSeqNode>($8)); }
+    { $$ = new ASTFunDecl(std::string($3), std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($2), std::shared_ptr<ASTArgSeqNode>($5)), true, $1, std::shared_ptr<ASTStmtSeqNode>($8)); free($3); }
   | linkage type IDENT LPAREN param_list RPAREN SEMI
-    { $$ = new ASTFunDecl($3, std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($2), std::shared_ptr<ASTArgSeqNode>($5)), false, $1, nullptr); }
+    { $$ = new ASTFunDecl(std::string($3), std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($2), std::shared_ptr<ASTArgSeqNode>($5)), false, $1, nullptr); free($3); }
   ;
 
 arg_list_follow:
