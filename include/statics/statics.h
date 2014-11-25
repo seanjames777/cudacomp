@@ -16,6 +16,7 @@
 #include <statics/returncheck.h>
 #include <statics/typeresolve.h>
 #include <statics/funcheck.h>
+#include <statics/exceptions.h>
 
 namespace Statics {
 

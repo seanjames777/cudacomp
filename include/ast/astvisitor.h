@@ -12,9 +12,7 @@
 #include <ast/ast.h>
 
 #define VISIT_HDR(NAME, ARG) virtual bool visit##NAME(std::shared_ptr<AST##NAME> ARG);
-#define VISIT_IMPL(NAME, ARG) \
-    template<typename T> \
-    bool ASTVisitor<T>::visit##NAME(std::shared_ptr<AST##NAME> ARG)
+#define VISIT_IMPL(NAME, ARG) bool ASTVisitor::visit##NAME(std::shared_ptr<AST##NAME> ARG)
 #define VISIT_CALL(NAME, ARG) visit##NAME(ARG)
 #define NODE_MATCH(NAME, ARG1, ARG2) std::shared_ptr<AST##NAME> ARG1 = std::dynamic_pointer_cast<AST##NAME>(ARG2)
 
@@ -39,18 +37,7 @@
  * Note that it is possible to avoid entirely terminating an analysis by "catching" a false return
  * value higher up the tree.
  */
-template<typename T>
 class ASTVisitor {
-private:
-
-    std::vector<T> stack;
-
-protected:
-
-    void push(T elem);
-
-    T pop();
-
 public:
 
     VISIT_HDR(DeclNode, node)

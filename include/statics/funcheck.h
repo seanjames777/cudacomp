@@ -12,37 +12,42 @@
 #include <statics/moduleinfo.h>
 #include <statics/functioninfo.h>
 #include <ast/ast.h>
+#include <ast/astvisitor.h>
 #include <statics/exceptions.h>
 
 namespace Statics {
 
+/**
+ * @brief Abstract syntax tree analysis which checks the rules below.
+ *
+ * - Functions may be declared more than once
+ * - All declarations of a function must have the same signature and linkage
+ * - Internal functions may only be defined once
+ * - External functions may not be defined
+ * - Functions must be declared before they can be called
+ * - Any internal function that is called must be defined
+ */
+class FunCheck : public ASTVisitor {
+private:
+
     typedef std::unordered_set<std::string> idset;
 
-    void funcheck_exp(
-        std::shared_ptr<ModuleInfo> mod,
-        idset & called,
-        std::shared_ptr<ASTExpNode> node);
+    std::shared_ptr<ModuleInfo> module;
+    idset called;
+    idset defined;
 
-    void funcheck_stmts(
-        std::shared_ptr<ModuleInfo> mod,
-        idset & called,
-        std::shared_ptr<ASTStmtSeqNode> node);
+public:
 
-    void funcheck_stmt(
-        std::shared_ptr<ModuleInfo> mod,
-        idset & called,
-        std::shared_ptr<ASTStmtNode> node);
+    FunCheck(std::shared_ptr<ModuleInfo> module);
 
-    void funcheck_tops(
-        std::shared_ptr<ModuleInfo> mod,
-        std::shared_ptr<ASTDeclSeqNode> node);
+    void run(std::shared_ptr<ASTDeclSeqNode> ast);
 
-    void funcheck_top(
-        std::shared_ptr<ModuleInfo> mod,
-        idset & called,
-        idset & defined,
-        std::shared_ptr<ASTDeclNode> node);
+    bool visitCallExp(std::shared_ptr<ASTCallExp> call_exp);
+
+    bool visitFunDecl(std::shared_ptr<ASTFunDecl> funDefn);
 
 };
+
+}
 
 #endif
