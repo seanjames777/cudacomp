@@ -262,6 +262,9 @@ VISIT_IMPL(VarDeclStmt, node) {
 }
 
 VISIT_IMPL(AssignStmt, node) {
+    if (!VISIT_CALL(ExpNode, node->getLValue()))
+        return false;
+
     if (!VISIT_CALL(ExpNode, node->getExp()))
         return false;
 
