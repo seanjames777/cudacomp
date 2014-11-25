@@ -44,5 +44,5 @@ void ASTFunDecl::setBody(std::shared_ptr<ASTStmtSeqNode> body) {
 }
 
 void ASTFunDecl::print(std::ostream & ss) {
-    // TODO
+    ss << name;
 }

@@ -19,9 +19,4 @@ std::shared_ptr<ASTStmtSeqNode> ASTScopeStmt::getBody() {
 }
 
 void ASTScopeStmt::print(std::ostream & ss) {
-    ss << "scope(";
-    ss << std::endl;
-    body->print(ss);
-    ss << std::endl;
-    ss << ")";
 }

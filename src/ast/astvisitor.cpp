@@ -41,34 +41,8 @@ VISIT_IMPL(FunDecl, node) {
 }
 
 VISIT_IMPL(TypeDecl, node) {
-    if (NODE_MATCH(BooleanType, booleanTypeNode, node)) {
-        if (!VISIT_CALL(BooleanType, booleanTypeNode))
-            return false;
-    }
-    else if (NODE_MATCH(IntegerType, integerTypeNode, node)) {
-        if (!VISIT_CALL(IntegerType, integerTypeNode))
-            return false;
-    }
-    else if (NODE_MATCH(VoidType, voidTypeNode, node)) {
-        if (!VISIT_CALL(VoidType, voidTypeNode))
-            return false;
-    }
-    else if (NODE_MATCH(IdType, idTypeNode, node)) {
-        if (!VISIT_CALL(IdType, idTypeNode))
-            return false;
-    }
-    else if (NODE_MATCH(PtrType, ptrTypeNode, node)) {
-        if (!VISIT_CALL(PtrType, ptrTypeNode))
-            return false;
-    }
-    else if (NODE_MATCH(ArrType, arrTypeNode, node)) {
-        if (!VISIT_CALL(ArrType, arrTypeNode))
-            return false;
-    }
-    else if (NODE_MATCH(FunType, funTypeNode, node)) {
-        if (!VISIT_CALL(FunType, funTypeNode))
-            return false;
-    }
+    if (!VISIT_CALL(TypeNode, node->getType()))
+        return false;
 
     return true;
 }
@@ -265,6 +239,9 @@ VISIT_IMPL(ReturnStmt, node) {
 }
 
 VISIT_IMPL(ScopeStmt, node) {
+    if (!VISIT_CALL(StmtSeqNode, node->getBody()))
+        return false;
+
     return true;
 }
 

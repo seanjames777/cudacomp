@@ -10,9 +10,11 @@
 #include <parser/parse.h>
 #include <codegen/codegen.h>
 #include <statics/statics.h>
+#include <ast/astprint.h>
 
 struct CCArgs {
     bool  emit_device;
+    bool  print_ast;
     char *in_file;
     char *out_file;
 } args;
@@ -23,6 +25,8 @@ void parseArgs(int argc, char *argv[]) {
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--emit-device") == 0)
             args.emit_device = true;
+        else if (strcmp(argv[i], "--print-ast") == 0)
+            args.print_ast = true;
         else if (strcmp(argv[i], "-o") == 0)
             args.out_file = argv[i++ + 1];
         else
@@ -41,6 +45,11 @@ int main(int argc, char *argv[]) {
     catch (Parser::ParseException & except) {
         std::cout << except.what() << std::endl;
         return -1;
+    }
+
+    if (args.print_ast) {
+        ASTPrint print(std::cout);
+        print.run(node);
     }
 
     std::shared_ptr<ModuleInfo> moduleInfo;

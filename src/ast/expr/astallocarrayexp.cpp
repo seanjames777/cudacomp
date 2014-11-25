@@ -16,10 +16,14 @@ std::shared_ptr<ASTTypeNode> ASTAllocArrayExp::getElemType() {
     return type;
 }
 
+void ASTAllocArrayExp::setElemType(std::shared_ptr<ASTTypeNode> type) {
+    this->type = type;
+}
+
 std::shared_ptr<ASTExpNode> ASTAllocArrayExp::getLength() {
     return length;
 }
 
 void ASTAllocArrayExp::print(std::ostream & ss) {
-    // TODO
+    ss << type;
 }

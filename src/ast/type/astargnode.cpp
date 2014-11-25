@@ -25,7 +25,5 @@ std::string ASTArgNode::getName() {
 }
 
 void ASTArgNode::print(std::ostream & ss) {
-    ss << "param(";
-    type->print(ss);
-    ss << ", " << name << ")";
+    ss << name;
 }

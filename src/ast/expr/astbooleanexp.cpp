@@ -19,5 +19,5 @@ bool ASTBooleanExp::getValue() {
 }
 
 void ASTBooleanExp::print(std::ostream & ss) {
-    ss << "boolean(" << value << ")";
+    ss << value;
 }

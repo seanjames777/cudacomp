@@ -11,6 +11,7 @@
 
 #include <ast/type/asttypenode.h>
 #include <ast/type/astargnode.h>
+#include <ast/type/astvoidtype.h>
 
 /**
  * @brief Function type AST type node

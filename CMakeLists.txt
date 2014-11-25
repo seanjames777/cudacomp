@@ -49,6 +49,7 @@ endif ("${PTX_BACKEND}" MATCHES "TRUE")
 
 add_executable(cc
     src/ast/astnode.cpp
+    src/ast/astprint.cpp
     src/ast/astseqnode.cpp
     src/ast/astvisitor.cpp
     src/ast/expr/astallocarrayexp.cpp

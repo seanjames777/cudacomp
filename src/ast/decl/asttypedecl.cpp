@@ -24,5 +24,5 @@ std::shared_ptr<ASTTypeNode> ASTTypeDecl::getType() {
 }
 
 void ASTTypeDecl::print(std::ostream & ss) {
-    // TODO
+    ss << name;
 }

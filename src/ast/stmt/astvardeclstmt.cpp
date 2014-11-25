@@ -33,12 +33,5 @@ void ASTVarDeclStmt::setType(std::shared_ptr<ASTTypeNode> type) {
 }
 
 void ASTVarDeclStmt::print(std::ostream & ss) {
-    ss << "decl(";
-    type->print(ss);
-    ss << ", " << id << ", ";
-
-    if (exp)
-        exp->print(ss);
-
-    ss << ")";
+    ss << id;
 }

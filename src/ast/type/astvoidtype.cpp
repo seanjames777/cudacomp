@@ -23,7 +23,6 @@ bool ASTVoidType::equal(std::shared_ptr<ASTTypeNode> other) {
 }
 
 void ASTVoidType::print(std::ostream & ss) {
-    ss << "void";
 }
 
 int ASTVoidType::getSize() {

@@ -19,5 +19,5 @@ int ASTIntegerExp::getValue() {
 }
 
 void ASTIntegerExp::print(std::ostream & ss) {
-    ss << "int(" << value << ")";
+    ss << value;
 }
