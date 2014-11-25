@@ -15,6 +15,8 @@ VISIT_IMPL(DeclNode, node) {
         if (!VISIT_CALL(TypeDecl, typeDeclNode))
             return false;
     }
+    else
+        throw ASTMalformedException();
 
     return true;
 }
@@ -80,6 +82,8 @@ VISIT_IMPL(ExpNode, node) {
         if (!VISIT_CALL(UnopExp, unopExpNode))
             return false;
     }
+    else
+        throw ASTMalformedException();
 
     return true;
 }
@@ -176,6 +180,8 @@ VISIT_IMPL(StmtNode, node) {
         if (!VISIT_CALL(WhileStmt, whileStmtNode))
             return false;
     }
+    else
+        throw ASTMalformedException();
 
     return true;
 }
@@ -309,6 +315,8 @@ VISIT_IMPL(TypeNode, node) {
         if (!VISIT_CALL(FunType, funTypeNode))
             return false;
     }
+    else
+        throw ASTMalformedException();
 
     return true;
 }
