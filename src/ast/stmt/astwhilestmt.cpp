@@ -24,10 +24,4 @@ std::shared_ptr<ASTStmtSeqNode> ASTWhileStmt::getBody() {
 }
 
 void ASTWhileStmt::print(std::ostream & ss) {
-    ss << "while(";
-    cond->print(ss);
-    ss << "," << std::endl;
-    bodyStmt->print(ss);
-    ss << ")";
-
 }

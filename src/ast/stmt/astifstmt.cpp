@@ -29,17 +29,4 @@ std::shared_ptr<ASTStmtSeqNode> ASTIfStmt::getFalseStmt() {
 }
 
 void ASTIfStmt::print(std::ostream & ss) {
-    ss << "if(";
-    cond->print(ss);
-    ss << "," << std::endl;
-    trueStmt->print(ss);
-    ss << "," << std::endl;
-
-    if (falseStmt)
-        falseStmt->print(ss);
-    else
-        ss << "null";
-
-    ss << ")";
-
 }

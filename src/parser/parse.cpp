@@ -22,8 +22,11 @@ std::shared_ptr<ASTDeclSeqNode> parse(const char *file) {
     if (file) {
         fp = fopen(file, "r");
 
-        if (!fp)
-            return nullptr;
+        if (!fp) {
+            std::stringstream ss;
+            ss << "Cannot open file '" << file << "'";
+            throw ParseException(ss.str());
+        }
 
         yyin = fp;
     }

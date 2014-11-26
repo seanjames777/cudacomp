@@ -23,7 +23,6 @@ bool ASTBooleanType::equal(std::shared_ptr<ASTTypeNode> other) {
 }
 
 void ASTBooleanType::print(std::ostream & ss) {
-    ss << "bool";
 }
 
 int ASTBooleanType::getSize() {

@@ -19,7 +19,4 @@ std::shared_ptr<ASTExpNode> ASTExprStmt::getExp() {
 }
 
 void ASTExprStmt::print(std::ostream & ss) {
-    ss << "expr(";
-    exp->print(ss);
-    ss << ")";
 }

@@ -68,6 +68,7 @@ tests = [
     (SOURCE_DIR + "tests/testFib1.cc", 34),
     (SOURCE_DIR + "tests/testFib2.cc", 34),
     (SOURCE_DIR + "tests/testFib3.cc", 34),
+    (SOURCE_DIR + "tests/testFib4.cc", 34),
     (SOURCE_DIR + "tests/testWhile1.cc", 1),
     (SOURCE_DIR + "tests/testWhile2.cc", 55),
     (SOURCE_DIR + "tests/testWhile3.cc", 1000),
@@ -89,6 +90,9 @@ tests = [
     (SOURCE_DIR + "tests/testFunDecl7.cc", "error"),
     (SOURCE_DIR + "tests/testFunDecl8.cc", "error"),
     (SOURCE_DIR + "tests/testFunDecl9.cc", 5),
+    (SOURCE_DIR + "tests/testFunDecl10.cc", "error"),
+    (SOURCE_DIR + "tests/testFunDecl11.cc", 5),
+    (SOURCE_DIR + "tests/testFunDecl12.cc", "error"),
     (SOURCE_DIR + "tests/testArr1.cc", 5),
     (SOURCE_DIR + "tests/testArr2.cc", 0),
     (SOURCE_DIR + "tests/testArr3.cc", 5),
@@ -165,7 +169,7 @@ for (name, expected) in tests:
     if dump_temp:
         print "    " + temp
 
-    stat = -7
+    stat = -1
     output = []
 
     if target == "host":
@@ -191,7 +195,10 @@ for (name, expected) in tests:
 
     run = run + 1
 
-    if type(expected) is int:
+    # stat == 0 => compiled OK, -1 => compiler caught an error
+    if stat != 0 and stat != 255:
+        print "\033[31;1m    FAILED: compiler crashed (" + str(stat) + ")\033[0m"
+    elif type(expected) is int:
         try:
             outval = int(output[0])
 

@@ -19,7 +19,4 @@ std::shared_ptr<ASTExpNode> ASTReturnStmt::getExp() {
 }
 
 void ASTReturnStmt::print(std::ostream & ss) {
-    ss << "return(";
-    exp->print(ss);
-    ss << ")";
 }

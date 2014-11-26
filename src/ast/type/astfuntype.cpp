@@ -53,22 +53,6 @@ bool ASTFunType::equal(std::shared_ptr<ASTTypeNode> other_type) {
 }
 
 void ASTFunType::print(std::ostream & ss) {
-    returnType->print(ss);
-
-    ss << "(";
-
-    std::shared_ptr<ASTArgSeqNode> arg = args;
-
-    while (arg != nullptr) {
-        arg->print(ss);
-
-        arg = arg->getTail();
-
-        if (arg != nullptr)
-            ss << ", ";
-    }
-
-    ss << ")";
 }
 
 int ASTFunType::getSize() {

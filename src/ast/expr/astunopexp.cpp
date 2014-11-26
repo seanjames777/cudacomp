@@ -24,10 +24,6 @@ std::shared_ptr<ASTExpNode> ASTUnopExp::getExp() {
 }
 
 void ASTUnopExp::print(std::ostream & ss) {
-    ss << "un(";
-    exp->print(ss);
-    ss << ", ";
-
     switch(op) {
     case NOT:
         ss << "!";
@@ -39,6 +35,4 @@ void ASTUnopExp::print(std::ostream & ss) {
         ss << "-";
         break;
     }
-
-    ss << ")";
 }

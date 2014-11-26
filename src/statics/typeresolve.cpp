@@ -28,18 +28,23 @@
 
 namespace Statics {
 
-std::shared_ptr<ASTTypeNode> resolveType(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTTypeNode> type) {
+TypeResolve::TypeResolve(std::shared_ptr<ModuleInfo> module)
+    : module(module)
+{
+}
+
+std::shared_ptr<ASTTypeNode> TypeResolve::resolveType(std::shared_ptr<ASTTypeNode> type) {
     // Type definitions can only introduce one level of indirection. So, a newly defined type is
     // either a basic type like int or bool, or a single indirection into the existing types.
 
     // Resolve the 'to' type for pointers. TODO: test this when language support arrives.
     if (std::shared_ptr<ASTPtrType> ptr_type = std::dynamic_pointer_cast<ASTPtrType>(type)) {
-        ptr_type->setToType(resolveType(module, ptr_type->getToType()));
+        ptr_type->setToType(resolveType(ptr_type->getToType()));
         return ptr_type;
     }
     // Resolve the element type for arrays. TODO: test this
     else if (std::shared_ptr<ASTArrType> arr_type = std::dynamic_pointer_cast<ASTArrType>(type)) {
-        arr_type->setElemType(resolveType(module, arr_type->getElemType()));
+        arr_type->setElemType(resolveType(arr_type->getElemType()));
         return arr_type;
     }
     // ID type. Look up the type, which should already be resolved.
@@ -57,88 +62,52 @@ std::shared_ptr<ASTTypeNode> resolveType(std::shared_ptr<ModuleInfo> module, std
         return type;
 }
 
-void typeresolve_stmts(
-    std::shared_ptr<ModuleInfo> mod,
-    std::shared_ptr<ASTStmtSeqNode> seq_node)
-{
-    while (seq_node != nullptr) {
-        typeresolve_stmt(mod, seq_node->getHead());
-        seq_node = seq_node->getTail();
-    }
+void TypeResolve::visitTypeNode(std::shared_ptr<ASTTypeNode> type) {
+    // Just resolve the type in place. We don't need to worry about the return value, because we
+    // aren't resolving recursively. That's done by resolveType() itself.
+    resolveType(type);
+    ASTVisitor::visitTypeNode(type);
 }
 
-void typeresolve_stmt(
-    std::shared_ptr<ModuleInfo> mod,
-    std::shared_ptr<ASTStmtNode> head)
-{
-    // Variable declaration. Resolve the declared type.
-    if (std::shared_ptr<ASTVarDeclStmt> decl_stmt = std::dynamic_pointer_cast<ASTVarDeclStmt>(head))
-        decl_stmt->setType(resolveType(mod, decl_stmt->getType()));
-    // Scope statement. Resolve the body
-    else if (std::shared_ptr<ASTScopeStmt> scope_node = std::dynamic_pointer_cast<ASTScopeStmt>(head)) {
-        if (scope_node->getBody())
-            typeresolve_stmts(mod, scope_node->getBody());
-    }
-    // If statement. Resolve branches.
-    else if (std::shared_ptr<ASTIfStmt> if_node = std::dynamic_pointer_cast<ASTIfStmt>(head)) {
-        typeresolve_stmts(mod, if_node->getTrueStmt());
-
-        if (if_node->getFalseStmt())
-            typeresolve_stmts(mod, if_node->getFalseStmt());
-    }
-    // While statement. Resolve body.
-    else if (std::shared_ptr<ASTWhileStmt> while_node = std::dynamic_pointer_cast<ASTWhileStmt>(head)) {
-        typeresolve_stmts(mod, while_node->getBody());
-    }
-
-    // TODO: need to handle expressions now for alloc_array
+void TypeResolve::visitArgNode(std::shared_ptr<ASTArgNode> argNode) {
+    argNode->setType(resolveType(argNode->getType()));
+    ASTVisitor::visitArgNode(argNode);
 }
 
-void typeresolve_tops(
-    std::shared_ptr<ModuleInfo> mod,
-    std::shared_ptr<ASTDeclSeqNode> seq_node)
-{
-    while (seq_node != nullptr) {
-        typeresolve_top(mod, seq_node->getHead());
-        seq_node = seq_node->getTail();
-    }
+void TypeResolve::visitFunType(std::shared_ptr<ASTFunType> funType) {
+    funType->setReturnType(resolveType(funType->getReturnType()));
+    // Arguments are handled in visitArgNode()
+    ASTVisitor::visitFunType(funType);
 }
 
-void typeresolve_top(
-    std::shared_ptr<ModuleInfo> mod,
-    std::shared_ptr<ASTDeclNode> node)
-{
-    // Function definition
-    if (std::shared_ptr<ASTFunDecl> funDefn = std::dynamic_pointer_cast<ASTFunDecl>(node)) {
-        std::shared_ptr<ASTFunType> fun_type = funDefn->getSignature();
+void TypeResolve::visitVarDeclStmt(std::shared_ptr<ASTVarDeclStmt> varDecl) {
+    varDecl->setType(resolveType(varDecl->getType()));
+    ASTVisitor::visitVarDeclStmt(varDecl);
+}
 
-        // Resolve the return type
-        fun_type->setReturnType(resolveType(mod, fun_type->getReturnType()));
+void TypeResolve::visitAllocArrayExp(std::shared_ptr<ASTAllocArrayExp> allocExp) {
+    allocExp->setElemType(resolveType(allocExp->getElemType()));
+    ASTVisitor::visitAllocArrayExp(allocExp);
+}
 
-        std::shared_ptr<ASTArgSeqNode> args = fun_type->getArgs();
+void TypeResolve::visitTypeDecl(std::shared_ptr<ASTTypeDecl> typeDecl) {
+    // TypeDecl's define new type names, so we need to update the mapping in the module
 
-        // Resolve each argument's type
-        while (args != nullptr) {
-            std::shared_ptr<ASTArgNode> arg = args->getHead();
-            arg->setType(resolveType(mod, arg->getType()));
-            args = args->getTail();
-        }
+    // Types must have a new name
+    if (module->getType(typeDecl->getName()) != nullptr)
+        throw RedeclaredTypeException(typeDecl->getName());
 
-        // Resolve the body
-        typeresolve_stmts(mod, funDefn->getBody());
-    }
-    // Type definition
-    else if (std::shared_ptr<ASTTypeDecl> typeDefn = std::dynamic_pointer_cast<ASTTypeDecl>(node)) {
-        // Types must have a new name
-        if (mod->getType(typeDefn->getName()) != nullptr)
-            throw RedeclaredTypeException(typeDefn->getName());
+    // TODO: type cannot be defined in terms of itself
+    // TODO: inconsistency between getName() and getId() all over the place
 
-        // TODO: type cannot be defined in terms of itself
-        // TODO: inconsistency between getName() and getId() all over the place
+    // Add the new type to the mapping
+    module->addType(typeDecl->getName(), resolveType(typeDecl->getType()));
 
-        // Add the new type to the mapping
-        mod->addType(typeDefn->getName(), resolveType(mod, typeDefn->getType()));
-    }
+    ASTVisitor::visitTypeDecl(typeDecl);
+}
+
+void TypeResolve::run(std::shared_ptr<ASTDeclSeqNode> ast) {
+    visitDeclSeqNode(ast);
 }
 
 };

@@ -12,25 +12,37 @@
 #include <statics/moduleinfo.h>
 #include <statics/functioninfo.h>
 #include <ast/ast.h>
+#include <ast/astvisitor.h>
 #include <statics/exceptions.h>
 
 namespace Statics {
 
-    void typeresolve_stmts(
-        std::shared_ptr<ModuleInfo> mod,
-        std::shared_ptr<ASTStmtSeqNode> node);
+class TypeResolve : public ASTVisitor {
+private:
 
-    void typeresolve_stmt(
-        std::shared_ptr<ModuleInfo> mod,
-        std::shared_ptr<ASTStmtNode> node);
+    std::shared_ptr<ModuleInfo> module;
 
-    void typeresolve_tops(
-        std::shared_ptr<ModuleInfo> mod,
-        std::shared_ptr<ASTDeclSeqNode> node);
+public:
 
-    void typeresolve_top(
-        std::shared_ptr<ModuleInfo> mod,
-        std::shared_ptr<ASTDeclNode> node);
+    TypeResolve(std::shared_ptr<ModuleInfo> module);
+
+    std::shared_ptr<ASTTypeNode> resolveType(std::shared_ptr<ASTTypeNode> type);
+
+    virtual void visitTypeNode(std::shared_ptr<ASTTypeNode> type) override;
+
+    virtual void visitArgNode(std::shared_ptr<ASTArgNode> argNode) override;
+
+    virtual void visitFunType(std::shared_ptr<ASTFunType> funType) override;
+
+    virtual void visitVarDeclStmt(std::shared_ptr<ASTVarDeclStmt> varDecl) override;
+
+    virtual void visitAllocArrayExp(std::shared_ptr<ASTAllocArrayExp> allocExp) override;
+
+    virtual void visitTypeDecl(std::shared_ptr<ASTTypeDecl> typeDecl) override;
+
+    void run(std::shared_ptr<ASTDeclSeqNode> ast);
+
+};
 
 };
 

@@ -24,8 +24,4 @@ std::shared_ptr<ASTExpNode> ASTAssignStmt::getExp() {
 }
 
 void ASTAssignStmt::print(std::ostream & ss) {
-    /*ss << "defn(" << id << ", ";
-    exp->print(ss);
-    ss << ")";*/
-    // TODO
 }

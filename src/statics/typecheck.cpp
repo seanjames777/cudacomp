@@ -190,10 +190,23 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         std::shared_ptr<ASTTypeNode> sizeType = typecheck_exp(mod, func, decl, def, alloc_exp->getLength());
 
         if (!sizeType->equal(ASTIntegerType::get()))
-            throw new IllegalTypeException();
+            throw IllegalTypeException();
 
         // Returns an array of elemTypes
         return std::make_shared<ASTArrType>(elemType);
+    }
+    // Range
+    else if (std::shared_ptr<ASTRangeExp> range_exp = std::dynamic_pointer_cast<ASTRangeExp>(node)) {
+        std::shared_ptr<ASTTypeNode> minType = typecheck_exp(mod, func, decl, def, range_exp->getMin());
+        std::shared_ptr<ASTTypeNode> maxType = typecheck_exp(mod, func, decl, def, range_exp->getMin());
+
+        if (!minType->equal(ASTIntegerType::get()))
+            throw IllegalTypeException();
+
+        if (!maxType->equal(ASTIntegerType::get()))
+            throw IllegalTypeException();
+
+        return ASTRangeType::get();
     }
     else
         throw ASTMalformedException();
