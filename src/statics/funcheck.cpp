@@ -29,7 +29,7 @@ void FunCheck::run(std::shared_ptr<ASTDeclSeqNode> ast) {
         throw UndefinedFunctionException(id);
 }
 
-bool FunCheck::visitCallExp(std::shared_ptr<ASTCallExp> call_exp) {
+void FunCheck::visitCallExp(std::shared_ptr<ASTCallExp> call_exp) {
     std::shared_ptr<FunctionInfo> call_func = module->getFunction(call_exp->getId());
 
     // Function must have been declared
@@ -40,10 +40,10 @@ bool FunCheck::visitCallExp(std::shared_ptr<ASTCallExp> call_exp) {
     if (call_func->getLinkage() == ASTDeclNode::Internal)
         called.insert(call_exp->getId());
 
-    return ASTVisitor::visitCallExp(call_exp);
+    ASTVisitor::visitCallExp(call_exp);
 }
 
-bool FunCheck::visitFunDecl(std::shared_ptr<ASTFunDecl> funDefn) {
+void FunCheck::visitFunDecl(std::shared_ptr<ASTFunDecl> funDefn) {
     // Check for an existing declaration
     std::shared_ptr<FunctionInfo> funInfo = module->getFunction(funDefn->getName());
 
@@ -78,7 +78,7 @@ bool FunCheck::visitFunDecl(std::shared_ptr<ASTFunDecl> funDefn) {
     if (funDefn->isDefn())
         defined.insert(funDefn->getName());
 
-    return ASTVisitor::visitFunDecl(funDefn);
+    ASTVisitor::visitFunDecl(funDefn);
 }
 
 }

@@ -42,9 +42,9 @@ public:
 
     void run(std::shared_ptr<ASTDeclSeqNode> ast);
 
-    bool visitCallExp(std::shared_ptr<ASTCallExp> call_exp);
+    void visitCallExp(std::shared_ptr<ASTCallExp> call_exp) override;
 
-    bool visitFunDecl(std::shared_ptr<ASTFunDecl> funDefn);
+    void visitFunDecl(std::shared_ptr<ASTFunDecl> funDefn) override;
 
 };
 

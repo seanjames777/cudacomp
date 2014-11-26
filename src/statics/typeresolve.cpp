@@ -62,35 +62,35 @@ std::shared_ptr<ASTTypeNode> TypeResolve::resolveType(std::shared_ptr<ASTTypeNod
         return type;
 }
 
-bool TypeResolve::visitTypeNode(std::shared_ptr<ASTTypeNode> type) {
+void TypeResolve::visitTypeNode(std::shared_ptr<ASTTypeNode> type) {
     // Just resolve the type in place. We don't need to worry about the return value, because we
     // aren't resolving recursively. That's done by resolveType() itself.
     resolveType(type);
-    return ASTVisitor::visitTypeNode(type);
+    ASTVisitor::visitTypeNode(type);
 }
 
-bool TypeResolve::visitArgNode(std::shared_ptr<ASTArgNode> argNode) {
+void TypeResolve::visitArgNode(std::shared_ptr<ASTArgNode> argNode) {
     argNode->setType(resolveType(argNode->getType()));
-    return ASTVisitor::visitArgNode(argNode);
+    ASTVisitor::visitArgNode(argNode);
 }
 
-bool TypeResolve::visitFunType(std::shared_ptr<ASTFunType> funType) {
+void TypeResolve::visitFunType(std::shared_ptr<ASTFunType> funType) {
     funType->setReturnType(resolveType(funType->getReturnType()));
     // Arguments are handled in visitArgNode()
-    return ASTVisitor::visitFunType(funType);
+    ASTVisitor::visitFunType(funType);
 }
 
-bool TypeResolve::visitVarDeclStmt(std::shared_ptr<ASTVarDeclStmt> varDecl) {
+void TypeResolve::visitVarDeclStmt(std::shared_ptr<ASTVarDeclStmt> varDecl) {
     varDecl->setType(resolveType(varDecl->getType()));
-    return ASTVisitor::visitVarDeclStmt(varDecl);
+    ASTVisitor::visitVarDeclStmt(varDecl);
 }
 
-bool TypeResolve::visitAllocArrayExp(std::shared_ptr<ASTAllocArrayExp> allocExp) {
+void TypeResolve::visitAllocArrayExp(std::shared_ptr<ASTAllocArrayExp> allocExp) {
     allocExp->setElemType(resolveType(allocExp->getElemType()));
-    return ASTVisitor::visitAllocArrayExp(allocExp);
+    ASTVisitor::visitAllocArrayExp(allocExp);
 }
 
-bool TypeResolve::visitTypeDecl(std::shared_ptr<ASTTypeDecl> typeDecl) {
+void TypeResolve::visitTypeDecl(std::shared_ptr<ASTTypeDecl> typeDecl) {
     // TypeDecl's define new type names, so we need to update the mapping in the module
 
     // Types must have a new name
@@ -103,7 +103,7 @@ bool TypeResolve::visitTypeDecl(std::shared_ptr<ASTTypeDecl> typeDecl) {
     // Add the new type to the mapping
     module->addType(typeDecl->getName(), resolveType(typeDecl->getType()));
 
-    return ASTVisitor::visitTypeDecl(typeDecl);
+    ASTVisitor::visitTypeDecl(typeDecl);
 }
 
 void TypeResolve::run(std::shared_ptr<ASTDeclSeqNode> ast) {

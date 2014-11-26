@@ -28,17 +28,17 @@ public:
 
     std::shared_ptr<ASTTypeNode> resolveType(std::shared_ptr<ASTTypeNode> type);
 
-    virtual bool visitTypeNode(std::shared_ptr<ASTTypeNode> type) override;
+    virtual void visitTypeNode(std::shared_ptr<ASTTypeNode> type) override;
 
-    virtual bool visitArgNode(std::shared_ptr<ASTArgNode> argNode) override;
+    virtual void visitArgNode(std::shared_ptr<ASTArgNode> argNode) override;
 
-    virtual bool visitFunType(std::shared_ptr<ASTFunType> funType) override;
+    virtual void visitFunType(std::shared_ptr<ASTFunType> funType) override;
 
-    virtual bool visitVarDeclStmt(std::shared_ptr<ASTVarDeclStmt> varDecl) override;
+    virtual void visitVarDeclStmt(std::shared_ptr<ASTVarDeclStmt> varDecl) override;
 
-    virtual bool visitAllocArrayExp(std::shared_ptr<ASTAllocArrayExp> allocExp) override;
+    virtual void visitAllocArrayExp(std::shared_ptr<ASTAllocArrayExp> allocExp) override;
 
-    virtual bool visitTypeDecl(std::shared_ptr<ASTTypeDecl> typeDecl) override;
+    virtual void visitTypeDecl(std::shared_ptr<ASTTypeDecl> typeDecl) override;
 
     void run(std::shared_ptr<ASTDeclSeqNode> ast);
 
