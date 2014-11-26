@@ -30,7 +30,7 @@ namespace Statics {
 class FunCheck : public ASTVisitor {
 private:
 
-    typedef std::unordered_set<std::string> idset;
+    typedef std::set<std::string> idset;
 
     std::shared_ptr<ModuleInfo> module;
     idset called;
