@@ -16,7 +16,7 @@
 
 namespace Statics {
 
-    typedef std::unordered_set<std::string> idset;
+    typedef std::set<std::string> idset;
 
     std::shared_ptr<ASTTypeNode> typecheck_exp(
         std::shared_ptr<ModuleInfo> mod,
