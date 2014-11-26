@@ -18,13 +18,17 @@
 
 #define DECLARE_CLASS(NAME) virtual void visit##NAME(std::shared_ptr<AST##NAME> node);
 #define IMPL_CLASS(NAME)    void ASTVisitor::visit##NAME(std::shared_ptr<AST##NAME> node)
-#define SUB_CLASS(SUB) if (std::shared_ptr<AST##SUB> ptr = std::dynamic_pointer_cast<AST##SUB>(node)) visit##SUB(ptr);
-#define HAS_MEMBER(ARG) if (node->ARG) visitNode(node->ARG);
+#define SUB_CLASS(SUB) \
+    if (std::shared_ptr<AST##SUB> ptr = std::dynamic_pointer_cast<AST##SUB>(node)) \
+        visit##SUB(ptr);
+#define HAS_MEMBER(ARG) \
+    if (node->ARG) \
+        visitNode(node->ARG);
 #define SEQ_CLASS(ELEM) \
-while (node != nullptr) {\
-    visitNode(node->getHead());\
-    node = node->getTail();\
-}
+    while (node != nullptr) {\
+        visitNode(node->getHead());\
+        node = node->getTail();\
+    }
 
 /**
  * @brief Base class for all classes that "visit" abstract syntax trees. This is a recursive
