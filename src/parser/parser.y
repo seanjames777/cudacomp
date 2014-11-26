@@ -49,7 +49,7 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR NOT BNOT
 %token ASSIGN SEMI COMMA LBRACKET RBRACKET
 %token INT BOOL VOID
-%token RETURN IF ELSE TYPEDEF WHILE EXTERN ALLOC_ARRAY
+%token RETURN IF ELSE TYPEDEF WHILE EXTERN ALLOC_ARRAY IN ELLIPSES
 %token LPAREN RPAREN LBRACE RBRACE
 %token EQ NEQ LEQ GEQ LT GT
 
@@ -134,6 +134,7 @@ exp:
   | exp LBRACKET exp RBRACKET         { $$ = new ASTIndexExp(std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | ALLOC_ARRAY LPAREN type COMMA exp RPAREN
     { $$ = new ASTAllocArrayExp(std::shared_ptr<ASTTypeNode>($3), std::shared_ptr<ASTExpNode>($5)); }
+  | IDENT IN exp ELLIPSES exp         { $$ = new ASTRangeExp(std::string($1), std::shared_ptr<ASTExpNode>($3), std::shared_ptr<ASTExpNode>($5)); free($1); }
   ;
 
 type:

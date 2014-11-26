@@ -71,6 +71,7 @@ public:
     DECLARE_CLASS(IdentifierExp);
     DECLARE_CLASS(IndexExp);
     DECLARE_CLASS(IntegerExp);
+    DECLARE_CLASS(RangeExp);
     DECLARE_CLASS(UnopExp);
 
     DECLARE_CLASS(AssignStmt);
@@ -86,6 +87,7 @@ public:
     DECLARE_CLASS(FunType);
     DECLARE_CLASS(IdType);
     DECLARE_CLASS(IntegerType);
+    DECLARE_CLASS(RangeType);
     DECLARE_CLASS(PtrType);
     DECLARE_CLASS(VoidType);
 

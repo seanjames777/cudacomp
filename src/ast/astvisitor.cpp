@@ -42,6 +42,7 @@ IMPL_CLASS(ExpNode) {
     SUB_CLASS(IdentifierExp);
     SUB_CLASS(IndexExp);
     SUB_CLASS(IntegerExp);
+    SUB_CLASS(RangeExp);
     SUB_CLASS(UnopExp);
 }
 
@@ -65,6 +66,7 @@ IMPL_CLASS(TypeNode) {
     SUB_CLASS(FunType);
     SUB_CLASS(IdType);
     SUB_CLASS(IntegerType);
+    SUB_CLASS(RangeType);
     SUB_CLASS(PtrType);
     SUB_CLASS(VoidType);
 }
@@ -122,6 +124,11 @@ IMPL_CLASS(IndexExp) {
 IMPL_CLASS(IntegerExp) {
 }
 
+IMPL_CLASS(RangeExp) {
+    HAS_MEMBER(getMin());
+    HAS_MEMBER(getMax());
+}
+
 IMPL_CLASS(UnopExp) {
     HAS_MEMBER(getExp());
 }
@@ -175,6 +182,9 @@ IMPL_CLASS(IntegerType) {
 
 IMPL_CLASS(ArrType) {
     HAS_MEMBER(getElemType());
+}
+
+IMPL_CLASS(RangeType) {
 }
 
 IMPL_CLASS(PtrType) {

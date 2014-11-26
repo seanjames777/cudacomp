@@ -152,6 +152,12 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         return builder->CreatePointerCast(buff,
             PointerType::getUnqual(convertType(alloc_exp->getElemType())));
     }
+    // Range. We can evaluate the endpoints for their effects
+    else if (std::shared_ptr<ASTRangeExp> range_exp = std::dynamic_pointer_cast<ASTRangeExp>(node)) {
+        codegen_exp(ctx, range_exp->getMin());
+        codegen_exp(ctx, range_exp->getMax());
+        return nullptr;
+    }
     // Otherwise, it's an lvalue. Get the address and dereference it.
     else {
         Value *lval_ptr = codegen_lvalue(ctx, node);
