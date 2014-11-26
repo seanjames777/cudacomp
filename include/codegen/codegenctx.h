@@ -14,6 +14,7 @@
 #include <statics/functioninfo.h>
 #include <statics/moduleinfo.h>
 
+#include <llvm/IR/DataLayout.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Value.h>
@@ -44,6 +45,7 @@ private:
     SymbolTable<Function *>        functions;    // Mapping from function names to LLVM functions
     std::shared_ptr<ModuleInfo>    modInfo;      // Information about module
     Function                      *alloc_array;  // Runtime alloc_array function
+    Function                      *alloc;        // Runtime alloc function
 
     // Current function
     BasicBlock                    *def_bblock;   // Locals definition block, assists with SSA
@@ -71,6 +73,11 @@ public:
      * @brief Get the 'alloc_array' runtime function
      */
     Function *getAllocArray();
+
+    /**
+     * @brief Get the 'alloc' runtime function
+     */
+    Function *getAlloc();
 
     /**
      * @brief Get module information

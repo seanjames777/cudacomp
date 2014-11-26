@@ -12,6 +12,11 @@ void *_rt_alloc_array(int elemSize, int length) {
     return (void *)&buff[8];
 }
 
+void *_rt_alloc(int size) {
+    return (void*)calloc(1, size);
+}
+
+
 int rt_add(int x, int y) {
     return x + y;
 }

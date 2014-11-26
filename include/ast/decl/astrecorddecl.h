@@ -9,6 +9,7 @@
 #ifndef __ASTRECORDDECL_H
 #define __ASTRECORDDECL_H
 
+#include <ast/decl/astdeclnode.h>
 #include <ast/stmt/aststmtnode.h>
 #include <ast/type/astargnode.h>
 #include <ast/type/astrecordtype.h>
@@ -28,8 +29,9 @@ public:
     /**
      * @brief Constructor
      *
-     * @param[in] name Struct type name
-     * @param[in] sig  Struct signature
+     * @param[in] name Record type name
+     * @param[in] sig  Record signature
+     * @param[in] defn Is this record was defined or just declared
      */
     ASTRecordDecl(std::string name, std::shared_ptr<ASTRecordType> sig, bool defn);
 

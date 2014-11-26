@@ -99,6 +99,7 @@ tests = [
     (SOURCE_DIR + "tests/testArr8.cc", "error"),
     (SOURCE_DIR + "tests/testArr9.cc", "error"),
     (SOURCE_DIR + "tests/testLValue1.cc", "error"),
+    (SOURCE_DIR + "tests/testPointers1.cc", 5),
 ]
 
 # TODO: actually test type checking...

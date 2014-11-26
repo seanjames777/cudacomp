@@ -15,7 +15,7 @@
 /**
  * @brief Pointer allocation AST expression node
  */
-class ASTAllocArrayExp : public ASTExpNode {
+class ASTAllocExp : public ASTExpNode {
 private:
 
     std::shared_ptr<ASTTypeNode> type;
@@ -27,7 +27,7 @@ public:
      *
      * @param[in] type   Pointer element type
      */
-    ASTAllocArrayExp(std::shared_ptr<ASTTypeNode> type);
+    ASTAllocExp(std::shared_ptr<ASTTypeNode> type);
 
     /**
      * @brief Get pointer element type

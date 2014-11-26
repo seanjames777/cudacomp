@@ -47,9 +47,9 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %token <string> IDENT IDTYPE
 %token <boolean> TRUE FALSE
 %token PLUS MINUS DIV STAR MOD SHL SHR AND OR BAND BOR BXOR NOT BNOT UNARY
-%token ASSIGN SEMI COMMA LBRACKET RBRACKET
+%token ASSIGN SEMI COMMA LBRACKET RBRACKET DOT
 %token INT BOOL VOID
-%token RETURN IF ELSE TYPEDEF WHILE EXTERN ALLOC_ARRAY ALLOC
+%token RETURN IF ELSE TYPEDEF WHILE EXTERN ALLOC_ARRAY ALLOC STRUCT
 %token LPAREN RPAREN LBRACE RBRACE
 %token EQ NEQ LEQ GEQ LT GT
 
@@ -58,11 +58,11 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %type <stmt> stmt simp
 %type <stmt_seq> stmt_list
 %type <stmt_seq> elseopt
-%type <arg> param
-%type <arg_seq> param_list param_list_follow
+%type <arg> param field
+%type <arg_seq> param_list param_list_follow field_list field_list_follow
 %type <top> top
 %type <top_seq> top_list
-%type <top> fundecl typedecl
+%type <top> fundecl typedecl structdecl
 %type <exp_seq> arg_list arg_list_follow
 %type <linkage> linkage
 
@@ -77,8 +77,8 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %left SHL SHR
 %left PLUS MINUS
 %left STAR DIV MOD
-%right NOT BNOT UMINUS UNARY
-%nonassoc LPAREN RPAREN LBRACKET RBRACKET
+%right NOT BNOT UNARY
+%nonassoc LPAREN RPAREN LBRACKET RBRACKET DOT
 
 %start program
 
@@ -128,7 +128,8 @@ exp:
   | exp LEQ exp                       { $$ = new ASTBinopExp(ASTBinopExp::LEQ, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | NOT exp                           { $$ = new ASTUnopExp(ASTUnopExp::NOT, std::shared_ptr<ASTExpNode>($2)); }
   | BNOT exp                          { $$ = new ASTUnopExp(ASTUnopExp::BNOT, std::shared_ptr<ASTExpNode>($2)); }
-  | MINUS exp %prec UMINUS            { $$ = new ASTUnopExp(ASTUnopExp::NEG, std::shared_ptr<ASTExpNode>($2)); }
+  | MINUS exp %prec UNARY             { $$ = new ASTUnopExp(ASTUnopExp::NEG, std::shared_ptr<ASTExpNode>($2)); }
+  | STAR exp %prec UNARY              { $$ = new ASTDerefExp(std::shared_ptr<ASTExpNode>($2)); }
   | IDENT LPAREN arg_list RPAREN      { $$ = new ASTCallExp($1, std::shared_ptr<ASTExpSeqNode>($3)); }
   | IDENT                             { $$ = new ASTIdentifierExp(std::string($1)); free($1); }
   | LPAREN exp RPAREN                 { $$ = $2; }
@@ -136,9 +137,11 @@ exp:
   | ALLOC_ARRAY LPAREN type COMMA exp RPAREN
     { $$ = new ASTAllocArrayExp(std::shared_ptr<ASTTypeNode>($3), std::shared_ptr<ASTExpNode>($5)); }
   | ALLOC LPAREN type RPAREN
-    { $$ = // TODO }
-  | STAR exp %prec UNARY
-    { $$ = // TODO }
+    { $$ = new ASTAllocExp(std::shared_ptr<ASTTypeNode>($3)); }
+  | exp DOT IDENT                     
+  { $$ = new ASTRecordAccessExp(std::shared_ptr<ASTExpNode>($1), std::string($3) ); }
+  | exp DOT IDTYPE              
+  { $$ = new ASTRecordAccessExp(std::shared_ptr<ASTExpNode>($1), std::string($3) ); }
   ;
 
 type:
@@ -146,8 +149,10 @@ type:
   | BOOL                              { $$ = new ASTBooleanType(); }
   | VOID                              { $$ = new ASTVoidType(); }
   | IDTYPE                            { $$ = new ASTIdType(std::string($1)); free($1); }
+  | STRUCT IDENT                      { $$ = new ASTRecordType(std::string($2), nullptr); }
+  | STRUCT IDTYPE                     { $$ = new ASTRecordType(std::string($2), nullptr); }
   | type LBRACKET RBRACKET            { $$ = new ASTArrType(std::shared_ptr<ASTTypeNode>($1)); }
-  | type STAR                         { $$ = // TODO }
+  | type STAR                         { $$ = new ASTPtrType(std::shared_ptr<ASTTypeNode>($1)); }
   ;
 
 simp:
@@ -219,13 +224,13 @@ arg_list:
 
 structdecl:
     STRUCT IDENT field_list SEMI
-    { $$ = new ASTRecordDecl(std::string($2), std::make_shared<ASTRecordType>(std::shared_ptr<ASTArgSeqNode>($4))); free($2); }
+    { $$ = new ASTRecordDecl(std::string($2), std::make_shared<ASTRecordType>(std::string($2),std::shared_ptr<ASTArgSeqNode>($3)), true); free($2); }
   | STRUCT IDTYPE field_list SEMI
-    { $$ = new ASTRecordDecl(std::string($2), std::make_shared<ASTRecordType>(std::shared_ptr<ASTArgSeqNode>($4))); free($2); }
+    { $$ = new ASTRecordDecl(std::string($2), std::make_shared<ASTRecordType>(std::string($2),std::shared_ptr<ASTArgSeqNode>($3)), true); free($2); }
   | STRUCT IDENT SEMI
-    { $$ = new ASTRecordDecl(std::string($2), nullptr); free($2); }
+    { $$ = new ASTRecordDecl(std::string($2), nullptr, false); free($2); }
   | STRUCT IDTYPE SEMI
-    { $$ = new ASTRecordDecl(std::string($2), nullptr); free($2); }
+    { $$ = new ASTRecordDecl(std::string($2), nullptr, false); free($2); }
   ;
 
 field:
@@ -240,5 +245,5 @@ field_list_follow:
   ;
 
 field_list:
-    LBRACE field_list_follow RBRACE     { $$ = $2 }
+    LBRACE field_list_follow RBRACE     { $$ = $2; }
   ;

@@ -14,15 +14,19 @@
 #include <ast/astseqnode.h>
 #include <ast/decl/astdeclnode.h>
 #include <ast/decl/astfundecl.h>
+#include <ast/decl/astrecorddecl.h>
 #include <ast/decl/asttypedecl.h>
 #include <ast/expr/astallocarrayexp.h>
+#include <ast/expr/astallocexp.h>
 #include <ast/expr/astbinopexp.h>
 #include <ast/expr/astbooleanexp.h>
 #include <ast/expr/astcallexp.h>
+#include <ast/expr/astderefexp.h>
 #include <ast/expr/astexpnode.h>
 #include <ast/expr/astidentifierexp.h>
 #include <ast/expr/astindexexp.h>
 #include <ast/expr/astintegerexp.h>
+#include <ast/expr/astrecordaccessexp.h>
 #include <ast/expr/astunopexp.h>
 #include <ast/stmt/astexprstmt.h>
 #include <ast/stmt/astifstmt.h>
@@ -39,6 +43,7 @@
 #include <ast/type/astidtype.h>
 #include <ast/type/astintegertype.h>
 #include <ast/type/astptrtype.h>
+#include <ast/type/astrecordtype.h>
 #include <ast/type/asttypenode.h>
 #include <ast/type/astvoidtype.h>
 

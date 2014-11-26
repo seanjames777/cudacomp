@@ -42,6 +42,17 @@ Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNod
 
         return builder->CreateGEP(lhs, sub);
     }
+    // Record access
+    else if (std::shared_ptr<ASTRecordAccessExp> rcd_exp = std::dynamic_pointer_cast<ASTRecordAccessExp>(node)) {
+        Value *lhs = codegen_exp(ctx, rcd_exp->getLValue());
+
+        return builder->CreateStructGEP(lhs, 0, rcd_exp->getId());
+    }
+    // Pointer dereference
+    else if (std::shared_ptr<ASTDerefExp> ptr_exp = std::dynamic_pointer_cast<ASTDerefExp>(node)) {
+        Value *subexp = codegen_exp(ctx, ptr_exp->getExp());
+        return builder->CreateGEP(subexp, ConstantInt::get(convertType(ASTIntegerType::get()), 0));
+    }
     else
         throw new ASTMalformedException();
 
@@ -147,6 +158,22 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         args.push_back(length);
 
         Value *buff = builder->CreateCall(ctx->getAllocArray(), args);
+
+        // Cast the result to the right type
+        return builder->CreatePointerCast(buff,
+            PointerType::getUnqual(convertType(alloc_exp->getElemType())));
+    }
+    // Heap allocation
+    else if (std::shared_ptr<ASTAllocExp> alloc_exp = std::dynamic_pointer_cast<ASTAllocExp>(node)) {
+        // Element size constant
+        Value *elemSize = ConstantInt::get(convertType(ASTIntegerType::get()),
+            alloc_exp->getElemType()->getSize());
+
+        // Call into runtime allocator
+        std::vector<Value *> args;
+        args.push_back(elemSize);
+
+        Value *buff = builder->CreateCall(ctx->getAlloc(), args);
 
         // Cast the result to the right type
         return builder->CreatePointerCast(buff,
@@ -347,6 +374,10 @@ void codegen_top(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTDeclNode> n
     }
     else if (std::shared_ptr<ASTTypeDecl> typeDefn = std::dynamic_pointer_cast<ASTTypeDecl>(node)) {
         // Skip it
+    }
+    // TODO
+    else if (std::shared_ptr<ASTRecordDecl> rcdDecl = std::dynamic_pointer_cast<ASTRecordDecl>(node)) {
+        // TODO
     }
     else
         throw new ASTMalformedException();

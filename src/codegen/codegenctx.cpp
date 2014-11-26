@@ -31,10 +31,22 @@ CodegenCtx::CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo)
 
     FunctionType *ftype = FunctionType::get(PointerType::getUnqual(Type::getInt8Ty(context)), argTypes, false);
     alloc_array = Function::Create(ftype, GlobalValue::ExternalLinkage, "_rt_alloc_array", module.get());
+
+    // Construct a declaration of the runtime's alloc function
+    std::vector<Type *> alloc_argTypes;
+    alloc_argTypes.push_back(Type::getInt32Ty(context));
+
+    FunctionType *alloc_ftype = FunctionType::get(PointerType::getUnqual(Type::getInt8Ty(context)), alloc_argTypes, false);
+
+    alloc = Function::Create(alloc_ftype, GlobalValue::ExternalLinkage, "_rt_alloc", module.get());
 }
 
 Function *CodegenCtx::getAllocArray() {
     return alloc_array;
+}
+
+Function *CodegenCtx::getAlloc() {
+    return alloc;
 }
 
 std::shared_ptr<ModuleInfo> CodegenCtx::getModuleInfo() {
