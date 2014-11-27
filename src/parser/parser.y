@@ -19,7 +19,7 @@ void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
 std::unordered_map<std::string, ASTTypeNode *> typedefs;
 
 %}
-;
+
 // Note: We can't return anything, so we need to use a pointer to a shared
 // pointer. TODO: Could use a reference, but it's not much of an improvement.
 %parse-param { std::shared_ptr<ASTDeclSeqNode> *root }
@@ -49,7 +49,7 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR NOT BNOT
 %token ASSIGN SEMI COMMA LBRACKET RBRACKET
 %token INT BOOL VOID
-%token RETURN IF ELSE TYPEDEF WHILE EXTERN ALLOC_ARRAY IN ELLIPSES
+%token RETURN IF ELSE TYPEDEF WHILE EXTERN ALLOC_ARRAY COLON TO DEVICE FOR
 %token LPAREN RPAREN LBRACE RBRACE
 %token EQ NEQ LEQ GEQ LT GT
 
@@ -67,6 +67,7 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %type <linkage> linkage
 
 %right ASSIGN
+%left TO
 %left OR
 %left AND
 %left BOR
@@ -125,6 +126,7 @@ exp:
   | exp LT exp                        { $$ = new ASTBinopExp(ASTBinopExp::LT, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp GEQ exp                       { $$ = new ASTBinopExp(ASTBinopExp::GEQ, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp LEQ exp                       { $$ = new ASTBinopExp(ASTBinopExp::LEQ, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp TO exp                        { $$ = new ASTRangeExp(std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | NOT exp                           { $$ = new ASTUnopExp(ASTUnopExp::NOT, std::shared_ptr<ASTExpNode>($2)); }
   | BNOT exp                          { $$ = new ASTUnopExp(ASTUnopExp::BNOT, std::shared_ptr<ASTExpNode>($2)); }
   | MINUS exp %prec UMINUS            { $$ = new ASTUnopExp(ASTUnopExp::NEG, std::shared_ptr<ASTExpNode>($2)); }
@@ -134,7 +136,7 @@ exp:
   | exp LBRACKET exp RBRACKET         { $$ = new ASTIndexExp(std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | ALLOC_ARRAY LPAREN type COMMA exp RPAREN
     { $$ = new ASTAllocArrayExp(std::shared_ptr<ASTTypeNode>($3), std::shared_ptr<ASTExpNode>($5)); }
-  | IDENT IN exp ELLIPSES exp         { $$ = new ASTRangeExp(std::string($1), std::shared_ptr<ASTExpNode>($3), std::shared_ptr<ASTExpNode>($5)); free($1); }
+  // | DEVICE exp                        { $$ = new ASTDeviceSched(std::shared_ptr<ASTExpNode>($2)); }
   ;
 
 type:
@@ -159,6 +161,8 @@ stmt:
   | LBRACE stmt_list RBRACE           { $$ = new ASTScopeStmt(std::shared_ptr<ASTStmtSeqNode>($2)); }
   | IF LPAREN exp RPAREN stmt elseopt { $$ = new ASTIfStmt(std::shared_ptr<ASTExpNode>($3), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($5), nullptr), std::shared_ptr<ASTStmtSeqNode>($6)); }
   | WHILE LPAREN exp RPAREN stmt      { $$ = new ASTWhileStmt(std::shared_ptr<ASTExpNode>($3), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($5), nullptr)); }
+  | FOR LPAREN type IDENT COLON exp RPAREN stmt
+    { $$ = new ASTRangeForStmt(std::shared_ptr<ASTTypeNode>($3), std::string($4), std::shared_ptr<ASTExpNode>($6), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($8), nullptr)); free($4); }
   ;
 
 elseopt:

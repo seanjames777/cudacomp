@@ -12,6 +12,16 @@
 #include <defs.h>
 
 /**
+ * @brief A symbol, which represents a function, variable, etc.
+ */
+typedef std::string Symbol;
+
+/**
+ * @brief An ordered set of symbol names
+ */
+typedef std::set<Symbol> SymbolSet;
+
+/**
  * @brief A map from symbols to arbitrary information, usually types. This is
  * used for both variable types in a function body, and function and other types
  * at the top level.
@@ -22,7 +32,7 @@ template<typename T>
 class SymbolTable {
 private:
 
-    std::unordered_map<std::string, T> table;
+    std::unordered_map<Symbol, T> table;
 
 public:
 
@@ -38,7 +48,7 @@ public:
      * @param[in] symbol Symbol to map from
      * @param[in] val    Symbol to map to
      */
-    void set(std::string symbol, T val) {
+    void set(Symbol symbol, T val) {
         table[symbol] = val;
     }
 
@@ -49,7 +59,7 @@ public:
      *
      * @return Value mapped to
      */
-    T get(std::string symbol) {
+    T get(Symbol symbol) {
         return table[symbol];
     }
 
@@ -60,7 +70,7 @@ public:
      *
      * @return Whether there is a mapping
      */
-    bool hasSymbol(std::string symbol) {
+    bool hasSymbol(Symbol symbol) {
         return table.find(symbol) != table.end();
     }
 

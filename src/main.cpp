@@ -17,6 +17,7 @@ struct CCArgs {
     bool  print_ast;
     char *in_file;
     char *out_file;
+    bool  verbose;
 } args;
 
 void printHelp(char *argv[]) {
@@ -46,6 +47,8 @@ void parseArgs(int argc, char *argv[]) {
             args.print_ast = true;
         else if (strcmp(argv[i], "-o") == 0)
             args.out_file = argv[i++ + 1];
+        else if (strcmp(argv[i], "--verbose") == 0)
+            args.verbose = true;
         else
             args.in_file = argv[i];
     }
@@ -60,7 +63,7 @@ int main(int argc, char *argv[]) {
         node = Parser::parse(args.in_file);
     }
     catch (Parser::ParseException & except) {
-        std::cout << except.what() << std::endl;
+        std::cout << "\033[31;1m" << except.what() << "\033[0m" << std::endl;
         return -1;
     }
 
@@ -72,10 +75,10 @@ int main(int argc, char *argv[]) {
     std::shared_ptr<ModuleInfo> moduleInfo;
 
     try {
-        moduleInfo = Statics::run(node);
+        moduleInfo = Statics::run(node, args.verbose);
     }
     catch (Statics::StaticsException & except) {
-        std::cout << except.what() << std::endl;
+        std::cout << "\033[31;1m" << except.what() << "\033[0m" << std::endl;
         return -1;
     }
 
@@ -83,7 +86,7 @@ int main(int argc, char *argv[]) {
         std::ofstream out(args.out_file, std::ios::out);
 
         if (!out) {
-            std::cout << "Error opening " << args.out_file << std::endl;
+            std::cout << "\033[31;1m" << "Error opening " << args.out_file << "\033[0m" << std::endl;
             return -1;
         }
 

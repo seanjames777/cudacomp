@@ -39,6 +39,7 @@ tests = [
     (SOURCE_DIR + "tests/testScope2.cc", "error"),
     (SOURCE_DIR + "tests/testScope3.cc", 10),
     (SOURCE_DIR + "tests/testScope4.cc", 10),
+    (SOURCE_DIR + "tests/testScope5.cc", 10),
     (SOURCE_DIR + "tests/testIf1.cc", 10),
     (SOURCE_DIR + "tests/testIf2.cc", 20),
     (SOURCE_DIR + "tests/testIf3.cc", 10),

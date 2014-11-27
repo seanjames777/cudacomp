@@ -27,6 +27,7 @@
 #include <ast/expr/astunopexp.h>
 #include <ast/stmt/astexprstmt.h>
 #include <ast/stmt/astifstmt.h>
+#include <ast/stmt/astrangeforstmt.h>
 #include <ast/stmt/astreturnstmt.h>
 #include <ast/stmt/astscopestmt.h>
 #include <ast/stmt/aststmtnode.h>

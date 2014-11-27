@@ -296,6 +296,10 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
         return true;
 
     }
+    // Range for loop statement
+    else if (std::shared_ptr<ASTRangeForStmt> range_node = std::dynamic_pointer_cast<ASTRangeForStmt>(head)) {
+        // TODO
+    }
     // Expression statement
     else if (std::shared_ptr<ASTExprStmt> exp_stmt = std::dynamic_pointer_cast<ASTExprStmt>(head))
         codegen_exp(ctx, exp_stmt->getExp());

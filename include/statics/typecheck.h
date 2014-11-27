@@ -21,22 +21,16 @@ namespace Statics {
     std::shared_ptr<ASTTypeNode> typecheck_exp(
         std::shared_ptr<ModuleInfo> mod,
         std::shared_ptr<FunctionInfo> func,
-        idset & decl,
-        idset & def,
         std::shared_ptr<ASTExpNode> node);
 
     void typecheck_stmts(
         std::shared_ptr<ModuleInfo> mod,
         std::shared_ptr<FunctionInfo> func,
-        idset & decl,
-        idset & def,
         std::shared_ptr<ASTStmtSeqNode> node);
 
     void typecheck_stmt(
         std::shared_ptr<ModuleInfo> mod,
         std::shared_ptr<FunctionInfo> func,
-        idset & decl,
-        idset & def,
         std::shared_ptr<ASTStmtNode> node);
 
     void typecheck_tops(

@@ -23,8 +23,10 @@ extern std::unordered_map<std::string, ASTTypeNode *> typedefs;
 "typedef"               { return TYPEDEF; }
 "extern"                { return EXTERN; }
 "alloc_array"           { return ALLOC_ARRAY; }
-"in"                    { return IN; }
-"..."                   { return ELLIPSES; }
+":"                     { return COLON; }
+"to"                    { return TO; }
+"for"                   { return FOR; }
+"@device"               { return DEVICE; }
 
 [0-9]+                  { yylval.number = atoi(yytext); return NUMBER; }
 [_a-zA-Z][_a-zA-Z0-9]*  {

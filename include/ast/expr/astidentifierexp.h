@@ -20,6 +20,7 @@ class ASTIdentifierExp : public ASTExpNode {
 private:
 
     std::string value;
+    bool lvalue;
 
 public:
 
@@ -39,6 +40,22 @@ public:
      * @brief Get the referenced variable name
      */
     std::string getId();
+
+    /**
+     * @brief Set the references variable name
+     */
+    void setId(std::string id);
+
+    /**
+     * @brief Get whether this is an lvalue. Unless setIsLValue() is called, this
+     * will always return false. SymbolCheck uses this method.
+     */
+    bool isLValue();
+
+    /**
+     * @brief Set whether this is an lvalue.
+     */
+    void setIsLValue(bool lvalue);
 
     /**
      * @copydoc ASTNode::print()

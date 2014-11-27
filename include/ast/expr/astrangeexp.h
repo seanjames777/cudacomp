@@ -18,7 +18,6 @@
 class ASTRangeExp : public ASTExpNode {
 private:
 
-    std::string id;
     std::shared_ptr<ASTExpNode> min;
     std::shared_ptr<ASTExpNode> max;
 
@@ -27,21 +26,15 @@ public:
     /**
      * @brief Constructor
      *
-     * @param[in] id Identifier representing range
      * @param[in] e1 Range min, inclusive
      * @param[in] e2 Range max, exclusive
      */
-    ASTRangeExp(std::string id, std::shared_ptr<ASTExpNode> min, std::shared_ptr<ASTExpNode> max);
+    ASTRangeExp(std::shared_ptr<ASTExpNode> min, std::shared_ptr<ASTExpNode> max);
 
     /**
      * @brief Destructor
      */
     ~ASTRangeExp();
-
-    /**
-     * @brief Get range identifier
-     */
-    std::string getId();
 
     /**
      * @brief Get minimum value, inclusive
