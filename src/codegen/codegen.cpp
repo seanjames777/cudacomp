@@ -294,11 +294,46 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
         ctx->pushBlock(doneBlock);
 
         return true;
-
     }
     // Range for loop statement
     else if (std::shared_ptr<ASTRangeForStmt> range_node = std::dynamic_pointer_cast<ASTRangeForStmt>(head)) {
-        // TODO
+        std::shared_ptr<ASTRangeExp> range = std::dynamic_pointer_cast<ASTRangeExp>(range_node->getRange());
+
+        Value *min = codegen_exp(ctx, range->getMin());
+        Value *max = codegen_exp(ctx, range->getMax());
+
+        Value *iter = ctx->getOrCreateSymbol(range_node->getIteratorID());
+        builder->CreateStore(min, iter);
+
+        BasicBlock *bodyBlock = ctx->createBlock();
+        BasicBlock *doneBlock = ctx->createBlock();
+
+        // Use 'min' as an iterator for now
+        builder->CreateCondBr(
+            ctx->getBuilder()->CreateICmpSGE(builder->CreateLoad(iter), max),
+            doneBlock,
+            bodyBlock);
+
+        ctx->pushBlock(bodyBlock);
+
+        std::shared_ptr<IRBuilder<>> bodyBuilder = ctx->getBuilder();
+
+        if (codegen_stmts(ctx, range_node->getBody())) {
+            bodyBuilder->CreateStore(
+                bodyBuilder->CreateBinOp(Instruction::Add,
+                    bodyBuilder->CreateLoad(iter),
+                    ConstantInt::get(convertType(ASTIntegerType::get()), 1)),
+                iter);
+
+            ctx->getBuilder()->CreateCondBr(
+                ctx->getBuilder()->CreateICmpSGE(
+                    bodyBuilder->CreateLoad(iter),
+                    max),
+                doneBlock,
+                bodyBlock);
+        }
+
+        ctx->pushBlock(doneBlock);
     }
     // Expression statement
     else if (std::shared_ptr<ASTExprStmt> exp_stmt = std::dynamic_pointer_cast<ASTExprStmt>(head))
