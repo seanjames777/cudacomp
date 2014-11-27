@@ -182,8 +182,8 @@ void SymbolCheck::visitRangeForStmt(std::shared_ptr<ASTRangeForStmt> rangeStmt) 
     SymbolSet old_decl = decl;
     SymbolSet old_def = def;
 
-    std::string newName = makeUniqueSymbol(rangeStmt->getIteratorID(), true);
-    rangeStmt->setIteratorID(newName);
+    std::string newName = makeUniqueSymbol(rangeStmt->getIteratorId(), true);
+    rangeStmt->setIteratorId(newName);
 
     visitStmtSeqNode(rangeStmt->getBody());
 

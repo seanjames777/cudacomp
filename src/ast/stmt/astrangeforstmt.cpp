@@ -25,11 +25,15 @@ std::shared_ptr<ASTTypeNode> ASTRangeForStmt::getIteratorType() {
     return type;
 }
 
-std::string ASTRangeForStmt::getIteratorID() {
+void ASTRangeForStmt::setIteratorType(std::shared_ptr<ASTTypeNode> type) {
+    this->type = type;
+}
+
+std::string ASTRangeForStmt::getIteratorId() {
     return id;
 }
 
-void ASTRangeForStmt::setIteratorID(std::string id) {
+void ASTRangeForStmt::setIteratorId(std::string id) {
     this->id = id;
 }
 

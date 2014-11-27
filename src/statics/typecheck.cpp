@@ -329,7 +329,7 @@ void typecheck_stmt(
 
         // Define the iterator variable
         // TODO: ID -> Id
-        func->addLocal(range_node->getIteratorID(), ASTIntegerType::get());
+        func->addLocal(range_node->getIteratorId(), ASTIntegerType::get());
 
         // Check the body
         typecheck_stmts(mod, func, range_node->getBody());

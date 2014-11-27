@@ -48,14 +48,19 @@ public:
     std::shared_ptr<ASTTypeNode> getIteratorType();
 
     /**
+     * @brief Set iterator variable type
+     */
+    void setIteratorType(std::shared_ptr<ASTTypeNode> type);
+
+    /**
      * @brief Get iterator variable name
      */
-    std::string getIteratorID();
+    std::string getIteratorId();
 
     /**
      * @brief Set iterator variable name
      */
-    void setIteratorID(std::string id);
+    void setIteratorId(std::string id);
 
     /**
      * @brief Get range expression

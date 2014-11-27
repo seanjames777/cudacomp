@@ -302,7 +302,7 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
         Value *min = codegen_exp(ctx, range->getMin());
         Value *max = codegen_exp(ctx, range->getMax());
 
-        Value *iter = ctx->getOrCreateSymbol(range_node->getIteratorID());
+        Value *iter = ctx->getOrCreateSymbol(range_node->getIteratorId());
         builder->CreateStore(min, iter);
 
         BasicBlock *bodyBlock = ctx->createBlock();
