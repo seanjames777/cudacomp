@@ -316,9 +316,9 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
 
         ctx->pushBlock(bodyBlock);
 
-        std::shared_ptr<IRBuilder<>> bodyBuilder = ctx->getBuilder();
-
         if (codegen_stmts(ctx, range_node->getBody())) {
+            std::shared_ptr<IRBuilder<>> bodyBuilder = ctx->getBuilder();
+
             bodyBuilder->CreateStore(
                 bodyBuilder->CreateBinOp(Instruction::Add,
                     bodyBuilder->CreateLoad(iter),

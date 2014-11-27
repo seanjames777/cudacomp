@@ -108,6 +108,7 @@ tests = [
     (SOURCE_DIR + "tests/testLValue1.cc", "error"),
     (SOURCE_DIR + "tests/testRange1.cc", 33),
     (SOURCE_DIR + "tests/testRange2.cc", 10),
+    (SOURCE_DIR + "tests/testRange3.cc", 4950),
 ]
 
 # TODO: actually test type checking...
