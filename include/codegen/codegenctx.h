@@ -25,7 +25,6 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/PassManager.h>
 #include <llvm/Support/raw_ostream.h>
-#include <llvm/IR/IRPrintingPasses.h>
 #include <llvm/ADT/Triple.h>
 #include <llvm/Support/raw_os_ostream.h>
 #include <llvm/IR/IRBuilder.h>

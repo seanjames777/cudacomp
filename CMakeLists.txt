@@ -49,6 +49,7 @@ endif ("${PTX_BACKEND}" MATCHES "TRUE")
 
 add_executable(cc
     src/ast/astnode.cpp
+    src/ast/astprint.cpp
     src/ast/astseqnode.cpp
     src/ast/astvisitor.cpp
     src/ast/expr/astallocarrayexp.cpp
@@ -62,6 +63,7 @@ add_executable(cc
     src/ast/expr/astindexexp.cpp
     src/ast/expr/astintegerexp.cpp
     src/ast/expr/astrecordaccessexp.cpp
+    src/ast/expr/astrangeexp.cpp
     src/ast/expr/astunopexp.cpp
     src/ast/stmt/astassignstmt.cpp
     src/ast/stmt/astexprstmt.cpp
@@ -81,6 +83,7 @@ add_executable(cc
     src/ast/type/astfuntype.cpp
     src/ast/type/astidtype.cpp
     src/ast/type/astintegertype.cpp
+    src/ast/type/astrangetype.cpp
     src/ast/type/astptrtype.cpp
     src/ast/type/astrecordtype.cpp
     src/ast/type/asttypenode.cpp

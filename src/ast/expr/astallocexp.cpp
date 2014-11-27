@@ -15,6 +15,10 @@ std::shared_ptr<ASTTypeNode> ASTAllocExp::getElemType() {
     return type;
 }
 
+void ASTAllocExp::setElemType(std::shared_ptr<ASTTypeNode> new_type) {
+    type = new_type;
+}
+
 
 void ASTAllocExp::print(std::ostream & ss) {
     // TODO

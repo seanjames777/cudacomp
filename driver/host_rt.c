@@ -6,6 +6,7 @@ extern int _cc_main();
 void *_rt_alloc_array(int elemSize, int length) {
     char *buff = (char *)calloc(1, elemSize * length + 8);
 
+    // TODO: alignment :)
     *((int *)&buff[0]) = length;
     *((int *)&buff[4]) = elemSize;
 

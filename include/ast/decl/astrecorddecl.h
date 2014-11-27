@@ -23,6 +23,7 @@ private:
 
     std::string name;
     std::shared_ptr<ASTRecordType> sig;
+    bool defn;
 
 public:
 

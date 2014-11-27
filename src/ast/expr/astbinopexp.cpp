@@ -29,10 +29,6 @@ std::shared_ptr<ASTExpNode> ASTBinopExp::getE2() {
 }
 
 void ASTBinopExp::print(std::ostream & ss) {
-    ss << "bin(";
-    e1->print(ss);
-    ss << ", ";
-
     switch(op) {
     case ADD:
         ss << "+";
@@ -89,8 +85,4 @@ void ASTBinopExp::print(std::ostream & ss) {
         ss << "!=";
         break;
     }
-
-    ss << ", ";
-    e2->print(ss);
-    ss << ")";
 }

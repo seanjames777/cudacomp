@@ -27,6 +27,7 @@
 #include <ast/expr/astindexexp.h>
 #include <ast/expr/astintegerexp.h>
 #include <ast/expr/astrecordaccessexp.h>
+#include <ast/expr/astrangeexp.h>
 #include <ast/expr/astunopexp.h>
 #include <ast/stmt/astexprstmt.h>
 #include <ast/stmt/astifstmt.h>
@@ -44,6 +45,7 @@
 #include <ast/type/astintegertype.h>
 #include <ast/type/astptrtype.h>
 #include <ast/type/astrecordtype.h>
+#include <ast/type/astrangetype.h>
 #include <ast/type/asttypenode.h>
 #include <ast/type/astvoidtype.h>
 

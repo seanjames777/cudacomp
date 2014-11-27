@@ -6,206 +6,216 @@
 
 #include <ast/astvisitor.h>
 
-VISIT_IMPL(DeclNode, node) {
-    if (NODE_MATCH(FunDecl, funDeclNode, node)) {
-        if (!VISIT_CALL(FunDecl, funDeclNode))
-            return false;
-    }
-    else if (NODE_MATCH(TypeDecl, typeDeclNode, node)) {
-        if (!VISIT_CALL(TypeDecl, typeDeclNode))
-            return false;
-    }
+// HELP: Because of the lack of reflection/RTTI in C++, this file generates a scary macro
+// implementing the AST visitor interface. I suggest looking at the existing code for examples.
+// Nonetheless, how to edit this file:
+//
+//   - Add an IMPL_CLASS for new AST nodes
+//   - Add a DECLARE_CLASS in the header
+//   - Add a SUB_CLASS entry in the IMPL_CLASS for every superclass of every AST type
+//   - Add a SEQ_CLASS in an additional IMPL_CLASS if a class has a corresponding sequence type
+//   - Add a HAS_MEMBER() for each AST node that should be traversed recursively
 
-    return true;
+IMPL_CLASS(Node) {
+    SUB_CLASS(DeclNode);
+    SUB_CLASS(ExpNode);
+    SUB_CLASS(StmtNode);
+    SUB_CLASS(ArgNode);
+    SUB_CLASS(TypeNode);
+
+    SUB_CLASS(DeclSeqNode);
+    SUB_CLASS(ExpSeqNode);
+    SUB_CLASS(StmtSeqNode);
+    SUB_CLASS(ArgSeqNode);
 }
 
-VISIT_IMPL(DeclSeqNode, node) {
-    if (!VISIT_CALL(DeclNode, node->getHead()))
-        return false;
-
-    if (node->getTail() && !VISIT_CALL(DeclSeqNode, node->getTail()))
-        return false;
-
-    return true;
+IMPL_CLASS(DeclNode) {
+    SUB_CLASS(FunDecl);
+    SUB_CLASS(RecordDecl);
+    SUB_CLASS(TypeDecl);
 }
 
-VISIT_IMPL(FunDecl, node) {
-    if (!VISIT_CALL(FunType, node->getSignature()))
-        return false;
-
-    if (!VISIT_CALL(StmtSeqNode, node->getBody()))
-        return false;
-
-    return true;
+IMPL_CLASS(ExpNode) {
+    SUB_CLASS(AllocArrayExp);
+    SUB_CLASS(AllocExp);
+    SUB_CLASS(BinopExp);
+    SUB_CLASS(BooleanExp);
+    SUB_CLASS(CallExp);
+    SUB_CLASS(DerefExp);
+    SUB_CLASS(IdentifierExp);
+    SUB_CLASS(IndexExp);
+    SUB_CLASS(IntegerExp);
+    SUB_CLASS(RangeExp);
+    SUB_CLASS(RecordAccessExp);
+    SUB_CLASS(UnopExp);
 }
 
-VISIT_IMPL(TypeDecl, node) {
-    if (NODE_MATCH(BooleanType, booleanTypeNode, node)) {
-        if (!VISIT_CALL(BooleanType, booleanTypeNode))
-            return false;
-    }
-    else if (NODE_MATCH(IntegerType, integerTypeNode, node)) {
-        if (!VISIT_CALL(IntegerType, integerTypeNode))
-            return false;
-    }
-    else if (NODE_MATCH(VoidType, voidTypeNode, node)) {
-        if (!VISIT_CALL(VoidType, voidTypeNode))
-            return false;
-    }
-    else if (NODE_MATCH(IdType, idTypeNode, node)) {
-        if (!VISIT_CALL(IdType, idTypeNode))
-            return false;
-    }
-    else if (NODE_MATCH(PtrType, ptrTypeNode, node)) {
-        if (!VISIT_CALL(PtrType, ptrTypeNode))
-            return false;
-    }
-    else if (NODE_MATCH(FunType, funTypeNode, node)) {
-        if (!VISIT_CALL(FunType, funTypeNode))
-            return false;
-    }
-
-    return true;
+IMPL_CLASS(StmtNode) {
+    SUB_CLASS(AssignStmt);
+    SUB_CLASS(ExprStmt);
+    SUB_CLASS(IfStmt);
+    SUB_CLASS(ReturnStmt);
+    SUB_CLASS(ScopeStmt);
+    SUB_CLASS(VarDeclStmt);
+    SUB_CLASS(WhileStmt);
 }
 
-VISIT_IMPL(ExpNode, node) {
-    if (NODE_MATCH(BinopExp, binopExpNode, node)) {
-        if (!VISIT_CALL(BinopExp, binopExpNode))
-            return false;
-    }
-    else if (NODE_MATCH(BooleanExp, booleanExpNode, node)) {
-        if (!VISIT_CALL(BooleanExp, booleanExpNode))
-            return false;
-    }
-    else if (NODE_MATCH(CallExp, callExpNode, node)) {
-        if (!VISIT_CALL(CallExp, callExpNode))
-            return false;
-    }
-    else if (NODE_MATCH(IdentifierExp, identifierExpNode, node)) {
-        if (!VISIT_CALL(IdentifierExp, identifierExpNode))
-            return false;
-    }
-    else if (NODE_MATCH(IntegerExp, integerExpNode, node)) {
-        if (!VISIT_CALL(IntegerExp, integerExpNode))
-            return false;
-    }
-    else if (NODE_MATCH(UnopExp, unopExpNode, node)) {
-        if (!VISIT_CALL(UnopExp, unopExpNode))
-            return false;
-    }
-
-    return true;
+IMPL_CLASS(ArgNode) {
+    HAS_MEMBER(getType());
 }
 
-VISIT_IMPL(ExpSeqNode, node) {
-    if (!VISIT_CALL(ExpNode, node->getHead()))
-        return false;
-
-    if (node->getTail() && !VISIT_CALL(ExpSeqNode, node->getTail()))
-        return false;
-
-    return true;
+IMPL_CLASS(TypeNode) {
+    SUB_CLASS(ArrType);
+    SUB_CLASS(BooleanType);
+    SUB_CLASS(FunType);
+    SUB_CLASS(IdType);
+    SUB_CLASS(IntegerType);
+    SUB_CLASS(PtrType);
+    SUB_CLASS(RangeType);
+    SUB_CLASS(RecordType);
+    SUB_CLASS(VoidType);
 }
 
-VISIT_IMPL(BinopExp, node) {
-
-    return true;
+IMPL_CLASS(DeclSeqNode) {
+    SEQ_CLASS(DeclNode);
 }
 
-VISIT_IMPL(BooleanExp, node) {
-    return true;
+IMPL_CLASS(ExpSeqNode) {
+    SEQ_CLASS(ExpNode);
 }
 
-VISIT_IMPL(CallExp, node) {
-    return true;
+IMPL_CLASS(StmtSeqNode) {
+    SEQ_CLASS(StmtNode);
 }
 
-VISIT_IMPL(IdentifierExp, node) {
-    return true;
+IMPL_CLASS(ArgSeqNode) {
+    SEQ_CLASS(ArgNode);
 }
 
-VISIT_IMPL(UnopExp, node) {
-    return true;
+IMPL_CLASS(FunDecl) {
+    HAS_MEMBER(getSignature())
+    HAS_MEMBER(getBody())
 }
 
-VISIT_IMPL(IntegerExp, node) {
-    return true;
+IMPL_CLASS(TypeDecl) {
+    HAS_MEMBER(getType());
 }
 
-VISIT_IMPL(StmtNode, node) {
-    return true;
+IMPL_CLASS(RecordDecl) {
+    HAS_MEMBER(getSignature());
 }
 
-VISIT_IMPL(StmtSeqNode, node) {
-    return true;
+IMPL_CLASS(AllocArrayExp) {
+    HAS_MEMBER(getElemType());
+    HAS_MEMBER(getLength());
 }
 
-VISIT_IMPL(ExprStmt, node) {
-    return true;
+IMPL_CLASS(AllocExp) {
+    HAS_MEMBER(getElemType());
 }
 
-VISIT_IMPL(IfStmt, node) {
-    return true;
+IMPL_CLASS(BinopExp) {
+    HAS_MEMBER(getE1());
+    HAS_MEMBER(getE2());
 }
 
-VISIT_IMPL(ReturnStmt, node) {
-    return true;
+IMPL_CLASS(BooleanExp) {
 }
 
-VISIT_IMPL(ScopeStmt, node) {
-    return true;
+IMPL_CLASS(CallExp) {
+    HAS_MEMBER(getArgs());
 }
 
-VISIT_IMPL(VarDeclStmt, node) {
-    if (!VISIT_CALL(TypeNode, node->getType()))
-        return false;
-
-    if (node->getExp() && !VISIT_CALL(ExpNode, node->getExp()))
-        return false;
-
-    return true;
+IMPL_CLASS(DerefExp) {
+    HAS_MEMBER(getExp());
 }
 
-VISIT_IMPL(AssignStmt, node) {
-    if (!VISIT_CALL(ExpNode, node->getExp()))
-        return false;
-
-    return true;
+IMPL_CLASS(IdentifierExp) {
 }
 
-VISIT_IMPL(ArgNode, node) {
-    return true;
+IMPL_CLASS(IndexExp) {
+    HAS_MEMBER(getLValue());
+    HAS_MEMBER(getSubscript());
 }
 
-VISIT_IMPL(ArgSeqNode, node) {
-    return true;
+IMPL_CLASS(IntegerExp) {
 }
 
-VISIT_IMPL(TypeNode, node) {
-    return true;
+IMPL_CLASS(RangeExp) {
+    HAS_MEMBER(getMin());
+    HAS_MEMBER(getMax());
 }
 
-VISIT_IMPL(BooleanType, node) {
-    return true;
+IMPL_CLASS(RecordAccessExp) {
+    HAS_MEMBER(getLValue());
 }
 
-VISIT_IMPL(FunType, node) {
-    return true;
+IMPL_CLASS(UnopExp) {
+    HAS_MEMBER(getExp());
 }
 
-VISIT_IMPL(IdType, node) {
-    return true;
+IMPL_CLASS(ExprStmt) {
+    HAS_MEMBER(getExp());
 }
 
-VISIT_IMPL(IntegerType, node) {
-    return true;
+IMPL_CLASS(IfStmt) {
+    HAS_MEMBER(getCond());
+    HAS_MEMBER(getTrueStmt());
+    HAS_MEMBER(getFalseStmt());
 }
 
-VISIT_IMPL(PtrType, node) {
-    return true;
+IMPL_CLASS(WhileStmt) {
+    HAS_MEMBER(getCond());
+    HAS_MEMBER(getBody());
 }
 
-VISIT_IMPL(VoidType, node) {
-    return true;
+IMPL_CLASS(ReturnStmt) {
+    HAS_MEMBER(getExp());
+}
+
+IMPL_CLASS(ScopeStmt) {
+    HAS_MEMBER(getBody());
+}
+
+IMPL_CLASS(VarDeclStmt) {
+    HAS_MEMBER(getType());
+    HAS_MEMBER(getExp());
+}
+
+IMPL_CLASS(AssignStmt) {
+    HAS_MEMBER(getLValue());
+    HAS_MEMBER(getExp());
+}
+
+IMPL_CLASS(BooleanType) {
+}
+
+IMPL_CLASS(FunType) {
+    HAS_MEMBER(getReturnType());
+    HAS_MEMBER(getArgs());
+}
+
+IMPL_CLASS(IdType) {
+}
+
+IMPL_CLASS(IntegerType) {
+}
+
+IMPL_CLASS(ArrType) {
+    HAS_MEMBER(getElemType());
+}
+
+IMPL_CLASS(RangeType) {
+}
+
+IMPL_CLASS(RecordType) {
+    HAS_MEMBER(getFields());
+}
+
+IMPL_CLASS(PtrType) {
+    HAS_MEMBER(getToType());
+}
+
+IMPL_CLASS(VoidType) {
 }
 

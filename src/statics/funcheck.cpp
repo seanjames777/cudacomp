@@ -8,84 +8,14 @@
 
 namespace Statics {
 
-void funcheck_exp(
-    std::shared_ptr<ModuleInfo> mod,
-    idset & called,
-    std::shared_ptr<ASTExpNode> node)
+FunCheck::FunCheck(std::shared_ptr<ModuleInfo> module)
+    : module(module)
 {
-    if (std::shared_ptr<ASTCallExp> call_exp = std::dynamic_pointer_cast<ASTCallExp>(node)) {
-        std::shared_ptr<FunctionInfo> call_func = mod->getFunction(call_exp->getId());
-
-        // Function must have been declared
-        if (!call_func)
-            throw UndeclaredFunctionException(call_exp->getId());
-
-        // Don't require definitions for externally defined functions
-        if (call_func->getLinkage() == ASTDeclNode::Internal)
-            called.insert(call_exp->getId());
-    }
-
-    // TODO: We actually need to do the whole traversal here to catch calls in subexpressions
 }
 
-void funcheck_stmts(
-    std::shared_ptr<ModuleInfo> mod,
-    idset & called,
-    std::shared_ptr<ASTStmtSeqNode> seq_node)
-{
-    while (seq_node != nullptr) {
-        funcheck_stmt(mod, called, seq_node->getHead());
-        seq_node = seq_node->getTail();
-    }
-}
-
-void funcheck_stmt(
-    std::shared_ptr<ModuleInfo> mod,
-    idset & called,
-    std::shared_ptr<ASTStmtNode> head)
-{
-    if (std::shared_ptr<ASTVarDeclStmt> decl_stmt = std::dynamic_pointer_cast<ASTVarDeclStmt>(head)) {
-        if (decl_stmt->getExp())
-            funcheck_exp(mod, called, decl_stmt->getExp());
-    }
-    else if (std::shared_ptr<ASTAssignStmt> defn_stmt = std::dynamic_pointer_cast<ASTAssignStmt>(head))
-        funcheck_exp(mod, called, defn_stmt->getExp());
-    else if (std::shared_ptr<ASTReturnStmt> ret_node = std::dynamic_pointer_cast<ASTReturnStmt>(head)) {
-        if (ret_node->getExp())
-            funcheck_exp(mod, called, ret_node->getExp());
-    }
-    else if (std::shared_ptr<ASTScopeStmt> scope_node = std::dynamic_pointer_cast<ASTScopeStmt>(head)) {
-        if (scope_node->getBody())
-            funcheck_stmts(mod, called, scope_node->getBody());
-    }
-    else if (std::shared_ptr<ASTIfStmt> if_node = std::dynamic_pointer_cast<ASTIfStmt>(head)) {
-        funcheck_exp(mod, called, if_node->getCond());
-        funcheck_stmts(mod, called, if_node->getTrueStmt());
-
-        if (if_node->getFalseStmt())
-            funcheck_stmts(mod, called, if_node->getFalseStmt());
-    }
-    else if (std::shared_ptr<ASTWhileStmt> while_node = std::dynamic_pointer_cast<ASTWhileStmt>(head)) {
-        funcheck_exp(mod, called, while_node->getCond());
-        funcheck_stmts(mod, called, while_node->getBody());
-    }
-    else if (std::shared_ptr<ASTExprStmt> exp_stmt = std::dynamic_pointer_cast<ASTExprStmt>(head))
-        funcheck_exp(mod, called, exp_stmt->getExp());
-    else
-        throw new ASTMalformedException();
-}
-
-void funcheck_tops(
-    std::shared_ptr<ModuleInfo> mod,
-    std::shared_ptr<ASTDeclSeqNode> seq_node)
-{
-    idset called;
-    idset defined;
-
-    while (seq_node != nullptr) {
-        funcheck_top(mod, called, defined, seq_node->getHead());
-        seq_node = seq_node->getTail();
-    }
+void FunCheck::run(std::shared_ptr<ASTDeclSeqNode> ast) {
+    // Visit the AST
+    visitDeclSeqNode(ast);
 
     // Find the functions which were called but never defined
     idset undef;
@@ -99,58 +29,56 @@ void funcheck_tops(
         throw UndefinedFunctionException(id);
 }
 
-void funcheck_top(
-    std::shared_ptr<ModuleInfo> mod,
-    idset & called,
-    idset & defined,
-    std::shared_ptr<ASTDeclNode> node)
-{
-    if (std::shared_ptr<ASTFunDecl> funDefn = std::dynamic_pointer_cast<ASTFunDecl>(node)) {
-        // Rules:
-        //   - Functions may be declared more than once
-        //   - All declarations of a function must have the same signature and linkage
-        //   - Internal functions may only be defined once
-        //   - External functions may not be defined
-        //   - Functions must be declared before they can be called
-        //   - Any internal function that is called must be defined
+void FunCheck::visitCallExp(std::shared_ptr<ASTCallExp> call_exp) {
+    std::shared_ptr<FunctionInfo> call_func = module->getFunction(call_exp->getId());
 
-        // Check for an existing declaration
-        std::shared_ptr<FunctionInfo> funInfo = mod->getFunction(funDefn->getName());
+    // Function must have been declared
+    if (!call_func)
+        throw UndeclaredFunctionException(call_exp->getId());
 
-        // Make sure external functions are not defined
-        if (funDefn->getLinkage() == ASTDeclNode::External && funDefn->isDefn())
-            throw ExternalFunctionDefinedException(funDefn->getName());
+    // Don't require definitions for externally defined functions
+    if (call_func->getLinkage() == ASTDeclNode::Internal)
+        called.insert(call_exp->getId());
 
-        if (funInfo) {
-            std::shared_ptr<ASTFunType> curr_sig = funInfo->getSignature();
-            std::shared_ptr<ASTFunType> new_sig = funDefn->getSignature();
-
-            // If there is an existing declaration, it must match this one
-            if (!curr_sig->equal(new_sig))
-                throw IncorrectSignatureException(funDefn->getName());
-
-            if (funInfo->getLinkage() != funDefn->getLinkage())
-                throw IncorrectLinkageException(funDefn->getName());
-
-            // If there is a definition, the function may not be defined already
-            if (funDefn->isDefn() && defined.find(funDefn->getName()) != defined.end())
-                throw RedefinedFunctionException(funDefn->getName());
-        }
-        else {
-            // Add the new function to the module
-            funInfo = std::make_shared<FunctionInfo>(funDefn->getName(),
-                funDefn->getSignature(), funDefn->getLinkage(),
-                funDefn->getName() == "_cc_main");
-            mod->addFunction(funInfo);
-        }
-
-        // If there is a body, mark the function as defined and collect function calls from the
-        // body.
-        if (funDefn->isDefn()) {
-            defined.insert(funDefn->getName());
-            funcheck_stmts(mod, called, funDefn->getBody());
-        }
-    }
+    ASTVisitor::visitCallExp(call_exp);
 }
 
-};
+void FunCheck::visitFunDecl(std::shared_ptr<ASTFunDecl> funDefn) {
+    // Check for an existing declaration
+    std::shared_ptr<FunctionInfo> funInfo = module->getFunction(funDefn->getName());
+
+    // Make sure external functions are not defined
+    if (funDefn->getLinkage() == ASTDeclNode::External && funDefn->isDefn())
+        throw ExternalFunctionDefinedException(funDefn->getName());
+
+    if (funInfo) {
+        std::shared_ptr<ASTFunType> curr_sig = funInfo->getSignature();
+        std::shared_ptr<ASTFunType> new_sig = funDefn->getSignature();
+
+        // If there is an existing declaration, it must match this one
+        if (!curr_sig->equal(new_sig))
+            throw IncorrectSignatureException(funDefn->getName());
+
+        if (funInfo->getLinkage() != funDefn->getLinkage())
+            throw IncorrectLinkageException(funDefn->getName());
+
+        // If there is a definition, the function may not be defined already
+        if (funDefn->isDefn() && defined.find(funDefn->getName()) != defined.end())
+            throw RedefinedFunctionException(funDefn->getName());
+    }
+    else {
+        // Add the new function to the module
+        funInfo = std::make_shared<FunctionInfo>(funDefn->getName(),
+            funDefn->getSignature(), funDefn->getLinkage(),
+            funDefn->getName() == "_cc_main");
+        module->addFunction(funInfo);
+    }
+
+    // If there is a body, mark the function as defined
+    if (funDefn->isDefn())
+        defined.insert(funDefn->getName());
+
+    ASTVisitor::visitFunDecl(funDefn);
+}
+
+}

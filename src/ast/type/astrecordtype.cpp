@@ -21,6 +21,17 @@ std::shared_ptr<ASTArgSeqNode> ASTRecordType::getFields() {
     return fields;
 }
 
+std::shared_ptr<ASTArgNode> ASTRecordType::getField(std::string id) {
+    std::shared_ptr<ASTArgSeqNode> my_fields = fields;
+    while (my_fields) {
+
+        std::shared_ptr<ASTArgNode> field = my_fields->getHead();
+        if (id.compare(field->getName()) == 0)
+            return field;
+    }
+    return nullptr;
+}
+
 void ASTRecordType::setFields(std::shared_ptr<ASTArgSeqNode> f) {
     fields = f;
 }

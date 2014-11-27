@@ -8,7 +8,8 @@
 
 ASTRecordDecl::ASTRecordDecl(std::string name, std::shared_ptr<ASTRecordType> sig, bool defn)
     : name(name),
-      sig(sig)
+      sig(sig),
+      defn(defn)
 {
 }
 
@@ -21,6 +22,10 @@ std::string ASTRecordDecl::getName() {
 
 std::shared_ptr<ASTRecordType> ASTRecordDecl::getSignature() {
     return sig;
+}
+
+bool ASTRecordDecl::isDefn() {
+    return defn;
 }
 
 void ASTRecordDecl::print(std::ostream & ss) {

@@ -11,6 +11,7 @@
 
 #include <statics/symboltable.h>
 #include <statics/functioninfo.h>
+#include <ast/type/astrecordtype.h>
 
 /**
  * @brief Packages all of the information known about a module. A module contains
@@ -21,6 +22,7 @@ private:
 
     SymbolTable<std::shared_ptr<FunctionInfo>> functions;
     SymbolTable<std::shared_ptr<ASTTypeNode>> typedefs;
+    SymbolTable<std::shared_ptr<ASTRecordType>> records;
 
 public:
 
@@ -58,6 +60,20 @@ public:
      */
     std::shared_ptr<ASTTypeNode> getType(std::string id);
 
+    /**
+     * @brief Add a record declaration to the module
+     *
+     * @param[in] name Name of the record
+     * @param[in] type The type object containing field information
+     */
+    void addRecord(std::string name, std::shared_ptr<ASTRecordType> type);
+
+    /**
+     * @brief Get the type object for a record
+     *
+     * @param[in] name Name of the record
+     */
+    std::shared_ptr<ASTRecordType> getRecord(std::string id);
 };
 
 #endif

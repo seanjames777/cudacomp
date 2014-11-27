@@ -201,7 +201,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         std::shared_ptr<ASTTypeNode> sizeType = typecheck_exp(mod, func, decl, def, alloc_exp->getLength());
 
         if (!sizeType->equal(ASTIntegerType::get()))
-            throw new IllegalTypeException();
+            throw IllegalTypeException();
 
         // Returns an array of elemTypes
         return std::make_shared<ASTArrType>(elemType);
@@ -217,6 +217,33 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
 
         // Returns a pointer to an elemType
         return std::make_shared<ASTPtrType>(elemType);
+    }
+    // Record access
+    else if (std::shared_ptr<ASTRecordAccessExp> record_exp = std::dynamic_pointer_cast<ASTRecordAccessExp>(node)) {
+        std::shared_ptr<ASTTypeNode> lvalue_type = typecheck_exp(mod, func, decl, def, record_exp->getLValue());
+
+        std::string field_name = record_exp->getId();
+
+        // This type needs to be a struct
+        if (std::shared_ptr<ASTRecordType> record_type = std::dynamic_pointer_cast<ASTRecordType>(lvalue_type)) {
+            // Get field information about the type, find the type of field_name
+            return (record_type->getField(field_name))->getType();
+        }
+        else
+            throw IllegalTypeException();
+    }
+    // Range
+    else if (std::shared_ptr<ASTRangeExp> range_exp = std::dynamic_pointer_cast<ASTRangeExp>(node)) {
+        std::shared_ptr<ASTTypeNode> minType = typecheck_exp(mod, func, decl, def, range_exp->getMin());
+        std::shared_ptr<ASTTypeNode> maxType = typecheck_exp(mod, func, decl, def, range_exp->getMin());
+
+        if (!minType->equal(ASTIntegerType::get()))
+            throw IllegalTypeException();
+
+        if (!maxType->equal(ASTIntegerType::get()))
+            throw IllegalTypeException();
+
+        return ASTRangeType::get();
     }
     else
         throw ASTMalformedException();

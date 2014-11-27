@@ -24,5 +24,5 @@ std::shared_ptr<ASTExpSeqNode> ASTCallExp::getArgs() {
 }
 
 void ASTCallExp::print(std::ostream & ss) {
-    // TODO
+    ss << id;
 }

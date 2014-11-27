@@ -25,15 +25,20 @@ public:
     /**
      * @brief Constructor
      *
-     * @param[in] type   Pointer element type
+     * @param[in] type Allocation element type
      */
     ASTAllocExp(std::shared_ptr<ASTTypeNode> type);
 
     /**
-     * @brief Get pointer element type
+     * @brief Get allocation element type
      */
     std::shared_ptr<ASTTypeNode> getElemType();
 
+    /**
+     * @brief Set allocation element type
+     */
+    void setElemType(std::shared_ptr<ASTTypeNode> type);
+    
     /**
      * @copydoc ASTNode::print()
      */

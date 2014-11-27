@@ -19,5 +19,5 @@ std::string ASTIdentifierExp::getId() {
 }
 
 void ASTIdentifierExp::print(std::ostream & ss) {
-    ss << "id(" << value << ")";
+    ss << value;
 }

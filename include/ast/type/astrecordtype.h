@@ -20,7 +20,6 @@ private:
 
     std::string id;
     std::shared_ptr<ASTArgSeqNode> fields;
-    //TODO: add map of offsets (string to int)
 
 public:
 
@@ -41,6 +40,11 @@ public:
      * @brief Get field name and types sequence
      */
     std::shared_ptr<ASTArgSeqNode> getFields();
+
+    /**
+     * @brief Get the field with the given name
+     */
+    std::shared_ptr<ASTArgNode> getField(std::string id);
 
     /**
      * @brief Sets the field name and type sequences

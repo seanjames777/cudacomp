@@ -37,6 +37,11 @@ public:
     std::shared_ptr<ASTTypeNode> getElemType();
 
     /**
+     * @brief Set array element type
+     */
+    void setElemType(std::shared_ptr<ASTTypeNode> type);
+
+    /**
      * @brief Get array length
      */
     std::shared_ptr<ASTExpNode> getLength();
