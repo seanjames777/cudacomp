@@ -9,7 +9,8 @@
 ASTBinopExp::ASTBinopExp(enum op op, std::shared_ptr<ASTExpNode> e1, std::shared_ptr<ASTExpNode> e2)
     : op(op),
       e1(e1),
-      e2(e2)
+      e2(e2),
+      type(nullptr)
 {
 }
 
@@ -26,6 +27,14 @@ std::shared_ptr<ASTExpNode> ASTBinopExp::getE1() {
 
 std::shared_ptr<ASTExpNode> ASTBinopExp::getE2() {
     return e2;
+}
+
+std::shared_ptr<ASTTypeNode> ASTBinopExp::getType() {
+    return type;
+}
+
+void ASTBinopExp::setType(std::shared_ptr<ASTTypeNode> type) {
+    this->type = type;
 }
 
 void ASTBinopExp::print(std::ostream & ss) {
@@ -85,4 +94,7 @@ void ASTBinopExp::print(std::ostream & ss) {
         ss << "!=";
         break;
     }
+
+    // TODO: If the AST was printed after all the statics, then we would know the
+    // types, lvalues, etc.
 }

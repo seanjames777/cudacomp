@@ -7,6 +7,8 @@
 
 extern std::unordered_map<std::string, ASTTypeNode *> typedefs;
 
+// TODO: should freak out when we can't fit a number in a type
+
 %}
 
 %%
@@ -15,6 +17,7 @@ extern std::unordered_map<std::string, ASTTypeNode *> typedefs;
 "while"                 { return WHILE; }
 "int"                   { return INT; }
 "bool"                  { return BOOL; }
+"float"                 { return FLOAT; }
 "if"                    { return IF; }
 "else"                  { return ELSE; }
 "true"                  { yylval.boolean = true; return TRUE; } // TODO: don't need the boolean
@@ -23,10 +26,14 @@ extern std::unordered_map<std::string, ASTTypeNode *> typedefs;
 "typedef"               { return TYPEDEF; }
 "extern"                { return EXTERN; }
 "alloc_array"           { return ALLOC_ARRAY; }
-"in"                    { return IN; }
-"..."                   { return ELLIPSES; }
+":"                     { return COLON; }
+"to"                    { return TO; }
+"for"                   { return FOR; }
+"@device"               { return DEVICE; }
 
-[0-9]+                  { yylval.number = atoi(yytext); return NUMBER; }
+[0-9]+                  { yylval.int32 = strtol(yytext, NULL, 10); return INT32; }
+0[xX][0-9A-Fa-f]+       { yylval.int32 = strtol(yytext, NULL, 16); return INT32; }
+[0-9]*\.[0-9]+           { yylval.float32 = strtod(yytext, NULL); return FLOAT32; }
 [_a-zA-Z][_a-zA-Z0-9]*  {
                             yylval.string = strdup(yytext);
 

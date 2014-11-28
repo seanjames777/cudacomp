@@ -52,6 +52,11 @@ public:
     std::string getName();
 
     /**
+     * @brief Set argument name
+     */
+    void setName(std::string name);
+
+    /**
      * @copydoc ASTNode::print()
      */
     void print(std::ostream & ss) override;

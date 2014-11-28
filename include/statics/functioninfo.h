@@ -81,6 +81,12 @@ public:
      */
     bool hasLocal(std::string id);
 
+    /**
+     * @brief Copy argument names/types to local symbols. This is deferred so
+     * that the symbols can be renamed/type resolved before typechecking.
+     */
+    void copyArgumentsToLocals();
+
 };
 
 #endif

@@ -1,23 +1,24 @@
 /**
- * @file astbooleantype.h
+ * @file astfloattype.h
  *
  * @brief Abstract syntax tree integer type
  *
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#ifndef __ASTBOOLEANTYPE_H
-#define __ASTBOOLEANTYPE_H
+#ifndef __ASTFLOATTYPE_H
+#define __ASTFLOATTYPE_H
 
 #include <ast/type/asttypenode.h>
 
 /**
- * @brief Boolean type AST type node
+ * @brief Integer type AST type node. Currently, these represent signed 32-bit
+ * integers only.
  */
-class ASTBooleanType : public ASTTypeNode {
+class ASTFloatType : public ASTTypeNode {
 private:
 
-    static std::shared_ptr<ASTBooleanType> instance;
+    static std::shared_ptr<ASTFloatType> instance;
 
 public:
 
@@ -25,12 +26,12 @@ public:
      * @brief Constructor. This is a private constructor: use the singleton
      * get() function.
      */
-    ASTBooleanType();
+    ASTFloatType();
 
     /**
      * @brief Get the singleton instance of this class
      */
-    static std::shared_ptr<ASTBooleanType> get();
+    static std::shared_ptr<ASTFloatType> get();
 
     /**
      * @copydoc ASTTypeNode::equal()
@@ -46,6 +47,7 @@ public:
      * @copydoc ASTTypeNode::getSize()
      */
     virtual int getSize() override;
+
 };
 
 #endif

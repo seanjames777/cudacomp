@@ -106,6 +106,11 @@ void TypeResolve::visitTypeDecl(std::shared_ptr<ASTTypeDecl> typeDecl) {
     ASTVisitor::visitTypeDecl(typeDecl);
 }
 
+void TypeResolve::visitRangeForStmt(std::shared_ptr<ASTRangeForStmt> forStmt) {
+    forStmt->setIteratorType(resolveType(forStmt->getIteratorType()));
+    ASTVisitor::visitRangeForStmt(forStmt);
+}
+
 void TypeResolve::run(std::shared_ptr<ASTDeclSeqNode> ast) {
     visitDeclSeqNode(ast);
 }

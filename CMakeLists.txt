@@ -57,14 +57,17 @@ add_executable(cc
     src/ast/expr/astbooleanexp.cpp
     src/ast/expr/astcallexp.cpp
     src/ast/expr/astexpnode.cpp
+    src/ast/expr/astfloatexp.cpp
     src/ast/expr/astidentifierexp.cpp
     src/ast/expr/astindexexp.cpp
     src/ast/expr/astintegerexp.cpp
     src/ast/expr/astrangeexp.cpp
     src/ast/expr/astunopexp.cpp
+    src/ast/sched/astschednode.cpp
     src/ast/stmt/astassignstmt.cpp
     src/ast/stmt/astexprstmt.cpp
     src/ast/stmt/astifstmt.cpp
+    src/ast/stmt/astrangeforstmt.cpp
     src/ast/stmt/astreturnstmt.cpp
     src/ast/stmt/astscopestmt.cpp
     src/ast/stmt/aststmtnode.cpp
@@ -76,6 +79,7 @@ add_executable(cc
     src/ast/type/astargnode.cpp
     src/ast/type/astarrtype.cpp
     src/ast/type/astbooleantype.cpp
+    src/ast/type/astfloattype.cpp
     src/ast/type/astfuntype.cpp
     src/ast/type/astidtype.cpp
     src/ast/type/astintegertype.cpp
@@ -92,6 +96,7 @@ add_executable(cc
     src/statics/moduleinfo.cpp
     src/statics/returncheck.cpp
     src/statics/statics.cpp
+    src/statics/symbolcheck.cpp
     src/statics/symboltable.cpp
     src/statics/typecheck.cpp
     src/statics/typeresolve.cpp

@@ -26,5 +26,5 @@ void ASTBooleanType::print(std::ostream & ss) {
 }
 
 int ASTBooleanType::getSize() {
-    return 4; // TODO
+    return 1;
 }

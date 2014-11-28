@@ -20,6 +20,10 @@ std::string ASTVarDeclStmt::getId() {
     return id;
 }
 
+void ASTVarDeclStmt::setId(std::string id) {
+    this->id = id;
+}
+
 std::shared_ptr<ASTExpNode> ASTVarDeclStmt::getExp() {
     return exp;
 }

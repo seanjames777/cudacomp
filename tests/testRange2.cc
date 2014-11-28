@@ -3,6 +3,7 @@ int _cc_main() {
 
     for (int x : 5 * 2 to 10 + 3) {
         y = y + x;
+        return y;
     }
 
     return y;

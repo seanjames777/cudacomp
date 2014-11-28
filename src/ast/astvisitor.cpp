@@ -50,6 +50,7 @@ IMPL_CLASS(StmtNode) {
     SUB_CLASS(AssignStmt);
     SUB_CLASS(ExprStmt);
     SUB_CLASS(IfStmt);
+    SUB_CLASS(RangeForStmt);
     SUB_CLASS(ReturnStmt);
     SUB_CLASS(ScopeStmt);
     SUB_CLASS(VarDeclStmt);
@@ -145,6 +146,12 @@ IMPL_CLASS(IfStmt) {
 
 IMPL_CLASS(WhileStmt) {
     HAS_MEMBER(getCond());
+    HAS_MEMBER(getBody());
+}
+
+IMPL_CLASS(RangeForStmt) {
+    HAS_MEMBER(getIteratorType());
+    HAS_MEMBER(getRange());
     HAS_MEMBER(getBody());
 }
 

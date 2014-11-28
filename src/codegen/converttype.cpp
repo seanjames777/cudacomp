@@ -15,6 +15,8 @@ Type *convertType(std::shared_ptr<ASTTypeNode> type) {
         return Type::getInt32Ty(ctx);
     else if (std::shared_ptr<ASTBooleanType> bool_type = std::dynamic_pointer_cast<ASTBooleanType>(type))
         return Type::getInt1Ty(ctx);
+    else if (std::shared_ptr<ASTFloatType> bool_type = std::dynamic_pointer_cast<ASTFloatType>(type))
+        return Type::getFloatTy(ctx);
     else if (std::shared_ptr<ASTVoidType> void_type = std::dynamic_pointer_cast<ASTVoidType>(type))
         return Type::getVoidTy(ctx);
     else if (std::shared_ptr<ASTPtrType> ptr_type = std::dynamic_pointer_cast<ASTPtrType>(type))
