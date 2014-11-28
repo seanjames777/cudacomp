@@ -16,8 +16,6 @@
 
 /**
  * @brief Function declaration/definition top-level AST node
- *
- * TODO: Make body optional to support forward declarations.
  */
 class ASTFunDecl : public ASTDeclNode {
 private:

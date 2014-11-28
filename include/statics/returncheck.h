@@ -15,9 +15,6 @@
 #include <ast/ast.h>
 #include <statics/exceptions.h>
 
-// TODO: Void functions don't require returns
-// TODO: Returns must match function declaration
-
 namespace Statics {
 
     bool returncheck_stmts(std::shared_ptr<FunctionInfo> func, std::shared_ptr<ASTStmtSeqNode> nodes);

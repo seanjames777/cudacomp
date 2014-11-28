@@ -38,17 +38,19 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
     ASTArgNode *arg;
     ASTArgSeqNode *arg_seq;
     enum ASTDeclNode::Linkage linkage;
-    int number;
+    int int32;
+    float float32;
     char *string;
     bool boolean;
 }
 
-%token <number> NUMBER
+%token <int32> INT32
+%token <float32> FLOAT32
 %token <string> IDENT IDTYPE
 %token <boolean> TRUE FALSE
 %token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR NOT BNOT
 %token ASSIGN SEMI COMMA LBRACKET RBRACKET
-%token INT BOOL VOID
+%token INT BOOL VOID FLOAT
 %token RETURN IF ELSE TYPEDEF WHILE EXTERN ALLOC_ARRAY COLON TO DEVICE FOR
 %token LPAREN RPAREN LBRACE RBRACE
 %token EQ NEQ LEQ GEQ LT GT
@@ -105,7 +107,8 @@ stmt_list:
   ;
 
 exp:
-    NUMBER                            { $$ = new ASTIntegerExp($1); }
+    INT32                             { $$ = new ASTIntegerExp($1); }
+  | FLOAT32                           { $$ = new ASTFloatExp($1); }
   | TRUE                              { $$ = new ASTBooleanExp(true); }
   | FALSE                             { $$ = new ASTBooleanExp(false); }
   | exp PLUS exp                      { $$ = new ASTBinopExp(ASTBinopExp::ADD, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
@@ -142,6 +145,7 @@ exp:
 type:
     INT                               { $$ = new ASTIntegerType(); }
   | BOOL                              { $$ = new ASTBooleanType(); }
+  | FLOAT                             { $$ = new ASTFloatType(); }
   | VOID                              { $$ = new ASTVoidType(); }
   | IDTYPE                            { $$ = new ASTIdType(std::string($1)); free($1); }
   | type LBRACKET RBRACKET            { $$ = new ASTArrType(std::shared_ptr<ASTTypeNode>($1)); }

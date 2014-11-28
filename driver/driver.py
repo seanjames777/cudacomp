@@ -67,6 +67,7 @@ tests = [
     (SOURCE_DIR + "tests/testCall13.cc", 11),
     (SOURCE_DIR + "tests/testCall14.cc", "error"),
     (SOURCE_DIR + "tests/testCall15.cc", "error"),
+    (SOURCE_DIR + "tests/testCall16.cc", 0),
     (SOURCE_DIR + "tests/testFib1.cc", 34),
     (SOURCE_DIR + "tests/testFib2.cc", 34),
     (SOURCE_DIR + "tests/testFib3.cc", 34),
@@ -109,6 +110,7 @@ tests = [
     (SOURCE_DIR + "tests/testRange1.cc", 33),
     (SOURCE_DIR + "tests/testRange2.cc", 10),
     (SOURCE_DIR + "tests/testRange3.cc", 4950),
+    (SOURCE_DIR + "tests/testFloat1.cc", 10),
 ]
 
 # TODO: actually test type checking...

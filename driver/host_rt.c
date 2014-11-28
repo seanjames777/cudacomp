@@ -13,6 +13,10 @@ void *_rt_alloc_array(int elemSize, int length) {
     return (void *)&buff[8];
 }
 
+void print_float(float x) {
+    printf("%f\n", x);
+}
+
 int rt_add(int x, int y) {
     return x + y;
 }

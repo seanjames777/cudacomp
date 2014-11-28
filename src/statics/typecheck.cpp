@@ -5,26 +5,6 @@
  */
 
 #include <statics/typecheck.h>
-#include <ast/expr/astintegerexp.h>
-#include <ast/expr/astbinopexp.h>
-#include <ast/astseqnode.h>
-#include <ast/stmt/astreturnstmt.h>
-#include <ast/expr/astidentifierexp.h>
-#include <ast/stmt/astvardeclstmt.h>
-#include <ast/stmt/astassignstmt.h>
-#include <ast/type/astintegertype.h>
-#include <ast/expr/astunopexp.h>
-#include <ast/type/astbooleantype.h>
-#include <ast/stmt/astscopestmt.h>
-#include <ast/stmt/astifstmt.h>
-#include <ast/expr/astbooleanexp.h>
-#include <ast/decl/astfundecl.h>
-#include <ast/expr/astcallexp.h>
-#include <ast/type/astvoidtype.h>
-#include <ast/type/astptrtype.h>
-#include <ast/stmt/astexprstmt.h>
-#include <ast/stmt/astwhilestmt.h>
-#include <ast/decl/asttypedecl.h>
 
 namespace Statics {
 
@@ -39,12 +19,12 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
     // Boolean constant
     else if (std::shared_ptr<ASTBooleanExp> bool_exp = std::dynamic_pointer_cast<ASTBooleanExp>(node))
         return ASTBooleanType::get();
+    else if (std::shared_ptr<ASTFloatExp> float_exp = std::dynamic_pointer_cast<ASTFloatExp>(node))
+        return ASTFloatType::get();
     // Variable reference
     else if (std::shared_ptr<ASTIdentifierExp> id_exp = std::dynamic_pointer_cast<ASTIdentifierExp>(node)) {
         std::shared_ptr<ASTTypeNode> type = func->getLocalType(id_exp->getId());
-
-        if (type == nullptr)
-            std::cout << "No type for " << id_exp->getId() << std::endl;
+        assert(type);
 
         return type;
     }
@@ -98,26 +78,59 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         case ASTBinopExp::MUL:
         case ASTBinopExp::DIV:
         case ASTBinopExp::MOD:
+            if (!t1->equal(t2))
+                throw IllegalTypeException();
+
+            if (t1->equal(ASTIntegerType::get())) {
+                binop_exp->setType(ASTIntegerType::get());
+                return ASTIntegerType::get();
+            }
+
+            if (t1->equal(ASTFloatType::get())) {
+                binop_exp->setType(ASTFloatType::get());
+                return ASTFloatType::get();
+            }
+
+            throw IllegalTypeException();
         case ASTBinopExp::SHL:
         case ASTBinopExp::SHR:
         case ASTBinopExp::BAND:
         case ASTBinopExp::BOR:
         case ASTBinopExp::BXOR:
-            if (!t1->equal(ASTIntegerType::get()) || !t2->equal(ASTIntegerType::get()))
+            if (!t1->equal(t2))
                 throw IllegalTypeException();
-            return ASTIntegerType::get();
+
+            if (t1->equal(ASTIntegerType::get())) {
+                binop_exp->setType(ASTIntegerType::get());
+                return ASTIntegerType::get();
+            }
+
+            throw IllegalTypeException();
         case ASTBinopExp::OR:
         case ASTBinopExp::AND:
             if (!t1->equal(ASTBooleanType::get()) || !t2->equal(ASTBooleanType::get()))
                 throw IllegalTypeException();
+
+            binop_exp->setType(ASTBooleanType::get());
             return ASTBooleanType::get();
         case ASTBinopExp::LEQ:
         case ASTBinopExp::GEQ:
         case ASTBinopExp::LT:
         case ASTBinopExp::GT:
-            if (!t1->equal(ASTIntegerType::get()) || !t2->equal(ASTIntegerType::get()))
+            if (!t1->equal(t2))
                 throw IllegalTypeException();
-            return ASTBooleanType::get();
+
+            if (t1->equal(ASTIntegerType::get())) {
+                binop_exp->setType(ASTIntegerType::get());
+                return ASTBooleanType::get();
+            }
+
+            if (t1->equal(ASTFloatType::get())) {
+                binop_exp->setType(ASTFloatType::get());
+                return ASTBooleanType::get();
+            }
+
+            throw IllegalTypeException();
         case ASTBinopExp::EQ:
         case ASTBinopExp::NEQ:
             // Must have the same type
@@ -127,12 +140,21 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             // Must be an 'equality type'
             std::shared_ptr<ASTArrType> arrType = std::dynamic_pointer_cast<ASTArrType>(t1);
 
-            if (!t1->equal(ASTIntegerType::get()) &&
-                !t1->equal(ASTBooleanType::get()) &&
-                !arrType)
-                throw IllegalTypeException();
+            if (t1->equal(ASTIntegerType::get()) ||
+                t1->equal(ASTBooleanType::get()) ||
+                arrType)
+            {
+                // TODO could split out boolean type, etc.
+                binop_exp->setType(ASTIntegerType::get());
+                return ASTBooleanType::get();
+            }
 
-            return ASTBooleanType::get();
+            if (t1->equal(ASTFloatType::get())) {
+                binop_exp->setType(ASTFloatType::get());
+                return ASTBooleanType::get();
+            }
+
+            throw IllegalTypeException();
         }
     }
     // Function call
@@ -158,7 +180,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             else if (args == nullptr && exprs == nullptr)
                 break;
 
-            std::shared_ptr<ASTTypeNode> exp_type = typecheck_exp(mod, call_func, exprs->getHead());
+            std::shared_ptr<ASTTypeNode> exp_type = typecheck_exp(mod, func, exprs->getHead());
             std::shared_ptr<ASTTypeNode> arg_type = args->getHead()->getType();
 
             // TODO: test for void argument
@@ -192,7 +214,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
     // Range
     else if (std::shared_ptr<ASTRangeExp> range_exp = std::dynamic_pointer_cast<ASTRangeExp>(node)) {
         std::shared_ptr<ASTTypeNode> minType = typecheck_exp(mod, func, range_exp->getMin());
-        std::shared_ptr<ASTTypeNode> maxType = typecheck_exp(mod, func, range_exp->getMin());
+        std::shared_ptr<ASTTypeNode> maxType = typecheck_exp(mod, func, range_exp->getMax());
 
         if (!minType->equal(ASTIntegerType::get()))
             throw IllegalTypeException();
@@ -316,6 +338,7 @@ void typecheck_stmt(
 
         typecheck_stmts(mod, func, while_node->getBody());
     }
+    // Range for loop
     else if (std::shared_ptr<ASTRangeForStmt> range_node = std::dynamic_pointer_cast<ASTRangeForStmt>(head)) {
         std::shared_ptr<ASTTypeNode> range_type = typecheck_exp(mod, func, range_node->getRange());
 

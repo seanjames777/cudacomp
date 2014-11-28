@@ -25,6 +25,8 @@
 #include <ast/stmt/astwhilestmt.h>
 #include <ast/decl/asttypedecl.h>
 
+// TODO: Alloca alignment
+
 namespace Codegen {
 
 Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
@@ -57,6 +59,9 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
     // Boolean constant
     else if (std::shared_ptr<ASTBooleanExp> bool_exp = std::dynamic_pointer_cast<ASTBooleanExp>(node))
         return ConstantInt::get(convertType(ASTBooleanType::get()), (int)bool_exp->getValue());
+    // Float constant
+    else if (std::shared_ptr<ASTFloatExp> float_exp = std::dynamic_pointer_cast<ASTFloatExp>(node))
+        return ConstantFP::get(convertType(ASTFloatType::get()), float_exp->getValue());
     // Unary operator
     else if (std::shared_ptr<ASTUnopExp> unop_exp = std::dynamic_pointer_cast<ASTUnopExp>(node)) {
         Value *v = codegen_exp(ctx, unop_exp->getExp());
@@ -72,12 +77,15 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         Value *v1 = codegen_exp(ctx, binop_exp->getE1());
         Value *v2 = codegen_exp(ctx, binop_exp->getE2());
 
+        assert(binop_exp->getType());
+        bool isFloat = binop_exp->getType()->equal(ASTFloatType::get());
+
         switch(binop_exp->getOp()) {
-        case ASTBinopExp::ADD:  return builder->CreateBinOp(Instruction::Add, v1, v2);
-        case ASTBinopExp::SUB:  return builder->CreateBinOp(Instruction::Sub, v1, v2);
-        case ASTBinopExp::MUL:  return builder->CreateBinOp(Instruction::Mul, v1, v2);
-        case ASTBinopExp::DIV:  return builder->CreateBinOp(Instruction::SDiv, v1, v2);
-        case ASTBinopExp::MOD:  return builder->CreateBinOp(Instruction::SRem, v1, v2);
+        case ASTBinopExp::ADD:  return builder->CreateBinOp(isFloat ? Instruction::FAdd : Instruction::Add, v1, v2);
+        case ASTBinopExp::SUB:  return builder->CreateBinOp(isFloat ? Instruction::FSub : Instruction::Sub, v1, v2);
+        case ASTBinopExp::MUL:  return builder->CreateBinOp(isFloat ? Instruction::FMul : Instruction::Mul, v1, v2);
+        case ASTBinopExp::DIV:  return builder->CreateBinOp(isFloat ? Instruction::FDiv : Instruction::SDiv, v1, v2);
+        case ASTBinopExp::MOD:  return builder->CreateBinOp(isFloat ? Instruction::FRem : Instruction::SRem, v1, v2);
         case ASTBinopExp::SHL:  return builder->CreateBinOp(Instruction::Shl, v1, v2);
         case ASTBinopExp::SHR:  return builder->CreateBinOp(Instruction::AShr, v1, v2);
         case ASTBinopExp::AND:  return builder->CreateBinOp(Instruction::And, v1, v2);
@@ -85,12 +93,12 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         case ASTBinopExp::BAND: return builder->CreateBinOp(Instruction::And, v1, v2);
         case ASTBinopExp::BOR:  return builder->CreateBinOp(Instruction::Or, v1, v2);
         case ASTBinopExp::BXOR: return builder->CreateBinOp(Instruction::Xor, v1, v2);
-        case ASTBinopExp::EQ:   return builder->CreateICmpEQ(v1, v2);
-        case ASTBinopExp::NEQ:  return builder->CreateICmpNE(v1, v2);
-        case ASTBinopExp::LEQ:  return builder->CreateICmpSLE(v1, v2);
-        case ASTBinopExp::GEQ:  return builder->CreateICmpSGE(v1, v2);
-        case ASTBinopExp::LT:   return builder->CreateICmpSLT(v1, v2);
-        case ASTBinopExp::GT:   return builder->CreateICmpSGT(v1, v2);
+        case ASTBinopExp::EQ:   return (isFloat ? builder->CreateFCmpOEQ(v1, v2) : builder->CreateICmpEQ(v1, v2));
+        case ASTBinopExp::NEQ:  return (isFloat ? builder->CreateFCmpONE(v1, v2) : builder->CreateICmpNE(v1, v2));
+        case ASTBinopExp::LEQ:  return (isFloat ? builder->CreateFCmpOLE(v1, v2) : builder->CreateICmpSLE(v1, v2));
+        case ASTBinopExp::GEQ:  return (isFloat ? builder->CreateFCmpOGE(v1, v2) : builder->CreateICmpSGE(v1, v2));
+        case ASTBinopExp::LT:   return (isFloat ? builder->CreateFCmpOLT(v1, v2) : builder->CreateICmpSLT(v1, v2));
+        case ASTBinopExp::GT:   return (isFloat ? builder->CreateFCmpOGT(v1, v2) : builder->CreateICmpSGT(v1, v2));
         }
     }
     // Function call

@@ -57,6 +57,7 @@ add_executable(cc
     src/ast/expr/astbooleanexp.cpp
     src/ast/expr/astcallexp.cpp
     src/ast/expr/astexpnode.cpp
+    src/ast/expr/astfloatexp.cpp
     src/ast/expr/astidentifierexp.cpp
     src/ast/expr/astindexexp.cpp
     src/ast/expr/astintegerexp.cpp
@@ -78,6 +79,7 @@ add_executable(cc
     src/ast/type/astargnode.cpp
     src/ast/type/astarrtype.cpp
     src/ast/type/astbooleantype.cpp
+    src/ast/type/astfloattype.cpp
     src/ast/type/astfuntype.cpp
     src/ast/type/astidtype.cpp
     src/ast/type/astintegertype.cpp
