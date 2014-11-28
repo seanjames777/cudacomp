@@ -77,6 +77,7 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         Value *v1 = codegen_exp(ctx, binop_exp->getE1());
         Value *v2 = codegen_exp(ctx, binop_exp->getE2());
 
+        // Type is stored by typechecker
         assert(binop_exp->getType());
         bool isFloat = binop_exp->getType()->equal(ASTFloatType::get());
 
