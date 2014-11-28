@@ -105,6 +105,9 @@ tests = [
     (SOURCE_DIR + "tests/testLValue1.cc", "error"),
     (SOURCE_DIR + "tests/testPointers1.cc", 5),
     (SOURCE_DIR + "tests/testPointers2.cc", 0),
+    (SOURCE_DIR + "tests/testPointers3.cc", 20),
+    (SOURCE_DIR + "tests/testPointers4.cc", 10),
+    (SOURCE_DIR + "tests/testPointers5.cc", "error"),
     (SOURCE_DIR + "tests/testStructs1.cc", 5),
     (SOURCE_DIR + "tests/testStructs2.cc", 5),
 ]

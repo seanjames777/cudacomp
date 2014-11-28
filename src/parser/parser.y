@@ -142,7 +142,7 @@ exp:
   { $$ = new ASTRecordAccessExp(std::shared_ptr<ASTExpNode>($1), std::string($3) ); }
   | exp DOT IDTYPE              
   { $$ = new ASTRecordAccessExp(std::shared_ptr<ASTExpNode>($1), std::string($3) ); }
-  | IDENT IN exp ELLIPSES exp         { $$ = new ASTRangeExp(std::string($1), std::shared_ptr<ASTExpNode>($3), std::shared_ptr<ASTExpNode>($5)); free($1); }
+  //| IDENT IN exp ELLIPSES exp         { $$ = new ASTRangeExp(std::string($1), std::shared_ptr<ASTExpNode>($3), std::shared_ptr<ASTExpNode>($5)); free($1); }
   ;
 
 type:

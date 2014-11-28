@@ -216,7 +216,8 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             throw IllegalTypeException();
 
         // Returns a pointer to an elemType
-        return std::make_shared<ASTPtrType>(elemType);
+        std::shared_ptr<ASTPtrType> e = std::make_shared<ASTPtrType>(elemType);
+        return e;
     }
     // Record access
     else if (std::shared_ptr<ASTRecordAccessExp> record_exp = std::dynamic_pointer_cast<ASTRecordAccessExp>(node)) {
