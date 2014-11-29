@@ -6,7 +6,7 @@ struct foo{
 
 typedef struct foo foo;
 
-int main() {
+int _cc_main() {
     foo * bar = alloc(foo);
     (*bar).baz = 5;
     return (*bar).baz;

@@ -17,6 +17,8 @@
 #include <statics/typeresolve.h>
 #include <statics/funcheck.h>
 #include <statics/exceptions.h>
+#include <statics/symbolcheck.h>
+#include <ast/astprint.h>
 
 namespace Statics {
 
@@ -26,11 +28,12 @@ namespace Statics {
  * exceptions if the code fails a static check. Outputs type information,
  * function signatures, etc.
  *
- * @param[in]  node   Top-level linked list output by parser
+ * @param[in] node    Top-level linked list output by parser
+ * @param[in] verbose Turn on verbose output
  *
  * @return Output module information
  */
-std::shared_ptr<ModuleInfo> run(std::shared_ptr<ASTDeclSeqNode> node);
+std::shared_ptr<ModuleInfo> run(std::shared_ptr<ASTDeclSeqNode> node, bool verbose);
 
 }
 

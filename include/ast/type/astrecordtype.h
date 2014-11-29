@@ -47,6 +47,11 @@ public:
     std::shared_ptr<ASTArgNode> getField(std::string id);
 
     /**
+     * @brief Returns n such that the nth field of the record is id.
+     */
+    int getFieldIndex(std::string id);
+
+    /**
      * @brief Sets the field name and type sequences
      */
     void setFields(std::shared_ptr<ASTArgSeqNode> fields);

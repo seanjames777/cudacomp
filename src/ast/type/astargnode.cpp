@@ -24,6 +24,10 @@ std::string ASTArgNode::getName() {
     return name;
 }
 
+void ASTArgNode::setName(std::string name) {
+    this->name = name;
+}
+
 void ASTArgNode::print(std::ostream & ss) {
     ss << name;
 }

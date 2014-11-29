@@ -10,6 +10,7 @@
 #define __ASTRECORDACCESSEXP_H
 
 #include <ast/expr/astexpnode.h>
+#include <ast/type/astrecordtype.h>
 
 /**
  * @brief Record field accessing expression/lvalue AST node
@@ -18,6 +19,7 @@ class ASTRecordAccessExp : public ASTExpNode {
 private:
 
     std::shared_ptr<ASTExpNode> lvalue;
+    std::shared_ptr<ASTRecordType> type;
     std::string id;
 
 public:
@@ -39,6 +41,18 @@ public:
      * @brief Get the name of the field
      */
     std::string getId();
+
+
+    /**
+     * @brief Get the type of the record we are accessing.
+     *        This is set during typechecking.
+     */
+    std::shared_ptr<ASTRecordType> getType();
+
+    /**
+     * @brief Set the type of the record we are accessing.
+     */
+    void setType(std::shared_ptr<ASTRecordType> t);
 
     /**
      * @copydoc ASTNode::print()

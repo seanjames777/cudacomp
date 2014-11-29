@@ -17,6 +17,9 @@ void *_rt_alloc(int size) {
     return (void*)calloc(1, size);
 }
 
+void print_float(float x) {
+    printf("%f\n", x);
+}
 
 int rt_add(int x, int y) {
     return x + y;

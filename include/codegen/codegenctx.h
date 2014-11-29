@@ -42,6 +42,7 @@ private:
     LLVMContext                   &context;      // LLVM context
     bool                           emit_device;  // Should we emit GPU code
     SymbolTable<Function *>        functions;    // Mapping from function names to LLVM functions
+    SymbolTable<Type *>            records;      // Mapping from struct names to LLVM types
     std::shared_ptr<ModuleInfo>    modInfo;      // Information about module
     Function                      *alloc_array;  // Runtime alloc_array function
     Function                      *alloc;        // Runtime alloc function
@@ -175,6 +176,17 @@ public:
      */
     std::shared_ptr<IRBuilder<>> getBuilder();
 
+    /**
+     * @brief Declare an LLVM record type. It may be retrieved later 
+     * with the getRecordType function.
+     */
+    void createRecord(std::shared_ptr<ASTRecordType> recordInfo);
+
+
+    /**
+     * @brief Gets the LLVM type for the record with the given name
+     */
+    Type *getRecordType(std::string name);
 };
 
 }

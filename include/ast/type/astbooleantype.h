@@ -24,9 +24,6 @@ public:
     /**
      * @brief Constructor. This is a private constructor: use the singleton
      * get() function.
-     *
-     * TODO: When we switch to shared pointers, make this private here and in
-     * other classes.
      */
     ASTBooleanType();
 

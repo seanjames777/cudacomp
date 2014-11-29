@@ -1,4 +1,8 @@
+int foo(int * bar) {
+    return *bar;
+}
+
 int _cc_main() {
-    int x = 5;
-    return *x;
+    int * baz = alloc(int);
+    return foo(baz);
 }

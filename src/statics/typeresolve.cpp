@@ -74,6 +74,11 @@ std::shared_ptr<ASTTypeNode> TypeResolve::resolveType(std::shared_ptr<ASTTypeNod
         return type;
 }
 
+void TypeResolve::visitRecordType(std::shared_ptr<ASTRecordType> type) {
+    resolveType(type);
+    // We already recursively resolved and just had to retrieve the result from a table
+}
+
 void TypeResolve::visitTypeNode(std::shared_ptr<ASTTypeNode> type) {
     // Just resolve the type in place. We don't need to worry about the return value, because we
     // aren't resolving recursively. That's done by resolveType() itself.
@@ -129,15 +134,47 @@ void TypeResolve::visitRecordDecl(std::shared_ptr<ASTRecordDecl> recordDecl) {
     if (!(recordDecl->isDefn()))
         return;
 
-    // TODO TODO
-    // We don't want repeat field names, don't want void fields or undefined struct fields, any other type is OK
-    // Also, need to recursively resolve all types inside the struct
-
     // Records cannot be redefined
     if (module->getRecord(recordDecl->getName()) != nullptr)
         throw RedeclaredTypeException(recordDecl->getName());
 
-    module->addRecord(recordDecl->getName(), recordDecl->getSignature());
+    // TODO TODO
+    // We don't want repeat field names, don't want void fields or undefined struct fields, any other type is OK
+    // Also, need to recursively resolve all types inside the struct
+
+    std::string name = recordDecl->getName();
+    module->addRecord(name, recordDecl->getSignature());
+    std::shared_ptr<ASTArgSeqNode> fields = recordDecl->getSignature()->getFields();
+
+    ASTVisitor::visitArgSeqNode(fields);
+    //manually weed out recursive structs
+    while(fields) {
+        std::shared_ptr<ASTArgNode> field = fields->getHead();
+        if (std::shared_ptr<ASTRecordType> type = std::dynamic_pointer_cast<ASTRecordType>(field->getType())) {
+            if ((name.compare(type->getId())) == 0)
+                throw IllegalTypeException(); // TODO : better exception?
+        }
+//        else if (std::shared_ptr<ASTPtrType> type = std::dynamic_pointer_cast<ASTPtrType>(field->getType())) {
+//            // Pointers to this record don't need to be resolved
+//            if (std::shared_ptr<ASTRecordType> rcd_type = std::dynamic_pointer_cast<ASTRecordType>(type->getToType())) {
+//                if ((name.compare(rcd_type->getId())) == 0){
+//                    // Nothing to do
+//                }
+//                else {
+//                    visitArgNode(field);
+//                }
+//            }
+//        }
+        else{
+            visitNode(field);
+        }
+        fields = fields->getTail();
+    }
+}
+
+void TypeResolve::visitRangeForStmt(std::shared_ptr<ASTRangeForStmt> forStmt) {
+    forStmt->setIteratorType(resolveType(forStmt->getIteratorType()));
+    ASTVisitor::visitRangeForStmt(forStmt);
 }
 
 void TypeResolve::run(std::shared_ptr<ASTDeclSeqNode> ast) {

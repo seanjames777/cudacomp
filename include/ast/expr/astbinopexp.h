@@ -11,6 +11,7 @@
 
 #include <defs.h>
 #include <ast/expr/astexpnode.h>
+#include <ast/type/asttypenode.h>
 
 /**
  * @brief Binary operator expression AST node
@@ -47,6 +48,7 @@ private:
     enum op op;
     std::shared_ptr<ASTExpNode> e1;
     std::shared_ptr<ASTExpNode> e2;
+    std::shared_ptr<ASTTypeNode> type;
 
 public:
 
@@ -78,6 +80,16 @@ public:
      * @brief Get right-hand expression
      */
     std::shared_ptr<ASTExpNode> getE2();
+
+    /**
+     * @brief Get the operation type. Not valid until after typechecking.
+     */
+    std::shared_ptr<ASTTypeNode> getType();
+
+    /**
+     * @brief Set the operation type.
+     */
+    void setType(std::shared_ptr<ASTTypeNode> type);
 
     /**
      * @copydoc ASTNode::print()

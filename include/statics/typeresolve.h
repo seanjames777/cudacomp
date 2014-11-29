@@ -28,6 +28,8 @@ public:
 
     std::shared_ptr<ASTTypeNode> resolveType(std::shared_ptr<ASTTypeNode> type);
 
+    virtual void visitRecordType(std::shared_ptr<ASTRecordType> type) override;
+
     virtual void visitTypeNode(std::shared_ptr<ASTTypeNode> type) override;
 
     virtual void visitArgNode(std::shared_ptr<ASTArgNode> argNode) override;
@@ -43,6 +45,8 @@ public:
     virtual void visitAllocExp(std::shared_ptr<ASTAllocExp> allocExp) override;
 
     virtual void visitTypeDecl(std::shared_ptr<ASTTypeDecl> typeDecl) override;
+
+    virtual void visitRangeForStmt(std::shared_ptr<ASTRangeForStmt> forStmt) override;
 
     void run(std::shared_ptr<ASTDeclSeqNode> ast);
 

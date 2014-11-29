@@ -30,4 +30,5 @@ bool ASTRecordDecl::isDefn() {
 
 void ASTRecordDecl::print(std::ostream & ss) {
     // TODO
+    sig->print(ss);
 }

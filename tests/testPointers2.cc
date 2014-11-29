@@ -1,6 +1,4 @@
-typedef int tau;
-
 int _cc_main() {
-    tau * t = alloc(tau);
+    int * t = alloc(int);
     return *t;
 }

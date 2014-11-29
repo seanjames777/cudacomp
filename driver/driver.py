@@ -11,6 +11,7 @@ import os.path
 target = "host"
 run_list = []
 dump_temp = False
+verbose = False
 
 SOURCE_DIR = "@CMAKE_CURRENT_SOURCE_DIR@/"
 BINARY_DIR = "@CMAKE_CURRENT_BINARY_DIR@/"
@@ -38,6 +39,7 @@ tests = [
     (SOURCE_DIR + "tests/testScope2.cc", "error"),
     (SOURCE_DIR + "tests/testScope3.cc", 10),
     (SOURCE_DIR + "tests/testScope4.cc", 10),
+    (SOURCE_DIR + "tests/testScope5.cc", 10),
     (SOURCE_DIR + "tests/testIf1.cc", 10),
     (SOURCE_DIR + "tests/testIf2.cc", 20),
     (SOURCE_DIR + "tests/testIf3.cc", 10),
@@ -65,6 +67,7 @@ tests = [
     (SOURCE_DIR + "tests/testCall13.cc", 11),
     (SOURCE_DIR + "tests/testCall14.cc", "error"),
     (SOURCE_DIR + "tests/testCall15.cc", "error"),
+    (SOURCE_DIR + "tests/testCall16.cc", 0),
     (SOURCE_DIR + "tests/testFib1.cc", 34),
     (SOURCE_DIR + "tests/testFib2.cc", 34),
     (SOURCE_DIR + "tests/testFib3.cc", 34),
@@ -93,6 +96,7 @@ tests = [
     (SOURCE_DIR + "tests/testFunDecl10.cc", "error"),
     (SOURCE_DIR + "tests/testFunDecl11.cc", 5),
     (SOURCE_DIR + "tests/testFunDecl12.cc", "error"),
+    (SOURCE_DIR + "tests/testFunDecl13.cc", 518),
     (SOURCE_DIR + "tests/testArr1.cc", 5),
     (SOURCE_DIR + "tests/testArr2.cc", 0),
     (SOURCE_DIR + "tests/testArr3.cc", 5),
@@ -106,10 +110,23 @@ tests = [
     (SOURCE_DIR + "tests/testPointers1.cc", 5),
     (SOURCE_DIR + "tests/testPointers2.cc", 0),
     (SOURCE_DIR + "tests/testPointers3.cc", 20),
-    (SOURCE_DIR + "tests/testPointers4.cc", 10),
-    (SOURCE_DIR + "tests/testPointers5.cc", "error"),
-    (SOURCE_DIR + "tests/testStructs1.cc", 5),
+    (SOURCE_DIR + "tests/testPointers4.cc", 0),
+    (SOURCE_DIR + "tests/testPointers5.cc", 0),
+    (SOURCE_DIR + "tests/testPointers6.cc", "error"),
+    (SOURCE_DIR + "tests/testPointers7.cc", 10),
+    (SOURCE_DIR + "tests/testPointers8.cc", 20),
+    (SOURCE_DIR + "tests/testPointers9.cc", 0),
+    (SOURCE_DIR + "tests/testStructs1.cc", 0),
     (SOURCE_DIR + "tests/testStructs2.cc", 5),
+    (SOURCE_DIR + "tests/testStructs3.cc", 1),
+    (SOURCE_DIR + "tests/testStructs4.cc", 30),
+    (SOURCE_DIR + "tests/testStructs5.cc", 5),
+    (SOURCE_DIR + "tests/testStructs6.cc", 10),
+    (SOURCE_DIR + "tests/testRange1.cc", 33),
+    (SOURCE_DIR + "tests/testRange2.cc", 10),
+    (SOURCE_DIR + "tests/testRange3.cc", 4950),
+    (SOURCE_DIR + "tests/testFloat1.cc", 10),
+
 ]
 
 # TODO: actually test type checking...
@@ -117,7 +134,7 @@ tests = [
 #############################
 
 def parse_args():
-    global target, input, dump_temp
+    global target, input, dump_temp, verbose
 
     for arg in sys.argv:
         if arg == "--host":
@@ -126,6 +143,8 @@ def parse_args():
             target = "device"
         elif arg == "--tmp":
             dump_temp = True
+        elif arg == "--verbose":
+            verbose = True
         elif arg != sys.argv[0]:
             run_list.append(os.path.basename(arg))
 
@@ -165,6 +184,10 @@ passed = 0
 
 run_shell([ "mkdir", "-p", "tmp" ])
 
+def print_verbose(s):
+    if verbose:
+        print "\033[37;1m    " + s + "\033[0m"
+
 for (name, expected) in tests:
     if len(run_list) > 0 and not(os.path.basename(name) in run_list):
         continue
@@ -180,10 +203,14 @@ for (name, expected) in tests:
     output = []
 
     if target == "host":
+        print_verbose("Compiling...")
         (cc_stat, cc_out) = run_shell([ INSTALL_DIR + "bin/cc", "-o", temp + "_host.ll", name ])
         if cc_stat == 0:
+            print_verbose("Assembling...")
             run_shell([ LLC, "-o", temp + "_host.o", "-filetype=obj", temp + "_host.ll" ])
+            print_verbose("Linking...")
             run_shell([ "clang", "-o", temp + "_host", temp + "_host.o", INSTALL_DIR + "lib/libhost_rt.a" ])
+            print_verbose("Executing...")
             (stat, output) = run_shell([ temp + "_host" ])
         else:
             (stat, output) = (cc_stat, cc_out)

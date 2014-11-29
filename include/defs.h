@@ -22,5 +22,6 @@
 #include <sstream>
 #include <memory>
 #include <stdexcept>
+#include <assert.h>
 
 #endif

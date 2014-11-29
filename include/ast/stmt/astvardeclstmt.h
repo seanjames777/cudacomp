@@ -47,6 +47,11 @@ public:
     std::string getId();
 
     /**
+     * @brief Set variable name
+     */
+    void setId(std::string id);
+
+    /**
      * @brief Get initial variable definition. May be null.
      */
     std::shared_ptr<ASTExpNode> getExp();

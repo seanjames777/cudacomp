@@ -4,7 +4,6 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
-#include <codegen/codegenctx.h>
 #include <codegen/converttype.h>
 #include <ast/type/astvoidtype.h>
 
@@ -111,7 +110,7 @@ Function *CodegenCtx::createFunction(std::shared_ptr<FunctionInfo> funcInfo) {
 
     std::shared_ptr<ASTFunType> sig = funcInfo->getSignature();
     std::shared_ptr<ASTArgSeqNode> args = sig->getArgs();
-    Type *returnType = convertType(sig->getReturnType());
+    Type *returnType = convertType(sig->getReturnType(), this);
 
     bool isVoid = sig->getReturnType()->equal(ASTVoidType::get());
 
@@ -123,7 +122,7 @@ Function *CodegenCtx::createFunction(std::shared_ptr<FunctionInfo> funcInfo) {
     // Add arguments to LLVM function type
     while (args != nullptr) {
         std::shared_ptr<ASTArgNode> arg = args->getHead();
-        argTypes.push_back(convertType(arg->getType()));
+        argTypes.push_back(convertType(arg->getType(), this));
         args = args->getTail();
     }
 
@@ -211,7 +210,7 @@ Value *CodegenCtx::getOrCreateSymbol(std::string id) {
     // TODO: can name some or all of the values
 
     if (!symbols.hasSymbol(id)) {
-        Value *instr = def_builder->CreateAlloca(convertType(funcInfo->getLocalType(id)));
+        Value *instr = def_builder->CreateAlloca(convertType(funcInfo->getLocalType(id), this));
         symbols.set(id, instr);
         return instr;
     }
@@ -222,5 +221,22 @@ Value *CodegenCtx::getOrCreateSymbol(std::string id) {
 Value *CodegenCtx::createTemp(Type *type) {
     return def_builder->CreateAlloca(type);
 }
+
+Type *CodegenCtx::getRecordType(std::string name) {
+    return records.get(name);
+}
+
+void CodegenCtx::createRecord(std::shared_ptr<ASTRecordType> recordInfo){
+    std::string name = recordInfo->getId();
+    std::vector<Type *> elems;
+    std::shared_ptr<ASTArgSeqNode> fields = recordInfo->getFields();
+    while (fields != nullptr) {
+        std::shared_ptr<ASTTypeNode> field_type = fields->getHead()->getType();
+        elems.push_back(convertType(field_type, this));
+        fields = fields->getTail();
+    }
+    records.set(name, StructType::create(elems, name));
+}
+
 
 }
