@@ -23,6 +23,7 @@ CodegenCtx::CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo)
       alloc_array(nullptr)
 {
     module = std::make_shared<Module>("", context);
+    layout = std::make_shared<DataLayout>(module.get());
 
     // TODO do what alloc array did
     // Construct a declaration of the runtime's alloc function
@@ -236,6 +237,11 @@ void CodegenCtx::createRecord(std::shared_ptr<ASTRecordType> recordInfo){
         fields = fields->getTail();
     }
     records.set(name, StructType::create(elems, name));
+}
+
+unsigned long CodegenCtx::getAlignedSize(std::shared_ptr<ASTTypeNode> t) {
+    Type * tau = convertType(t, this);
+    return layout->getTypeAllocSizeInBits(tau);
 }
 
 

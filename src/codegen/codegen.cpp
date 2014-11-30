@@ -158,7 +158,7 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
     else if (std::shared_ptr<ASTAllocArrayExp> alloc_exp = std::dynamic_pointer_cast<ASTAllocArrayExp>(node)) {
         // Element size constant
         Value *elemSize = ConstantInt::get(convertType(ASTIntegerType::get()),
-            alloc_exp->getElemType()->getSize());
+            ctx->getAlignedSize((alloc_exp->getElemType())));
 
         // Array length
         Value *length = codegen_exp(ctx, alloc_exp->getLength());
@@ -178,7 +178,7 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
     else if (std::shared_ptr<ASTAllocExp> alloc_exp = std::dynamic_pointer_cast<ASTAllocExp>(node)) {
         // Element size constant
         Value *elemSize = ConstantInt::get(convertType(ASTIntegerType::get()),
-            alloc_exp->getElemType()->getSize());
+            ctx->getAlignedSize((alloc_exp->getElemType())));
 
         // Call into runtime allocator
         std::vector<Value *> args;

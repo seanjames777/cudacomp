@@ -40,6 +40,7 @@ private:
     // Whole module
     std::shared_ptr<Module>        module;       // LLVM module for all functions
     LLVMContext                   &context;      // LLVM context
+    std::shared_ptr<DataLayout>    layout;       // LLVM data layout
     bool                           emit_device;  // Should we emit GPU code
     SymbolTable<Function *>        functions;    // Mapping from function names to LLVM functions
     SymbolTable<Type *>            records;      // Mapping from struct names to LLVM types
@@ -187,6 +188,11 @@ public:
      * @brief Gets the LLVM type for the record with the given name
      */
     Type *getRecordType(std::string name);
+
+    /**
+     * @brief Gets the bits needed to hold a type on the heap, with padding.
+     */
+    unsigned long getAlignedSize(std::shared_ptr<ASTTypeNode> t);
 };
 
 }

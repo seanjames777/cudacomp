@@ -28,10 +28,10 @@ Type *convertType(std::shared_ptr<ASTTypeNode> type, CodegenCtx *c) {
         if (c)
             return c->getRecordType(rcd_type->getId());
         else
-            *c;
+            throw ASTMalformedException(); 
     }
     else
-        throw new ASTMalformedException();
+        throw ASTMalformedException();
 
     return nullptr;
 }
