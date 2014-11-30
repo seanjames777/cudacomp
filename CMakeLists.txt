@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(cuda_comp)
+project(comp)
 
 ##############################################
 # CONFIGURATION                              #
@@ -123,19 +123,19 @@ target_link_libraries(cc
 # Configure host and device runtime libraries
 
 add_library(host_rt
-    driver/host_rt.c
+    runtime/host_rt.c
 )
 
 if ("${PTX_BACKEND}" MATCHES "TRUE")
 add_library(device_rt
-    driver/device_rt.c
+    runtime/device_rt.c
 )
 
 add_custom_command(
     OUTPUT device_rt_kernel.cubin
-    COMMAND nvcc -arch=sm_30 -cubin -dc -o device_rt_kernel.cubin ${CMAKE_CURRENT_SOURCE_DIR}/driver/device_rt_kernel.cu
+    COMMAND nvcc -arch=sm_30 -cubin -dc -o device_rt_kernel.cubin ${CMAKE_CURRENT_SOURCE_DIR}/runtime/device_rt_kernel.cu
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    DEPENDS driver/device_rt_kernel.cu
+    DEPENDS runtime/device_rt_kernel.cu
     COMMENT "Building device runtime kernels" VERBATIM)
 
 add_custom_target(device_rt_kernel DEPENDS device_rt_kernel.cubin)
@@ -177,7 +177,7 @@ add_custom_target(l4c
     DEPENDS cc host_rt
     COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/bin/
     COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/cc ${CMAKE_CURRENT_BINARY_DIR}/bin/cc
-    COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/driver/411.sh ${CMAKE_CURRENT_BINARY_DIR}/bin/l4c
+    COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/411.sh ${CMAKE_CURRENT_BINARY_DIR}/bin/l4c
 )
 
 add_custom_target(clean
