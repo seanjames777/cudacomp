@@ -19,6 +19,10 @@ std::string ASTCallExp::getId() {
     return id;
 }
 
+void ASTCallExp::setId(std::string id) {
+    this->id = id;
+}
+
 std::shared_ptr<ASTExpSeqNode> ASTCallExp::getArgs() {
     return args;
 }

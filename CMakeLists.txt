@@ -95,6 +95,7 @@ add_executable(cc
     src/codegen/codegenctx.cpp
     src/codegen/converttype.cpp
     src/main.cpp
+    src/options.cpp
     src/parser/parse.cpp
     src/statics/functioninfo.cpp
     src/statics/moduleinfo.cpp
@@ -106,6 +107,7 @@ add_executable(cc
     src/statics/typeresolve.cpp
     src/statics/funcheck.cpp
     src/statics/exceptions.cpp
+    src/statics/symbolmangle.cpp
     ${BISON_parser_OUTPUTS}
     ${FLEX_lexer_OUTPUTS}
 )
