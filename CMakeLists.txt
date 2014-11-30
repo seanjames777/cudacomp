@@ -5,16 +5,15 @@ project(cuda_comp)
 # CONFIGURATION                              #
 ##############################################
 
-if (NOT (DEFINED LLVM_SUFFIX))
-set(LLVM_SUFFIX  "-mp-3.5")
-endif (NOT (DEFINED LLVM_SUFFIX))
+if (NOT (DEFINED LLVM_PATH))
+message(FATAL_ERROR "LLVM_PATH variable is required. See README.txt for help.")
+endif ()
 
-set(LLVM_LLC     "llc${LLVM_SUFFIX}")
-set(LLVM_CONFIG  "llvm-config${LLVM_SUFFIX}")
+set(LLVM_LLC     "${LLVM_PATH}/llc")
+set(LLVM_CONFIG  "${LLVM_PATH}/llvm-config")
 
 if (("${PTX_BACKEND}" MATCHES "TRUE") AND (NOT (DEFINED CUDA_PATH)))
-message("Support PTX")
-set(CUDA_PATH    "/Developer/NVIDIA/CUDA-6.5/")
+message(FATAL_ERROR "CUDA_PATH variable is required when PTX_BACKEND is specified. See README.txt for help.")
 endif (("${PTX_BACKEND}" MATCHES "TRUE") AND (NOT (DEFINED CUDA_PATH)))
 
 ##############################################
@@ -25,10 +24,15 @@ endif (("${PTX_BACKEND}" MATCHES "TRUE") AND (NOT (DEFINED CUDA_PATH)))
 set(CMAKE_INSTALL_RPATH "\$ORIGIN/")
 set(CMAKE_INSTALL_NAME_DIR "@executable_path/")
 
+execute_process(COMMAND ${LLVM_CONFIG} --version OUTPUT_VARIABLE LLVM_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
 execute_process(COMMAND ${LLVM_CONFIG} --cxxflags OUTPUT_VARIABLE LLVM_CXX_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
 execute_process(COMMAND ${LLVM_CONFIG} --ldflags OUTPUT_VARIABLE LLVM_LD_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
-execute_process(COMMAND ${LLVM_CONFIG} --libs core native OUTPUT_VARIABLE LLVM_LIBS OUTPUT_STRIP_TRAILING_WHITESPACE)
-execute_process(COMMAND ${LLVM_CONFIG} --system-libs core native OUTPUT_VARIABLE LLVM_SYS_LIBS OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+set(LLVM_LIBS "libLLVM-${LLVM_VERSION}.dylib")
+else ()
+set(LLVM_LIBS "libLLVM-${LLVM_VERSION}.so")
+endif ()
 
 include_directories(include)
 
@@ -114,7 +118,6 @@ target_link_libraries(cc
     ${BISON_LIBRARIES}
     ${LLVM_LD_FLAGS}
     ${LLVM_LIBS}
-    ${LLVM_SYS_LIBS}
 )
 
 # Configure host and device runtime libraries

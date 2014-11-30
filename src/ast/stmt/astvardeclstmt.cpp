@@ -7,9 +7,9 @@
 #include <ast/stmt/astvardeclstmt.h>
 
 ASTVarDeclStmt::ASTVarDeclStmt(std::shared_ptr<ASTTypeNode> type, std::string id, std::shared_ptr<ASTExpNode> exp)
-    : type(type),
-      id(id),
-      exp(exp)
+    : id(id),
+      exp(exp),
+      type(type)
 {
 }
 

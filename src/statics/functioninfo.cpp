@@ -8,8 +8,8 @@
 
 FunctionInfo::FunctionInfo(std::string name, std::shared_ptr<ASTFunType> signature,
     enum ASTDeclNode::Linkage linkage, bool cudaGlobal)
-    : name(name),
-      signature(signature),
+    : signature(signature),
+      name(name),
       linkage(linkage),
       cudaGlobal(cudaGlobal)
 {
