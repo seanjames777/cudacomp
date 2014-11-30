@@ -15,13 +15,13 @@ CodegenCtx::CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo)
       context(getGlobalContext()),
       emit_device(emit_device),
       modInfo(modInfo),
+      alloc_array(nullptr),
       def_bblock(nullptr),
       first_bblock(nullptr),
       def_builder(nullptr),
       function(nullptr),
       funcInfo(nullptr),
-      body_builder(nullptr),
-      alloc_array(nullptr)
+      body_builder(nullptr)
 {
     module = std::make_shared<Module>("", context);
 }
@@ -60,8 +60,10 @@ LLVMContext & CodegenCtx::getContext() {
 void CodegenCtx::emit(std::ostream & out) {
     if (emit_device)
         module->setTargetTriple("nvptx64-nvidia-cuda");
-    else
-        module->setTargetTriple("x86_64-apple-macosx10.10.0");
+    else {
+        // Default to host machine's triple
+        module->setTargetTriple(llvm::sys::getDefaultTargetTriple());
+    }
 
     PassManager pm;
 

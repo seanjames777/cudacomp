@@ -9,19 +9,18 @@ BUILD:
 
     - Install CMake
     - Insatll Flex and Bison. These can be installed via, for example, MacPorts.
-    - Install LLVM, and tell the build system which LLVM to use. For example,
-      if the 'llc' command is available on your path as "llc-mp-3.5", then you
-      would configure CMake as follows.
+    - Install LLVM, and specify the LLVM_PATH variable
     - The driver requires Python
     - The CUDA backend requires that CUDA is installed. To support a CUDA
-      backend, define "PTX_BACKEND" and set the path to CUDA. Otherwise, omit
-      these options.
+      backend, define "PTX_BACKEND" and set the CUDA_PATH variable. Otherwise,
+      omit these options.
 
     Then, create a build directory, configure CMake, and build:
 
       mkdir build
       cd build
-      cmake -DCMAKE_INSTALL_PREFIX="../out/" -DLLVM_SUFFIX="-mp-3.5" \
+      cmake -DCMAKE_INSTALL_PREFIX="../out/" \
+          -DLLVM_PATH="/opt/local/libexec/llvm-3.5/bin/" \
           -DPTX_BACKEND="TRUE" -DCUDA_PATH="/Developer/NVIDIA/CUDA-6.5/" ../
       make && make install
 

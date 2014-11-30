@@ -22,7 +22,7 @@ void StaticsException::setMsg(std::string msg) {
     this->msg = msg;
 }
 
-const char *StaticsException::what() const _NOEXCEPT {
+const char *StaticsException::what() const noexcept {
     return msg.c_str();
 }
 

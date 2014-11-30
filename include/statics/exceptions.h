@@ -43,7 +43,7 @@ public:
     /**
      * @brief Get a message describing the exception
      */
-    virtual const char *what() const _NOEXCEPT override;
+    virtual const char *what() const noexcept override;
 };
 
 /**

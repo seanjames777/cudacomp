@@ -19,7 +19,7 @@ class ParseException : public std::exception {
         std::string msg;
     public:
         ParseException(std::string msg);
-        virtual const char *what() const _NOEXCEPT override { return msg.c_str(); }
+        virtual const char *what() const noexcept override { return msg.c_str(); }
     };
 
 std::shared_ptr<ASTDeclSeqNode> parse(const char *file);

@@ -3,15 +3,31 @@
 #include <string>
 #include <ast/ast.h>
 
+#define YY_STACK_USED
 #include "parser.hpp"
 
 extern std::unordered_map<std::string, ASTTypeNode *> typedefs;
+
+int comment_depth = 0;
 
 // TODO: should freak out when we can't fit a number in a type
 
 %}
 
+%x COMMENT
+%x LINE_COMMENT
+
 %%
+
+"/*"                    { BEGIN(COMMENT); comment_depth++; }
+<COMMENT>[^*/]*         /* ignore */
+<COMMENT>"/*"           { comment_depth++; }
+<COMMENT>"*/"           { if (--comment_depth == 0) { BEGIN(INITIAL); } }
+<COMMENT>[*/]           /* ignore */
+
+"//"                    { BEGIN(LINE_COMMENT); }
+<LINE_COMMENT>[^\n]*    /* ignore */
+<LINE_COMMENT>"\n"      { BEGIN(INITIAL); }
 
 "return"                { return RETURN; }
 "while"                 { return WHILE; }
