@@ -49,7 +49,7 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %token <string> IDENT IDTYPE
 %token <boolean> TRUE FALSE
 %token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR NOT BNOT UNARY
-%token ASSIGN SEMI COMMA LBRACKET RBRACKET DOT
+%token ASSIGN SEMI COMMA LBRACKET RBRACKET DOT ARROW
 %token INT BOOL VOID FLOAT
 %token RETURN IF ELSE TYPEDEF WHILE EXTERN ALLOC_ARRAY COLON TO DEVICE FOR ALLOC STRUCT
 %token LPAREN RPAREN LBRACE RBRACE
@@ -81,7 +81,7 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %left PLUS MINUS
 %left STAR DIV MOD
 %right NOT BNOT UNARY
-%nonassoc LPAREN RPAREN LBRACKET RBRACKET DOT
+%nonassoc LPAREN RPAREN LBRACKET RBRACKET DOT ARROW
 
 %start program
 
@@ -147,6 +147,10 @@ exp:
   { $$ = new ASTRecordAccessExp(std::shared_ptr<ASTExpNode>($1), std::string($3) ); }
   | exp DOT IDTYPE              
   { $$ = new ASTRecordAccessExp(std::shared_ptr<ASTExpNode>($1), std::string($3) ); }
+  | exp ARROW IDENT
+  { $$ = new ASTRecordAccessExp(std::shared_ptr<ASTExpNode>( new ASTDerefExp( std::shared_ptr<ASTExpNode>($1))), std::string($3) ); }
+  | exp ARROW IDTYPE
+  { $$ = new ASTRecordAccessExp(std::shared_ptr<ASTExpNode>( new ASTDerefExp( std::shared_ptr<ASTExpNode>($1))), std::string($3) ); }
   //| IDENT IN exp ELLIPSES exp         { $$ = new ASTRangeExp(std::string($1), std::shared_ptr<ASTExpNode>($3), std::shared_ptr<ASTExpNode>($5)); free($1); }
   // | DEVICE exp                        { $$ = new ASTDeviceSched(std::shared_ptr<ASTExpNode>($2)); }
   ;

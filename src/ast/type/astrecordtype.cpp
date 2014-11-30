@@ -14,7 +14,7 @@ ASTRecordType::ASTRecordType(std::string id, std::shared_ptr<ASTArgSeqNode> fiel
 }
 
 std::string ASTRecordType::getId() {
-    return id;
+    return "_struct_" + id;
 }
 
 std::shared_ptr<ASTArgSeqNode> ASTRecordType::getFields() {

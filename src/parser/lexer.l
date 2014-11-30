@@ -47,6 +47,7 @@ extern std::unordered_map<std::string, ASTTypeNode *> typedefs;
 
 ","                     { return COMMA; }
 "."                     { return DOT; }
+"->"                    { return ARROW; }
 "+"                     { return PLUS; }
 "*"                     { return STAR; }
 "-"                     { return MINUS; }

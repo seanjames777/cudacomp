@@ -227,7 +227,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         std::shared_ptr<ASTTypeNode> elemType = alloc_exp->getElemType();
 
         // We cannot allocate certain types
-        // TODO: do I need to check for more than void?
+        // TODO: better void check (e.g. structural search for void)
         if (elemType->equal(ASTVoidType::get()))
             throw IllegalTypeException();
 
@@ -450,7 +450,6 @@ void typecheck_top(
     // Skip
     else if (std::shared_ptr<ASTTypeDecl> typeDefn = std::dynamic_pointer_cast<ASTTypeDecl>(node))
         return;
-    // TODO
     else if (std::shared_ptr<ASTRecordDecl> rcdDecl = std::dynamic_pointer_cast<ASTRecordDecl>(node))
         return;
     else

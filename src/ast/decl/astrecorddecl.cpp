@@ -17,7 +17,7 @@ ASTRecordDecl::~ASTRecordDecl() {
 }
 
 std::string ASTRecordDecl::getName() {
-    return name;
+    return "_struct_" + name;
 }
 
 std::shared_ptr<ASTRecordType> ASTRecordDecl::getSignature() {

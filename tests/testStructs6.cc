@@ -16,10 +16,11 @@ int _cc_main() {
     (*foo).bar = 5;
     struct bar *bar = alloc(struct bar);
     (*bar).bar = 5;
-    (*bar).foo = *foo;
+    (*bar).foo.bar = (*foo).bar;
     struct baz *baz = alloc(struct baz);
-    (*baz).bar = *bar; 
+    (*baz).bar.bar = (*bar).bar; 
+    (*baz).bar.foo.bar = (*bar).foo.bar; 
 
-    return (*((*baz).bar)).bar +
-           ((*((*baz).bar)).foo).bar;
+    return ((*baz).bar).bar +
+           (((*baz).bar).foo).bar;
 }
