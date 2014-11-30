@@ -177,7 +177,7 @@ add_custom_target(l4c
     DEPENDS cc host_rt
     COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/bin/
     COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/cc ${CMAKE_CURRENT_BINARY_DIR}/bin/cc
-    COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/411.sh ${CMAKE_CURRENT_BINARY_DIR}/bin/l4c
+    COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/411_wrapper.py ${CMAKE_CURRENT_BINARY_DIR}/bin/l4c
 )
 
 add_custom_target(clean
