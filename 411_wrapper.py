@@ -54,9 +54,10 @@ def run_shell(command):
 
 # Process each source file
 for source in sources:
-    outfile_llvm = source.rsplit('.')[0] + ".ll"
+    outfile_llvm = source.rsplit('.', 1)[0] + ".ll"
 
-    run_shell([ "./cc", "-o", outfile_llvm, "--print-ast", source ])
+    run_shell([ "./cc", "-o", outfile_llvm, source ])
 
     if not(emit_llvm):
         outfile = source.rsplit('.')[0] + ".s"
+        run_shell([ "llc", "-o", outfile, outfile_llvm ])
