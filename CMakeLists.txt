@@ -170,3 +170,17 @@ install(TARGETS host_rt DESTINATION lib/)
 if ("${PTX_BACKEND}" MATCHES "TRUE")
 install(TARGETS device_rt DESTINATION lib/)
 endif ("${PTX_BACKEND}" MATCHES "TRUE")
+
+# Autolab support
+
+add_custom_target(l4c
+    DEPENDS cc host_rt
+    COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/bin/
+    COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/cc ${CMAKE_CURRENT_BINARY_DIR}/bin/cc
+    COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/driver/411.sh ${CMAKE_CURRENT_BINARY_DIR}/bin/l4c
+)
+
+add_custom_target(clean
+    COMMAND rm -rf bin/ lexer.cpp parser.output cc driver.py
+        lib parser.cpp Doxyfile_Configured libhost_rt.a parser.hpp
+)
