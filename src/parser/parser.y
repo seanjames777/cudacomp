@@ -58,6 +58,7 @@ void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
 %token LPAREN RPAREN LBRACE RBRACE
 %token EQ NEQ LEQ GEQ LT GT
 %token PLUSEQ MINUSEQ TIMESEQ DIVEQ MODEQ
+%token STRUCT BREAK CONTINUE ASSERT KWNULL ALLOC CHAR STRING
 
 %type <exp> exp
 %type <type> type
