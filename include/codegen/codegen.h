@@ -16,6 +16,7 @@
 #include <statics/functioninfo.h>
 #include <ast/decl/astdeclnode.h>
 #include <ast/decl/astfundecl.h>
+#include <options.h>
 
 /**
  * @defgroup CodeGen Code Generator

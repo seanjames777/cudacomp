@@ -53,6 +53,8 @@ Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNod
 Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
     std::shared_ptr<IRBuilder<>> builder = ctx->getBuilder();
 
+    CCArgs *args = getOptions();
+
     // Integer constant
     if (std::shared_ptr<ASTIntegerExp> int_exp = std::dynamic_pointer_cast<ASTIntegerExp>(node))
         return ConstantInt::get(convertType(ASTIntegerType::get()), int_exp->getValue());
@@ -85,7 +87,17 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         case ASTBinopExp::ADD:  return builder->CreateBinOp(isFloat ? Instruction::FAdd : Instruction::Add, v1, v2);
         case ASTBinopExp::SUB:  return builder->CreateBinOp(isFloat ? Instruction::FSub : Instruction::Sub, v1, v2);
         case ASTBinopExp::MUL:  return builder->CreateBinOp(isFloat ? Instruction::FMul : Instruction::Mul, v1, v2);
-        case ASTBinopExp::DIV:  return builder->CreateBinOp(isFloat ? Instruction::FDiv : Instruction::SDiv, v1, v2);
+        case ASTBinopExp::DIV:
+            // Insert division checks
+            if (args->opr_safe) {
+                std::vector<Value *> args;
+                args.push_back(v1);
+                args.push_back(v2);
+
+                builder->CreateCall(ctx->getDivCheck(), args);
+            }
+
+            return builder->CreateBinOp(isFloat ? Instruction::FDiv : Instruction::SDiv, v1, v2);
         case ASTBinopExp::MOD:  return builder->CreateBinOp(isFloat ? Instruction::FRem : Instruction::SRem, v1, v2);
         case ASTBinopExp::SHL:  return builder->CreateBinOp(Instruction::Shl, v1, v2);
         case ASTBinopExp::SHR:  return builder->CreateBinOp(Instruction::AShr, v1, v2);

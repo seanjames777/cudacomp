@@ -21,6 +21,9 @@ struct CCArgs {
     char *out_file;      //!< Output file, possibly null to indicate stdout
     bool  verbose;       //!< Whether to print verbose output
     char *symbol_prefix; //!< String to prefix intern function names with
+    bool  mem_safe;      //!< Whether to insert memory safety checks
+    bool  opr_safe;      //!< Whether to insert operator safety checks
+    bool  emit_text;     //!< Whether to emit LLVM IR as text
 };
 
 /**

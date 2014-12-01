@@ -6,6 +6,9 @@
 
 #define YYERROR_VERBOSE
 
+int line_num = 1;
+std::unordered_map<std::string, ASTTypeNode *> typedefs;
+
 int yylex(void);
 
 int yywrap() {
@@ -13,10 +16,10 @@ int yywrap() {
 }
 
 void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
-    throw Parser::ParseException(std::string(str));
+    std::stringstream ss;
+    ss << "Line " << line_num << ": " << str;
+    throw Parser::ParseException(ss.str());
 }
-
-std::unordered_map<std::string, ASTTypeNode *> typedefs;
 
 %}
 

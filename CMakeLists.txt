@@ -175,6 +175,9 @@ endif ("${PTX_BACKEND}" MATCHES "TRUE")
 
 # Autolab support
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/runtime/host_rt.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/l4lib.c)
+
 add_custom_target(l4c
     DEPENDS cc host_rt
     COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/bin/

@@ -6,7 +6,9 @@
 #define YY_STACK_USED
 #include "parser.hpp"
 
+// TODO: Might be able to get the line number more easily
 extern std::unordered_map<std::string, ASTTypeNode *> typedefs;
+extern int line_num;
 
 int comment_depth = 0;
 
@@ -20,14 +22,15 @@ int comment_depth = 0;
 %%
 
 "/*"                    { BEGIN(COMMENT); comment_depth++; }
-<COMMENT>[^*/]*         /* ignore */
+<COMMENT>[^\n*/]*         /* ignore */
+<COMMENT>"\n"           { line_num++; }
 <COMMENT>"/*"           { comment_depth++; }
 <COMMENT>"*/"           { if (--comment_depth == 0) { BEGIN(INITIAL); } }
 <COMMENT>[*/]           /* ignore */
 
 "//"                    { BEGIN(LINE_COMMENT); }
 <LINE_COMMENT>[^\n]*    /* ignore */
-<LINE_COMMENT>"\n"      { BEGIN(INITIAL); }
+<LINE_COMMENT>"\n"      { BEGIN(INITIAL); line_num++; }
 
 "return"                { return RETURN; }
 "while"                 { return WHILE; }
@@ -89,6 +92,7 @@ int comment_depth = 0;
 "["                     { return LBRACKET; }
 "]"                     { return RBRACKET; }
 
-[ \r\n\t]+              /* ignore whitespace */
+[ \r\t]+                /* ignore whitespace */
+"\n"                    { line_num++; }
 
 %%
