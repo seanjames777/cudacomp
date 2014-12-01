@@ -157,6 +157,25 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             throw IllegalTypeException();
         }
     }
+    // Ternary operator
+    else if (std::shared_ptr<ASTTernopExp> tern_exp = std::dynamic_pointer_cast<ASTTernopExp>(node)) {
+        // Condition must be a boolean
+        std::shared_ptr<ASTTypeNode> condType = typecheck_exp(mod, func, tern_exp->getCond());
+
+        if (!condType->equal(ASTBooleanType::get()))
+            throw IllegalTypeException();
+
+        // Each side must have the same type
+        std::shared_ptr<ASTTypeNode> leftType = typecheck_exp(mod, func, tern_exp->getTrueExp());
+        std::shared_ptr<ASTTypeNode> rightType = typecheck_exp(mod, func, tern_exp->getFalseExp());
+
+        if (!leftType->equal(rightType))
+            throw IllegalTypeException();
+
+        tern_exp->setType(leftType);
+
+        return leftType;
+    }
     // Function call
     else if (std::shared_ptr<ASTCallExp> call_exp = std::dynamic_pointer_cast<ASTCallExp>(node)) {
         // The function checker guarantees that this exists

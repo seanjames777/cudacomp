@@ -43,6 +43,7 @@ IMPL_CLASS(ExpNode) {
     SUB_CLASS(IndexExp);
     SUB_CLASS(IntegerExp);
     SUB_CLASS(RangeExp);
+    SUB_CLASS(TernopExp);
     SUB_CLASS(UnopExp);
 }
 
@@ -128,6 +129,12 @@ IMPL_CLASS(IntegerExp) {
 IMPL_CLASS(RangeExp) {
     HAS_MEMBER(getMin());
     HAS_MEMBER(getMax());
+}
+
+IMPL_CLASS(TernopExp) {
+    HAS_MEMBER(getCond());
+    HAS_MEMBER(getTrueExp());
+    HAS_MEMBER(getFalseExp());
 }
 
 IMPL_CLASS(UnopExp) {

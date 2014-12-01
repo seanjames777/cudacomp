@@ -54,7 +54,7 @@ void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
 %token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR NOT BNOT
 %token ASSIGN SEMI COMMA LBRACKET RBRACKET INCR DECR
 %token INT BOOL VOID FLOAT
-%token RETURN IF ELSE TYPEDEF WHILE EXTERN ALLOC_ARRAY COLON TO DEVICE FOR
+%token RETURN IF ELSE TYPEDEF WHILE EXTERN ALLOC_ARRAY COLON TO DEVICE FOR QUESTION
 %token LPAREN RPAREN LBRACE RBRACE
 %token EQ NEQ LEQ GEQ LT GT
 
@@ -73,6 +73,7 @@ void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
 
 %right ASSIGN
 %left TO
+%right QUESTION COLON
 %left OR
 %left AND
 %left BOR
@@ -143,6 +144,7 @@ exp:
   | ALLOC_ARRAY LPAREN type COMMA exp RPAREN
     { $$ = new ASTAllocArrayExp(std::shared_ptr<ASTTypeNode>($3), std::shared_ptr<ASTExpNode>($5)); }
   // | DEVICE exp                        { $$ = new ASTDeviceSched(std::shared_ptr<ASTExpNode>($2)); }
+  | exp QUESTION exp COLON exp        { $$ = new ASTTernopExp(std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3), std::shared_ptr<ASTExpNode>($5)); }
   ;
 
 type:

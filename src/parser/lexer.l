@@ -44,7 +44,6 @@ int comment_depth = 0;
 "typedef"               { return TYPEDEF; }
 "extern"                { return EXTERN; }
 "alloc_array"           { return ALLOC_ARRAY; }
-":"                     { return COLON; }
 "to"                    { return TO; }
 "for"                   { return FOR; }
 "@device"               { return DEVICE; }
@@ -78,7 +77,8 @@ int comment_depth = 0;
                             else
                                 return IDENT;
                         }
-
+"?"                     { return QUESTION; }
+":"                     { return COLON; }
 ","                     { return COMMA; }
 "+"                     { return PLUS; }
 "*"                     { return TIMES; }
