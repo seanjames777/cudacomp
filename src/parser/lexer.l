@@ -108,6 +108,8 @@ int comment_depth = 0;
 "}"                     { return RBRACE; }
 "["                     { return LBRACKET; }
 "]"                     { return RBRACKET; }
+"++"                    { return INCR; }
+"--"                    { return DECR; }
 
 [ \r\t\v\f]+            /* ignore whitespace */
 "\n"                    { line_num++; }
