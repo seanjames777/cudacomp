@@ -7,11 +7,13 @@
 #include <ast/stmt/astrangeforstmt.h>
 
 ASTRangeForStmt::ASTRangeForStmt(
+    std::shared_ptr<ASTSchedSeqNode> sched,
     std::shared_ptr<ASTTypeNode> type,
     std::string id,
     std::shared_ptr<ASTExpNode> range,
     std::shared_ptr<ASTStmtSeqNode> body)
-    : type(type),
+    : sched(sched),
+      type(type),
       id(id),
       range(range),
       body(body)
@@ -19,6 +21,10 @@ ASTRangeForStmt::ASTRangeForStmt(
 }
 
 ASTRangeForStmt::~ASTRangeForStmt() {
+}
+
+std::shared_ptr<ASTSchedSeqNode> ASTRangeForStmt::getSchedule() {
+    return sched;
 }
 
 std::shared_ptr<ASTTypeNode> ASTRangeForStmt::getIteratorType() {

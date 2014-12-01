@@ -182,7 +182,7 @@ stmt:
   | IF LPAREN exp RPAREN stmt elseopt { $$ = new ASTIfStmt(std::shared_ptr<ASTExpNode>($3), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($5), nullptr), std::shared_ptr<ASTStmtSeqNode>($6)); }
   | WHILE LPAREN exp RPAREN stmt      { $$ = new ASTWhileStmt(std::shared_ptr<ASTExpNode>($3), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($5), nullptr)); }
   | sched_list FOR LPAREN type IDENT COLON exp RPAREN stmt
-    { $$ = new ASTRangeForStmt(std::shared_ptr<ASTTypeNode>($4), std::string($5), std::shared_ptr<ASTExpNode>($7), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($9), nullptr)); free($5); }
+    { $$ = new ASTRangeForStmt(std::shared_ptr<ASTSchedSeqNode>($1), std::shared_ptr<ASTTypeNode>($4), std::string($5), std::shared_ptr<ASTExpNode>($7), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($9), nullptr)); free($5); }
   ;
 
 sched:

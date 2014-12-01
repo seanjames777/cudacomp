@@ -170,6 +170,7 @@ IMPL_CLASS(WhileStmt) {
 }
 
 IMPL_CLASS(RangeForStmt) {
+    HAS_MEMBER(getSchedule());
     HAS_MEMBER(getIteratorType());
     HAS_MEMBER(getRange());
     HAS_MEMBER(getBody());
