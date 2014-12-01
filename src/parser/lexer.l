@@ -50,7 +50,6 @@ int comment_depth = 0;
 "extern"                { return EXTERN; }
 "alloc_array"           { return ALLOC_ARRAY; }
 "alloc"                 { return ALLOC; }
-"struct"                { return STRUCT; }
 ":"                     { return COLON; }
 "to"                    { return TO; }
 "for"                   { return FOR; }
@@ -60,7 +59,6 @@ int comment_depth = 0;
 "break"                 { return BREAK; }
 "assert"                { return ASSERT; }
 "NULL"                  { return KWNULL; }
-"alloc"                 { return ALLOC; }
 "char"                  { return CHAR; }
 "string"                { return STRING; }
 
@@ -94,7 +92,6 @@ int comment_depth = 0;
                                 return IDENT;
                         }
 "?"                     { return QUESTION; }
-":"                     { return COLON; }
 ","                     { return COMMA; }
 "."                     { return DOT; }
 "->"                    { return ARROW; }
