@@ -213,6 +213,9 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
     else if (std::shared_ptr<ASTAllocArrayExp> alloc_exp = std::dynamic_pointer_cast<ASTAllocArrayExp>(node)) {
         std::shared_ptr<ASTTypeNode> elemType = alloc_exp->getElemType();
 
+        if (elemType->equal(ASTVoidType::get()))
+            throw IllegalTypeException();
+
         // Size must be an integer
         std::shared_ptr<ASTTypeNode> sizeType = typecheck_exp(mod, func, alloc_exp->getLength());
 
@@ -290,7 +293,8 @@ void typecheck_stmt(
     if (std::shared_ptr<ASTVarDeclStmt> decl_stmt = std::dynamic_pointer_cast<ASTVarDeclStmt>(head)) {
         std::shared_ptr<ASTTypeNode> decl_type = decl_stmt->getType();
 
-        // TODO: test for void declaration
+        if (decl_type->equal(ASTVoidType::get()))
+            throw IllegalTypeException();
 
         std::shared_ptr<ASTExpNode> decl_exp = decl_stmt->getExp();
 
@@ -442,6 +446,9 @@ void typecheck_top(
 
         // The function checker has already allocated FunctionInfo's for us
         std::shared_ptr<FunctionInfo> funInfo = mod->getFunction(funDefn->getName());
+
+        // TODO: void args
+
         funInfo->copyArgumentsToLocals();
 
         // Check the function body, building the local symbol table in the process

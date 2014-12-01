@@ -6,6 +6,9 @@
 
 #define YYERROR_VERBOSE
 
+int line_num = 1;
+std::unordered_map<std::string, ASTTypeNode *> typedefs;
+
 int yylex(void);
 
 int yywrap() {
@@ -13,10 +16,10 @@ int yywrap() {
 }
 
 void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
-    throw Parser::ParseException(std::string(str));
+    std::stringstream ss;
+    ss << "Line " << line_num << ": " << str;
+    throw Parser::ParseException(ss.str());
 }
-
-std::unordered_map<std::string, ASTTypeNode *> typedefs;
 
 %}
 
@@ -49,7 +52,7 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %token <string> IDENT IDTYPE
 %token <boolean> TRUE FALSE
 %token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR NOT BNOT UNARY
-%token ASSIGN SEMI COMMA LBRACKET RBRACKET DOT ARROW
+%token ASSIGN SEMI COMMA LBRACKET RBRACKET INCR DECR DOT ARROW
 %token INT BOOL VOID FLOAT
 %token RETURN IF ELSE TYPEDEF WHILE EXTERN ALLOC_ARRAY COLON TO DEVICE FOR ALLOC STRUCT
 %token LPAREN RPAREN LBRACE RBRACE
@@ -151,7 +154,6 @@ exp:
   { $$ = new ASTRecordAccessExp(std::shared_ptr<ASTExpNode>( new ASTDerefExp( std::shared_ptr<ASTExpNode>($1))), std::string($3) ); }
   | exp ARROW IDTYPE
   { $$ = new ASTRecordAccessExp(std::shared_ptr<ASTExpNode>( new ASTDerefExp( std::shared_ptr<ASTExpNode>($1))), std::string($3) ); }
-  //| IDENT IN exp ELLIPSES exp         { $$ = new ASTRangeExp(std::string($1), std::shared_ptr<ASTExpNode>($3), std::shared_ptr<ASTExpNode>($5)); free($1); }
   // | DEVICE exp                        { $$ = new ASTDeviceSched(std::shared_ptr<ASTExpNode>($2)); }
   ;
 

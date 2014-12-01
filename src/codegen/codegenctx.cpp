@@ -14,25 +14,18 @@ CodegenCtx::CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo)
       context(getGlobalContext()),
       emit_device(emit_device),
       modInfo(modInfo),
+      alloc_array(nullptr),
+      div_check(nullptr),
       def_bblock(nullptr),
       first_bblock(nullptr),
       def_builder(nullptr),
       function(nullptr),
       funcInfo(nullptr),
-      body_builder(nullptr),
-      alloc_array(nullptr)
+      body_builder(nullptr)
 {
     module = std::make_shared<Module>("", context);
     layout = std::make_shared<DataLayout>(module.get());
 
-    // TODO do what alloc array did
-    // Construct a declaration of the runtime's alloc function
-    std::vector<Type *> alloc_argTypes;
-    alloc_argTypes.push_back(Type::getInt32Ty(context));
-
-    FunctionType *alloc_ftype = FunctionType::get(PointerType::getUnqual(Type::getInt8Ty(context)), alloc_argTypes, false);
-
-    alloc = Function::Create(alloc_ftype, GlobalValue::ExternalLinkage, "_rt_alloc", module.get());
 }
 
 Function *CodegenCtx::getAllocArray() {
@@ -51,7 +44,32 @@ Function *CodegenCtx::getAllocArray() {
 }
 
 Function *CodegenCtx::getAlloc() {
+    // Only declare it if it's used, to make small programs simpler
+    if (!alloc) {
+        // Construct a declaration of the runtime's alloc function
+        std::vector<Type *> argTypes;
+        argTypes.push_back(Type::getInt32Ty(context));    
+
+        FunctionType *ftype = FunctionType::get(PointerType::getUnqual(Type::getInt8Ty(context)), argTypes, false); 
+        alloc = Function::Create(ftype, GlobalValue::ExternalLinkage, "_rt_alloc", module.get()); 
+
+    }
     return alloc;
+}
+
+Function *CodegenCtx::getDivCheck() {
+    // Only declare it if it's used, to make small programs simpler
+    if (!div_check) {
+        // Construct a declaration of the runtime's div_check function
+        std::vector<Type *> argTypes;
+        argTypes.push_back(Type::getInt32Ty(context));
+        argTypes.push_back(Type::getInt32Ty(context));
+
+        FunctionType *ftype = FunctionType::get(Type::getVoidTy(context), argTypes, false);
+        div_check = Function::Create(ftype, GlobalValue::ExternalLinkage, "_rt_div_check", module.get());
+    }
+
+    return div_check;
 }
 
 std::shared_ptr<ModuleInfo> CodegenCtx::getModuleInfo() {
@@ -73,8 +91,10 @@ LLVMContext & CodegenCtx::getContext() {
 void CodegenCtx::emit(std::ostream & out) {
     if (emit_device)
         module->setTargetTriple("nvptx64-nvidia-cuda");
-    else
-        module->setTargetTriple("x86_64-apple-macosx10.10.0");
+    else {
+        // Default to host machine's triple
+        module->setTargetTriple(llvm::sys::getDefaultTargetTriple());
+    }
 
     PassManager pm;
 
@@ -88,9 +108,15 @@ void CodegenCtx::emit(std::ostream & out) {
 
     pm.run(*module);
 
+    CCArgs *args = getOptions();
+
     // Finally, print the result to the output stream
     raw_os_ostream outs(out);
-    outs << *module;
+
+    if (args->emit_text)
+        outs << *module;
+    else
+        WriteBitcodeToFile(module.get(), outs);
 }
 
 Function *CodegenCtx::getFunction(std::string id) {

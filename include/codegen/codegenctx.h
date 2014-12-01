@@ -13,6 +13,7 @@
 #include <statics/symboltable.h>
 #include <statics/functioninfo.h>
 #include <statics/moduleinfo.h>
+#include <options.h>
 
 #include <llvm/IR/DataLayout.h>
 #include <llvm/IR/Module.h>
@@ -25,10 +26,12 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/PassManager.h>
 #include <llvm/Support/raw_ostream.h>
+#include <llvm/Support/Host.h>
 #include <llvm/ADT/Triple.h>
 #include <llvm/Support/raw_os_ostream.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/Transforms/Scalar.h>
+#include <llvm/Bitcode/ReaderWriter.h>
 
 using namespace llvm;
 
@@ -47,6 +50,7 @@ private:
     std::shared_ptr<ModuleInfo>    modInfo;      // Information about module
     Function                      *alloc_array;  // Runtime alloc_array function
     Function                      *alloc;        // Runtime alloc function
+    Function                      *div_check;    // Runtime division safety check
 
     // Current function
     BasicBlock                    *def_bblock;   // Locals definition block, assists with SSA
@@ -79,6 +83,11 @@ public:
      * @brief Get the 'alloc' runtime function
      */
     Function *getAlloc();
+
+    /*
+     * @brief Get the 'div_check' runtime function
+     */
+    Function *getDivCheck();
 
     /**
      * @brief Get module information

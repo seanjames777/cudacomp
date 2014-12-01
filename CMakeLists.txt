@@ -1,20 +1,19 @@
 cmake_minimum_required(VERSION 2.6)
-project(cuda_comp)
+project(comp)
 
 ##############################################
 # CONFIGURATION                              #
 ##############################################
 
-if (NOT (DEFINED LLVM_SUFFIX))
-set(LLVM_SUFFIX  "-mp-3.5")
-endif (NOT (DEFINED LLVM_SUFFIX))
+if (NOT (DEFINED LLVM_PATH))
+message(FATAL_ERROR "LLVM_PATH variable is required. See README.txt for help.")
+endif ()
 
-set(LLVM_LLC     "llc${LLVM_SUFFIX}")
-set(LLVM_CONFIG  "llvm-config${LLVM_SUFFIX}")
+set(LLVM_LLC     "${LLVM_PATH}/llc")
+set(LLVM_CONFIG  "${LLVM_PATH}/llvm-config")
 
 if (("${PTX_BACKEND}" MATCHES "TRUE") AND (NOT (DEFINED CUDA_PATH)))
-message("Support PTX")
-set(CUDA_PATH    "/Developer/NVIDIA/CUDA-6.5/")
+message(FATAL_ERROR "CUDA_PATH variable is required when PTX_BACKEND is specified. See README.txt for help.")
 endif (("${PTX_BACKEND}" MATCHES "TRUE") AND (NOT (DEFINED CUDA_PATH)))
 
 ##############################################
@@ -25,10 +24,15 @@ endif (("${PTX_BACKEND}" MATCHES "TRUE") AND (NOT (DEFINED CUDA_PATH)))
 set(CMAKE_INSTALL_RPATH "\$ORIGIN/")
 set(CMAKE_INSTALL_NAME_DIR "@executable_path/")
 
+execute_process(COMMAND ${LLVM_CONFIG} --version OUTPUT_VARIABLE LLVM_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
 execute_process(COMMAND ${LLVM_CONFIG} --cxxflags OUTPUT_VARIABLE LLVM_CXX_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
 execute_process(COMMAND ${LLVM_CONFIG} --ldflags OUTPUT_VARIABLE LLVM_LD_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
-execute_process(COMMAND ${LLVM_CONFIG} --libs core native OUTPUT_VARIABLE LLVM_LIBS OUTPUT_STRIP_TRAILING_WHITESPACE)
-execute_process(COMMAND ${LLVM_CONFIG} --system-libs core native OUTPUT_VARIABLE LLVM_SYS_LIBS OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+set(LLVM_LIBS "libLLVM-${LLVM_VERSION}.dylib")
+else ()
+set(LLVM_LIBS "libLLVM-${LLVM_VERSION}.so")
+endif ()
 
 include_directories(include)
 
@@ -96,6 +100,7 @@ add_executable(cc
     src/codegen/codegenctx.cpp
     src/codegen/converttype.cpp
     src/main.cpp
+    src/options.cpp
     src/parser/parse.cpp
     src/statics/functioninfo.cpp
     src/statics/moduleinfo.cpp
@@ -107,6 +112,7 @@ add_executable(cc
     src/statics/typeresolve.cpp
     src/statics/funcheck.cpp
     src/statics/exceptions.cpp
+    src/statics/symbolmangle.cpp
     ${BISON_parser_OUTPUTS}
     ${FLEX_lexer_OUTPUTS}
 )
@@ -119,25 +125,25 @@ target_link_libraries(cc
     ${BISON_LIBRARIES}
     ${LLVM_LD_FLAGS}
     ${LLVM_LIBS}
-    ${LLVM_SYS_LIBS}
 )
 
 # Configure host and device runtime libraries
 
 add_library(host_rt
-    driver/host_rt.c
+    runtime/host_rt.c
+    runtime/host_main.c
 )
 
 if ("${PTX_BACKEND}" MATCHES "TRUE")
 add_library(device_rt
-    driver/device_rt.c
+    runtime/device_rt.c
 )
 
 add_custom_command(
     OUTPUT device_rt_kernel.cubin
-    COMMAND nvcc -arch=sm_30 -cubin -dc -o device_rt_kernel.cubin ${CMAKE_CURRENT_SOURCE_DIR}/driver/device_rt_kernel.cu
+    COMMAND nvcc -arch=sm_30 -cubin -dc -o device_rt_kernel.cubin ${CMAKE_CURRENT_SOURCE_DIR}/runtime/device_rt_kernel.cu
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    DEPENDS driver/device_rt_kernel.cu
+    DEPENDS runtime/device_rt_kernel.cu
     COMMENT "Building device runtime kernels" VERBATIM)
 
 add_custom_target(device_rt_kernel DEPENDS device_rt_kernel.cubin)
@@ -172,3 +178,21 @@ install(TARGETS host_rt DESTINATION lib/)
 if ("${PTX_BACKEND}" MATCHES "TRUE")
 install(TARGETS device_rt DESTINATION lib/)
 endif ("${PTX_BACKEND}" MATCHES "TRUE")
+
+# Autolab support
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/runtime/host_rt.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/l4lib.c)
+
+add_custom_target(l4c
+    DEPENDS cc
+    COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/bin/
+    COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/cc ${CMAKE_CURRENT_BINARY_DIR}/bin/cc
+    COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/411_wrapper.py ${CMAKE_CURRENT_BINARY_DIR}/bin/l4c
+    COMMAND clang -emit-llvm -o l4lib.bc -c runtime/host_rt.c
+)
+
+add_custom_target(clean
+    COMMAND rm -rf bin/ lexer.cpp parser.output cc driver.py
+        lib parser.cpp Doxyfile_Configured libhost_rt.a parser.hpp
+)

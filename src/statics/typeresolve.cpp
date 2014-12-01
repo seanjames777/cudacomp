@@ -5,26 +5,6 @@
  */
 
 #include <statics/typeresolve.h>
-#include <ast/expr/astintegerexp.h>
-#include <ast/expr/astbinopexp.h>
-#include <ast/astseqnode.h>
-#include <ast/stmt/astreturnstmt.h>
-#include <ast/expr/astidentifierexp.h>
-#include <ast/stmt/astvardeclstmt.h>
-#include <ast/stmt/astassignstmt.h>
-#include <ast/type/astintegertype.h>
-#include <ast/expr/astunopexp.h>
-#include <ast/type/astbooleantype.h>
-#include <ast/stmt/astscopestmt.h>
-#include <ast/stmt/astifstmt.h>
-#include <ast/expr/astbooleanexp.h>
-#include <ast/decl/astfundecl.h>
-#include <ast/expr/astcallexp.h>
-#include <ast/type/astvoidtype.h>
-#include <ast/type/astptrtype.h>
-#include <ast/stmt/astexprstmt.h>
-#include <ast/decl/asttypedecl.h>
-#include <ast/type/astidtype.h>
 
 namespace Statics {
 
