@@ -126,7 +126,7 @@ Function *CodegenCtx::createFunction(std::shared_ptr<FunctionInfo> funcInfo) {
 
     bool isVoid = sig->getReturnType()->equal(ASTVoidType::get());
 
-    if (emit_device && funcInfo->isCudaGlobal() && !isVoid) {
+    if (emit_device && (funcInfo->getUsage() & FunctionInfo::Global) && !isVoid) {
         argTypes.push_back(PointerType::getUnqual(returnType));
         returnType = Type::getVoidTy(context);
     }
@@ -163,7 +163,7 @@ void CodegenCtx::startFunction(std::string id) {
     std::shared_ptr<ASTArgSeqNode> args = sig->getArgs();
     auto arg_iter = function->arg_begin();
 
-    if (emit_device && funcInfo->isCudaGlobal() && !sig->getReturnType()->equal(ASTVoidType::get()))
+    if (emit_device && (funcInfo->getUsage() & FunctionInfo::Global) && !sig->getReturnType()->equal(ASTVoidType::get()))
         arg_iter++;
 
     // Map arguments to symbol table. Move arguments into alloca's functions

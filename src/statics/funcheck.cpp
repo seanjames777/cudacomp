@@ -92,7 +92,7 @@ void FunCheck::visitFunDecl(std::shared_ptr<ASTFunDecl> funDefn) {
         // Add the new function to the module
         funInfo = std::make_shared<FunctionInfo>(funDefn->getName(),
             funDefn->getSignature(), funDefn->getLinkage(),
-            funDefn->getName() == "_cc_main");
+            funDefn->getName() == "_cc_main" ? FunctionInfo::Global : FunctionInfo::Host);
         module->addFunction(funInfo);
     }
 

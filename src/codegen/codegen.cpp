@@ -185,7 +185,7 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         bool isVoid = sig->getReturnType()->equal(ASTVoidType::get());
 
         // In device mode, add a pointer to a new temp to get the return value
-        if (ctx->getEmitDevice() && funcInfo->isCudaGlobal() && !isVoid) {
+        if (ctx->getEmitDevice() && (funcInfo->getUsage() & FunctionInfo::Global) && !isVoid) {
             // TODO use an address of instead maybe
             ret_val = ctx->createTemp(convertType(sig->getReturnType()));
             args.push_back(ret_val);
@@ -202,7 +202,7 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
 
         Value *call = ctx->getBuilder()->CreateCall(ctx->getFunction(call_exp->getId()), args);
 
-        if (!ctx->getEmitDevice() || !funcInfo->isCudaGlobal())
+        if (!ctx->getEmitDevice() || !(funcInfo->getUsage() & FunctionInfo::Global))
             ret_val = call;
         else if (!isVoid) {
             ret_val = ctx->getBuilder()->CreateLoad(ret_val);
@@ -267,7 +267,7 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
 
             // In device mode, have to move into return value argument because kernels
             // must return void
-            if (ctx->getEmitDevice() && ctx->getCurrentFunctionInfo()->isCudaGlobal()) {
+            if (ctx->getEmitDevice() && (ctx->getCurrentFunctionInfo()->getUsage() & FunctionInfo::Global)) {
                 Value *out_arg = ctx->getCurrentFunction()->arg_begin();
 
                 ctx->getBuilder()->CreateStore(ret_val, out_arg);
@@ -478,7 +478,7 @@ void codegen_top(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTDeclNode> n
         ctx->startFunction(func->getName());
         codegen_stmts(ctx, funDefn->getBody());
 
-        if (ctx->getEmitDevice() && func->isCudaGlobal()) // TODO require this function
+        if (ctx->getEmitDevice() && (func->getUsage() & FunctionInfo::Global))
             ctx->markKernel(ctx->getFunction(func->getName()));
 
         ctx->finishFunction();
