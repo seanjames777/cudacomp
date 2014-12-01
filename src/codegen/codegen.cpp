@@ -27,6 +27,11 @@
 
 // TODO: Alloca alignment
 
+// Note: This file makes heavy use of ctx->getBuilder(). This is an easy way to ensure
+// that the IR builder used to create an instruction always refers to the correct
+// basic block. The same builder is reused until it is no longer valid, so this is not
+// terribly inefficient.
+
 namespace Codegen {
 
 Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
