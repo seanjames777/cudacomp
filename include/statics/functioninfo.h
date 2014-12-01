@@ -50,6 +50,11 @@ public:
     std::string getName();
 
     /**
+     * @brief Set function name
+     */
+    void setName(std::string name);
+
+    /**
      * @brief Get function linkage
      */
      enum ASTDeclNode::Linkage getLinkage();

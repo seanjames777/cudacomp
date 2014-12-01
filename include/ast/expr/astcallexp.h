@@ -41,6 +41,11 @@ public:
     std::string getId();
 
     /**
+     * @brief Set name of function to call
+     */
+    void setId(std::string id);
+
+    /**
      * @brief Get argument sequence to function call
      */
     std::shared_ptr<ASTExpSeqNode> getArgs();

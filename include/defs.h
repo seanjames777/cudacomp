@@ -23,5 +23,7 @@
 #include <memory>
 #include <stdexcept>
 #include <assert.h>
+#include <stdio.h>
+#include <string.h>
 
 #endif

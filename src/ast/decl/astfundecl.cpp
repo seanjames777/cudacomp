@@ -23,6 +23,10 @@ std::string ASTFunDecl::getName() {
     return name;
 }
 
+void ASTFunDecl::setName(std::string name) {
+    this->name = name;
+}
+
 bool ASTFunDecl::isDefn() {
     return defn;
 }

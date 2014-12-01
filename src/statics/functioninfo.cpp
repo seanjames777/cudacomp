@@ -19,6 +19,10 @@ std::string FunctionInfo::getName() {
     return name;
 }
 
+void FunctionInfo::setName(std::string name) {
+    this->name = name;
+}
+
 enum ASTDeclNode::Linkage FunctionInfo::getLinkage() {
     return linkage;
 }
@@ -48,7 +52,6 @@ void FunctionInfo::copyArgumentsToLocals() {
 
     while (args != nullptr) {
         std::shared_ptr<ASTArgNode> arg = args->getHead();
-        std::cout << "Add arg " << arg->getName() << std::endl;
         addLocal(arg->getName(), arg->getType());
         args = args->getTail();
     }

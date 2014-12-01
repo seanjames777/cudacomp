@@ -6,6 +6,9 @@
 
 #define YYERROR_VERBOSE
 
+int line_num = 1;
+std::unordered_map<std::string, ASTTypeNode *> typedefs;
+
 int yylex(void);
 
 int yywrap() {
@@ -13,10 +16,10 @@ int yywrap() {
 }
 
 void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
-    throw Parser::ParseException(std::string(str));
+    std::stringstream ss;
+    ss << "Line " << line_num << ": " << str;
+    throw Parser::ParseException(ss.str());
 }
-
-std::unordered_map<std::string, ASTTypeNode *> typedefs;
 
 %}
 
@@ -49,7 +52,7 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %token <string> IDENT IDTYPE
 %token <boolean> TRUE FALSE
 %token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR NOT BNOT
-%token ASSIGN SEMI COMMA LBRACKET RBRACKET
+%token ASSIGN SEMI COMMA LBRACKET RBRACKET INCR DECR
 %token INT BOOL VOID FLOAT
 %token RETURN IF ELSE TYPEDEF WHILE EXTERN ALLOC_ARRAY COLON TO DEVICE FOR
 %token LPAREN RPAREN LBRACE RBRACE

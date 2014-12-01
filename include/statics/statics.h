@@ -18,7 +18,9 @@
 #include <statics/funcheck.h>
 #include <statics/exceptions.h>
 #include <statics/symbolcheck.h>
+#include <statics/symbolmangle.h>
 #include <ast/astprint.h>
+#include <options.h>
 
 namespace Statics {
 
@@ -29,11 +31,10 @@ namespace Statics {
  * function signatures, etc.
  *
  * @param[in] node    Top-level linked list output by parser
- * @param[in] verbose Turn on verbose output
  *
  * @return Output module information
  */
-std::shared_ptr<ModuleInfo> run(std::shared_ptr<ASTDeclSeqNode> node, bool verbose);
+std::shared_ptr<ModuleInfo> run(std::shared_ptr<ASTDeclSeqNode> node);
 
 }
 

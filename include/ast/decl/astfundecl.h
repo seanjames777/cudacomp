@@ -50,6 +50,11 @@ public:
     std::string getName();
 
     /**
+     * @brief Set function name
+     */
+    void setName(std::string name);
+
+    /**
      * @brief Get whether this is a definition
      */
     bool isDefn();

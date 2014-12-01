@@ -188,10 +188,10 @@ for (name, expected) in tests:
 
     if target == "host":
         print_verbose("Compiling...")
-        (cc_stat, cc_out) = run_shell([ INSTALL_DIR + "bin/cc", "-o", temp + "_host.ll", name ])
+        (cc_stat, cc_out) = run_shell([ INSTALL_DIR + "bin/cc", "-o", temp + "_host.bc", name ])
         if cc_stat == 0:
             print_verbose("Assembling...")
-            run_shell([ LLC, "-o", temp + "_host.o", "-filetype=obj", temp + "_host.ll" ])
+            run_shell([ LLC, "-o", temp + "_host.o", "-filetype=obj", temp + "_host.bc" ])
             print_verbose("Linking...")
             run_shell([ "clang", "-o", temp + "_host", temp + "_host.o", INSTALL_DIR + "lib/libhost_rt.a" ])
             print_verbose("Executing...")
@@ -199,9 +199,9 @@ for (name, expected) in tests:
         else:
             (stat, output) = (cc_stat, cc_out)
     else:
-        (cc_stat, cc_out) = run_shell([ INSTALL_DIR + "bin/cc", "-o", temp + "_device.ll", "--emit-device", name ])
+        (cc_stat, cc_out) = run_shell([ INSTALL_DIR + "bin/cc", "-o", temp + "_device.bc", "--emit-device", name ])
         if cc_stat == 0:
-            run_shell([ LLC, "-o", temp + "_device.ptx", temp + "_device.ll" ])
+            run_shell([ LLC, "-o", temp + "_device.ptx", temp + "_device.bc" ])
             run_shell([ "nvcc", "-arch=sm_30", "-cubin", "-dc", "-o", temp + "_device.cubin", temp + "_device.ptx" ])
             run_shell([ "nvcc", "-arch=sm_30", "-cubin", "-dlink", "-o", temp + "_link.cubin", temp + "_device.cubin", BINARY_DIR + "device_rt_kernel.cubin" ])
             run_shell([ "clang", "-o", temp + "_device", INSTALL_DIR + "lib/libdevice_rt.a", "-framework", "CUDA",
