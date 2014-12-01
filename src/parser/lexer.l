@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <ast/ast.h>
+#include <parser/parse.h>
 
 #define YY_STACK_USED
 #include "parser.hpp"
@@ -11,8 +12,6 @@ extern std::unordered_map<std::string, ASTTypeNode *> typedefs;
 extern int line_num;
 
 int comment_depth = 0;
-
-// TODO: should freak out when we can't fit a number in a type
 
 %}
 
@@ -50,9 +49,27 @@ int comment_depth = 0;
 "for"                   { return FOR; }
 "@device"               { return DEVICE; }
 
-[0-9]+                  { yylval.int32 = strtol(yytext, NULL, 10); return INT32; }
-0[xX][0-9A-Fa-f]+       { yylval.int32 = strtol(yytext, NULL, 16); return INT32; }
-[0-9]*\.[0-9]+           { yylval.float32 = strtod(yytext, NULL); return FLOAT32; }
+0|[1-9][0-9]*           {
+                            unsigned long long int val = strtoull(yytext, NULL, 10);
+                            if (val > (1UL << 31)) {
+                                std::stringstream ss;
+                                ss << "Line " << line_num << ": Constant too large: " << yytext;
+                                throw Parser::ParseException(ss.str());
+                            }
+                            yylval.int32 = val;
+                            return INT32;
+                        }
+0[xX][0-9A-Fa-f]+       {
+                            unsigned long long int val = strtoull(yytext, NULL, 16);
+                            if (val > 0xFFFFFFFFUL) {
+                                std::stringstream ss;
+                                ss << "Line " << line_num << ": Constant too large: " << yytext;
+                                throw Parser::ParseException(ss.str());
+                            }
+                            yylval.int32 = val;
+                            return INT32;
+                        }
+[0-9]*\.[0-9]+          { yylval.float32 = strtod(yytext, NULL); return FLOAT32; }
 [_a-zA-Z][_a-zA-Z0-9]*  {
                             yylval.string = strdup(yytext);
 
@@ -92,7 +109,7 @@ int comment_depth = 0;
 "["                     { return LBRACKET; }
 "]"                     { return RBRACKET; }
 
-[ \r\t]+                /* ignore whitespace */
+[ \r\t\v\f]+            /* ignore whitespace */
 "\n"                    { line_num++; }
 
 %%

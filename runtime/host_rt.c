@@ -14,7 +14,7 @@ void *_rt_alloc_array(int elemSize, int length) {
 }
 
 void _rt_div_check(int n, int d) {
-    if (d == 0 || (n == 0x08000000 && d == 0xFFFFFFFF)) {
+    if (d == 0 || (n == 0x80000000 && d == 0xFFFFFFFF)) {
         // TODO
         raise(SIGKILL);
     }

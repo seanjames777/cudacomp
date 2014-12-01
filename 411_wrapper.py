@@ -56,12 +56,6 @@ def run_shell(command):
 autograder = getpass.getuser() == "autograder"
 link_runtime = not(autograder) or not(emit_llvm)
 
-if link_runtime and not(os.path.isfile("l4lib.bc")):
-    stat = run_shell([ "clang", "-emit-llvm", "-o", "l4lib.bc", "-c", "l4lib.c" ])
-
-    if stat != 0:
-        exit(stat)
-
 # Process each source file
 for source in sources:
     compiler_args = [ "./cc", "--symbol-prefix", "_c0_" ]
