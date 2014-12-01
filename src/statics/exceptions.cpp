@@ -112,4 +112,8 @@ IllegalLValueException::IllegalLValueException() {
     setMsg("Attempted to assign to an illegal lvalue");
 }
 
+InvalidEntrypointException::InvalidEntrypointException() {
+    setMsg("Required entry point is missing or has an incorrect signature");
+}
+
 }

@@ -24,6 +24,7 @@ struct CCArgs {
     bool  mem_safe;      //!< Whether to insert memory safety checks
     bool  opr_safe;      //!< Whether to insert operator safety checks
     bool  emit_text;     //!< Whether to emit LLVM IR as text
+    char *entrypoint;    //!< Required entrypoint name
 };
 
 /**

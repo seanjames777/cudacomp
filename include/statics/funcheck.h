@@ -14,6 +14,7 @@
 #include <ast/ast.h>
 #include <ast/astvisitor.h>
 #include <statics/exceptions.h>
+#include <options.h>
 
 namespace Statics {
 
