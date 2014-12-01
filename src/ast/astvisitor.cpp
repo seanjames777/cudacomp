@@ -19,12 +19,14 @@
 IMPL_CLASS(Node) {
     SUB_CLASS(DeclNode);
     SUB_CLASS(ExpNode);
+    SUB_CLASS(SchedNode);
     SUB_CLASS(StmtNode);
     SUB_CLASS(ArgNode);
     SUB_CLASS(TypeNode);
 
     SUB_CLASS(DeclSeqNode);
     SUB_CLASS(ExpSeqNode);
+    SUB_CLASS(SchedSeqNode);
     SUB_CLASS(StmtSeqNode);
     SUB_CLASS(ArgSeqNode);
 }
@@ -49,6 +51,10 @@ IMPL_CLASS(ExpNode) {
     SUB_CLASS(RecordAccessExp);
     SUB_CLASS(TernopExp);
     SUB_CLASS(UnopExp);
+}
+
+IMPL_CLASS(SchedNode) {
+    SUB_CLASS(DeviceSched);
 }
 
 IMPL_CLASS(StmtNode) {
@@ -84,6 +90,10 @@ IMPL_CLASS(DeclSeqNode) {
 
 IMPL_CLASS(ExpSeqNode) {
     SEQ_CLASS(ExpNode);
+}
+
+IMPL_CLASS(SchedSeqNode) {
+    SEQ_CLASS(StmtNode);
 }
 
 IMPL_CLASS(StmtSeqNode) {
@@ -162,6 +172,9 @@ IMPL_CLASS(UnopExp) {
     HAS_MEMBER(getExp());
 }
 
+IMPL_CLASS(DeviceSched) {
+}
+
 IMPL_CLASS(ExprStmt) {
     HAS_MEMBER(getExp());
 }
@@ -178,6 +191,7 @@ IMPL_CLASS(WhileStmt) {
 }
 
 IMPL_CLASS(RangeForStmt) {
+    HAS_MEMBER(getSchedule());
     HAS_MEMBER(getIteratorType());
     HAS_MEMBER(getRange());
     HAS_MEMBER(getBody());

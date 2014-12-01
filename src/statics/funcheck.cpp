@@ -32,7 +32,7 @@ void FunCheck::run(std::shared_ptr<ASTDeclSeqNode> ast) {
     // signature.
     struct CCArgs *args = getOptions();
 
-    if (args->entrypoint) {
+    if (!args->entrypoint.empty()) {
         std::shared_ptr<FunctionInfo> entry = module->getFunction(args->entrypoint);
 
         // Must be present
@@ -92,7 +92,7 @@ void FunCheck::visitFunDecl(std::shared_ptr<ASTFunDecl> funDefn) {
         // Add the new function to the module
         funInfo = std::make_shared<FunctionInfo>(funDefn->getName(),
             funDefn->getSignature(), funDefn->getLinkage(),
-            funDefn->getName() == "_cc_main");
+            funDefn->getName() == "_cc_main" ? FunctionInfo::Global : FunctionInfo::Host);
         module->addFunction(funInfo);
     }
 

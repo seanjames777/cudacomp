@@ -52,12 +52,14 @@ public:
 
     DECLARE_CLASS(DeclNode);
     DECLARE_CLASS(ExpNode);
+    DECLARE_CLASS(SchedNode);
     DECLARE_CLASS(StmtNode);
     DECLARE_CLASS(ArgNode);
     DECLARE_CLASS(TypeNode);
 
     DECLARE_CLASS(DeclSeqNode);
     DECLARE_CLASS(ExpSeqNode);
+    DECLARE_CLASS(SchedSeqNode);
     DECLARE_CLASS(StmtSeqNode);
     DECLARE_CLASS(ArgSeqNode);
 
@@ -78,6 +80,8 @@ public:
     DECLARE_CLASS(RecordAccessExp);
     DECLARE_CLASS(TernopExp);
     DECLARE_CLASS(UnopExp);
+
+    DECLARE_CLASS(DeviceSched);
 
     DECLARE_CLASS(AssignStmt);
     DECLARE_CLASS(ExprStmt);

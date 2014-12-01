@@ -142,7 +142,7 @@ Function *CodegenCtx::createFunction(std::shared_ptr<FunctionInfo> funcInfo) {
 
     bool isVoid = sig->getReturnType()->equal(ASTVoidType::get());
 
-    if (emit_device && funcInfo->isCudaGlobal() && !isVoid) {
+    if (emit_device && (funcInfo->getUsage() & FunctionInfo::Global) && !isVoid) {
         argTypes.push_back(PointerType::getUnqual(returnType));
         returnType = Type::getVoidTy(context);
     }
@@ -179,7 +179,7 @@ void CodegenCtx::startFunction(std::string id) {
     std::shared_ptr<ASTArgSeqNode> args = sig->getArgs();
     auto arg_iter = function->arg_begin();
 
-    if (emit_device && funcInfo->isCudaGlobal() && !sig->getReturnType()->equal(ASTVoidType::get()))
+    if (emit_device && (funcInfo->getUsage() & FunctionInfo::Global) && !sig->getReturnType()->equal(ASTVoidType::get()))
         arg_iter++;
 
     // Map arguments to symbol table. Move arguments into alloca's functions
@@ -222,8 +222,8 @@ void CodegenCtx::markKernel(Function *kernel) {
     meta.push_back(ConstantInt::get(Type::getInt32Ty(context), 1));
     MDNode *node = MDNode::get(context, meta);
 
-    NamedMDNode *cat = module->getOrInsertNamedMetadata("nvvm.annotations");
-    cat->addOperand(node);
+    NamedMDNode *nvvm = module->getOrInsertNamedMetadata("nvvm.annotations");
+    nvvm->addOperand(node);
 }
 
 void CodegenCtx::finishFunction() {

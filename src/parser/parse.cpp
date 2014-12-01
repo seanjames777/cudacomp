@@ -16,11 +16,11 @@ ParseException::ParseException(std::string msg)
 {
 }
 
-std::shared_ptr<ASTDeclSeqNode> parse(const char *file) {
+std::shared_ptr<ASTDeclSeqNode> parse(std::string file) {
     FILE *fp = nullptr;
 
-    if (file) {
-        fp = fopen(file, "r");
+    if (!file.empty()) {
+        fp = fopen(file.c_str(), "r");
 
         if (!fp) {
             std::stringstream ss;
@@ -34,13 +34,13 @@ std::shared_ptr<ASTDeclSeqNode> parse(const char *file) {
     std::shared_ptr<ASTDeclSeqNode> root = nullptr;
 
     if (yyparse(&root)) {
-        if (file)
+        if (!file.empty())
             fclose(fp);
 
         return nullptr;
     }
 
-    if (file)
+    if (!file.empty())
         fclose(fp);
 
     return root;

@@ -12,10 +12,12 @@
 #include <ast/stmt/aststmtnode.h>
 #include <ast/type/asttypenode.h>
 #include <ast/expr/astexpnode.h>
+#include <ast/sched/astschednode.h>
 
 class ASTRangeForStmt : public ASTStmtNode {
 private:
 
+    std::shared_ptr<ASTSchedSeqNode> sched;
     std::shared_ptr<ASTTypeNode> type;
     std::string id;
     std::shared_ptr<ASTExpNode> range;
@@ -32,6 +34,7 @@ public:
      * @param[in] body  Statement to evaluate for each iteration
      */
     ASTRangeForStmt(
+        std::shared_ptr<ASTSchedSeqNode> sched,
         std::shared_ptr<ASTTypeNode> type,
         std::string id,
         std::shared_ptr<ASTExpNode> range,
@@ -41,6 +44,11 @@ public:
      * @brief Destructor
      */
     ~ASTRangeForStmt();
+
+    /**
+     * @brief Get loop schedule
+     */
+    std::shared_ptr<ASTSchedSeqNode> getSchedule();
 
     /**
      * @brief Get iterator variable type

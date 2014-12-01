@@ -19,13 +19,24 @@
  * local symbols' types.
  */
 class FunctionInfo {
+public:
+
+    /**
+     * @brief CUDA function usage flags
+     */
+    enum CudaUsage {
+        Host = 1,
+        Device = 2,
+        Global = 4,
+    };
+
 private:
 
     std::shared_ptr<ASTFunType> signature;
     SymbolTable<std::shared_ptr<ASTTypeNode>> locals; // including arguments
     std::string name;
     enum ASTDeclNode::Linkage linkage;
-    bool cudaGlobal;
+    enum CudaUsage usage;
 
 public:
 
@@ -35,9 +46,10 @@ public:
      * @param[in] name      Function name
      * @param[in] signature Function signature
      * @param[in] linkage   Function linkage
+     * @param[in] usage     CUDA function usage
      */
     FunctionInfo(std::string name, std::shared_ptr<ASTFunType> signature,
-        enum ASTDeclNode::Linkage linkage, bool cudaGlobal = false);
+        enum ASTDeclNode::Linkage linkage, enum CudaUsage usage);
 
     /**
      * @brief Get function signature
@@ -68,9 +80,9 @@ public:
     void addLocal(std::string id, std::shared_ptr<ASTTypeNode> type);
 
     /**
-     * @brief Get whether this is a CUDA kernel
+     * @brief Get CUDA function usage
      */
-    bool isCudaGlobal();
+    enum CudaUsage getUsage();
 
     /**
      * @brief Get the type of a symbol in the function's body

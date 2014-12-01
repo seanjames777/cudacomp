@@ -33,6 +33,8 @@ void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
 %union {
     ASTDeclNode *top;
     ASTDeclSeqNode *top_seq;
+    ASTSchedNode *sched;
+    ASTSchedSeqNode *sched_seq;
     ASTStmtNode *stmt;
     ASTStmtSeqNode *stmt_seq;
     ASTExpNode *exp;
@@ -62,9 +64,10 @@ void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
 
 %type <exp> exp
 %type <type> type
+%type <sched> sched
+%type <sched_seq> sched_list
 %type <stmt> stmt simp
-%type <stmt_seq> stmt_list
-%type <stmt_seq> elseopt
+%type <stmt_seq> stmt_list elseopt
 %type <arg> param field
 %type <arg_seq> param_list param_list_follow field_list field_list_follow
 %type <top> top
@@ -156,7 +159,6 @@ exp:
   { $$ = new ASTRecordAccessExp(std::shared_ptr<ASTExpNode>( new ASTDerefExp( std::shared_ptr<ASTExpNode>($1))), std::string($3) ); free($3); }
   | exp ARROW IDTYPE
   { $$ = new ASTRecordAccessExp(std::shared_ptr<ASTExpNode>( new ASTDerefExp( std::shared_ptr<ASTExpNode>($1))), std::string($3) ); free($3); }
-  // | DEVICE exp                        { $$ = new ASTDeviceSched(std::shared_ptr<ASTExpNode>($2)); }
   | exp QUESTION exp COLON exp        { $$ = new ASTTernopExp(std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3), std::shared_ptr<ASTExpNode>($5)); }
   ;
 
@@ -193,9 +195,17 @@ stmt:
   | LBRACE stmt_list RBRACE           { $$ = new ASTScopeStmt(std::shared_ptr<ASTStmtSeqNode>($2)); }
   | IF LPAREN exp RPAREN stmt elseopt { $$ = new ASTIfStmt(std::shared_ptr<ASTExpNode>($3), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($5), nullptr), std::shared_ptr<ASTStmtSeqNode>($6)); }
   | WHILE LPAREN exp RPAREN stmt      { $$ = new ASTWhileStmt(std::shared_ptr<ASTExpNode>($3), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($5), nullptr)); }
-  | FOR LPAREN type IDENT COLON exp RPAREN stmt
-    { $$ = new ASTRangeForStmt(std::shared_ptr<ASTTypeNode>($3), std::string($4), std::shared_ptr<ASTExpNode>($6), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($8), nullptr)); free($4); }
+  | sched_list FOR LPAREN type IDENT COLON exp RPAREN stmt
+    { $$ = new ASTRangeForStmt(std::shared_ptr<ASTSchedSeqNode>($1), std::shared_ptr<ASTTypeNode>($4), std::string($5), std::shared_ptr<ASTExpNode>($7), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($9), nullptr)); free($5); }
   ;
+
+sched:
+    DEVICE                            { $$ = new ASTDeviceSched(); }
+  ;
+
+sched_list:
+    /* empty */                       { $$ = nullptr; }
+  | sched sched_list                    { $$ = new ASTSchedSeqNode(std::shared_ptr<ASTSchedNode>($1), std::shared_ptr<ASTSchedSeqNode>($2)); }
 
 elseopt:
     /* empty */                       { $$ = nullptr; }

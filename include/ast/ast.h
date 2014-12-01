@@ -31,6 +31,8 @@
 #include <ast/expr/astrangeexp.h>
 #include <ast/expr/astternopexp.h>
 #include <ast/expr/astunopexp.h>
+#include <ast/sched/astdevicesched.h>
+#include <ast/sched/astschednode.h>
 #include <ast/stmt/astexprstmt.h>
 #include <ast/stmt/astifstmt.h>
 #include <ast/stmt/astrangeforstmt.h>

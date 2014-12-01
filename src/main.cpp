@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    if (args->out_file) {
+    if (!args->out_file.empty()) {
         std::ofstream out(args->out_file, std::ios::out);
 
         if (!out) {

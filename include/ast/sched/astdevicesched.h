@@ -18,19 +18,19 @@
 class ASTDeviceSched : public ASTSchedNode {
 private:
 
-    std::shared_ptr<ASTExpNode> exp;
+    static std::shared_ptr<ASTDeviceSched> instance;
 
 public:
 
     /**
      * @brief Constructor
      */
-    ASTDeviceSched(std::shared_ptr<ASTExpNode> exp);
+    ASTDeviceSched();
 
     /**
-     * @brief Get the expression to run
+     * @brief Get singleton instance
      */
-    std::shared_ptr<ASTExpNode> getExp();
+    static std::shared_ptr<ASTDeviceSched> get();
 
     /**
      * @copydoc ASTNode::print()
