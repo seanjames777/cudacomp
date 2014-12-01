@@ -206,8 +206,8 @@ void CodegenCtx::markKernel(Function *kernel) {
     meta.push_back(ConstantInt::get(Type::getInt32Ty(context), 1));
     MDNode *node = MDNode::get(context, meta);
 
-    NamedMDNode *cat = module->getOrInsertNamedMetadata("nvvm.annotations");
-    cat->addOperand(node);
+    NamedMDNode *nvvm = module->getOrInsertNamedMetadata("nvvm.annotations");
+    nvvm->addOperand(node);
 }
 
 void CodegenCtx::finishFunction() {
