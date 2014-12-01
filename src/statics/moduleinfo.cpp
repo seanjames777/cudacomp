@@ -31,13 +31,13 @@ std::shared_ptr<ASTTypeNode> ModuleInfo::getType(std::string id) {
     return typedefs.get(id);
 }
 
-void ModuleInfo::addRecord(std::string name, std::shared_ptr<ASTRecordType> type) {
-    records.set(name,type);
+void ModuleInfo::addRecordType(std::string name, std::shared_ptr<ASTRecordType> type) {
+    recordTypes.set(name,type);
 }
 
-std::shared_ptr<ASTRecordType> ModuleInfo::getRecord(std::string id) {
-    if (!records.hasSymbol(id))
+std::shared_ptr<ASTRecordType> ModuleInfo::getRecordType(std::string id) {
+    if (!recordTypes.hasSymbol(id))
         return nullptr;
 
-    return records.get(id);
+    return recordTypes.get(id);
 }

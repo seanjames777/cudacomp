@@ -4,6 +4,7 @@
  * @author Sean James <seanjames777@gmail.com>
  */
 
+#include <codegen/codegenctx.h>
 #include <codegen/converttype.h>
 #include <ast/type/astvoidtype.h>
 
@@ -26,7 +27,6 @@ CodegenCtx::CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo)
 {
     module = std::make_shared<Module>("", context);
     layout = std::make_shared<DataLayout>(module.get());
-
 }
 
 Function *CodegenCtx::getAllocArray() {
@@ -251,12 +251,23 @@ Value *CodegenCtx::createTemp(Type *type) {
 }
 
 Type *CodegenCtx::getRecordType(std::string name) {
-    return records.get(name);
+    if (records.hasSymbol(name))
+        return records.get(name);
+
+    // The record has not been declared, so implicitly declare an opaque type
+    StructType *type = StructType::create(context, name);
+    records.set(name, type);
+    return type;
+
 }
 
 void CodegenCtx::createRecord(std::shared_ptr<ASTRecordType> recordInfo){
     // TODO : evaluate possibility of undesirable name conflicts between "struct foo" and named type foo
     std::string name = recordInfo->getId();
+    // Add opaque type for the recursive case
+    StructType *type = StructType::create(context, name);
+    records.set(name, type);
+
     std::vector<Type *> elems;
     std::shared_ptr<ASTArgSeqNode> fields = recordInfo->getFields();
     while (fields != nullptr) {
@@ -264,13 +275,12 @@ void CodegenCtx::createRecord(std::shared_ptr<ASTRecordType> recordInfo){
         elems.push_back(convertType(field_type, this));
         fields = fields->getTail();
     }
-    records.set(name, StructType::create(elems, name));
+    type->setBody(elems);
 }
 
 unsigned long CodegenCtx::getAlignedSize(std::shared_ptr<ASTTypeNode> t) {
     Type * tau = convertType(t, this);
-    return layout->getTypeAllocSizeInBits(tau);
+    return layout->getTypeAllocSize(tau);
 }
-
 
 }

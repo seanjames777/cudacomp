@@ -19,7 +19,4 @@ std::shared_ptr<ASTExpNode> ASTDerefExp::getExp() {
 }
 
 void ASTDerefExp::print(std::ostream & ss) {
-    ss << "*(";
-    exp->print(ss); 
-    ss << ")";
 }

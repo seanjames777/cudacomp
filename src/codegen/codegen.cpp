@@ -34,7 +34,6 @@
 
 namespace Codegen {
 
-
 Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
     std::shared_ptr<IRBuilder<>> builder = ctx->getBuilder();
 
@@ -53,14 +52,12 @@ Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNod
     else if (std::shared_ptr<ASTRecordAccessExp> rcd_exp = std::dynamic_pointer_cast<ASTRecordAccessExp>(node)) { 
         Value *lhs = codegen_lvalue(ctx, rcd_exp->getLValue());
         int field_idx = rcd_exp->getType()->getFieldIndex(rcd_exp->getId());
-        std::string structtypename = rcd_exp->getType()->getId();
         return builder->CreateConstGEP2_32(lhs, 0, field_idx);
-
     }
     // Pointer dereference
     else if (std::shared_ptr<ASTDerefExp> ptr_exp = std::dynamic_pointer_cast<ASTDerefExp>(node)) {
         Value *subexp = codegen_exp(ctx, ptr_exp->getExp());
-        return builder->CreateGEP(subexp, ConstantInt::get(convertType(ASTIntegerType::get()), 0));
+        return builder->CreateGEP(subexp, ConstantInt::get(convertType(ASTIntegerType::get(), ctx.get()), 0));
     }
     else
         throw new ASTMalformedException();
@@ -118,13 +115,13 @@ Value *codegen_binop(
 Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
     // Integer constant
     if (std::shared_ptr<ASTIntegerExp> int_exp = std::dynamic_pointer_cast<ASTIntegerExp>(node))
-        return ConstantInt::get(convertType(ASTIntegerType::get()), int_exp->getValue());
+        return ConstantInt::get(convertType(ASTIntegerType::get(), ctx.get()), int_exp->getValue());
     // Boolean constant
     else if (std::shared_ptr<ASTBooleanExp> bool_exp = std::dynamic_pointer_cast<ASTBooleanExp>(node))
-        return ConstantInt::get(convertType(ASTBooleanType::get()), (int)bool_exp->getValue());
+        return ConstantInt::get(convertType(ASTBooleanType::get(), ctx.get()), (int)bool_exp->getValue());
     // Float constant
     else if (std::shared_ptr<ASTFloatExp> float_exp = std::dynamic_pointer_cast<ASTFloatExp>(node))
-        return ConstantFP::get(convertType(ASTFloatType::get()), float_exp->getValue());
+        return ConstantFP::get(convertType(ASTFloatType::get(), ctx.get()), float_exp->getValue());
     // Unary operator
     else if (std::shared_ptr<ASTUnopExp> unop_exp = std::dynamic_pointer_cast<ASTUnopExp>(node)) {
         Value *v = codegen_exp(ctx, unop_exp->getExp());
@@ -151,7 +148,7 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
 
         std::shared_ptr<ASTTypeNode> expType = tern_exp->getType();
         assert(expType != nullptr);
-        Value *result = ctx->createTemp(convertType(expType));
+        Value *result = ctx->createTemp(convertType(expType, ctx.get()));
 
         BasicBlock *trueBlock = ctx->createBlock();
         BasicBlock *falseBlock = ctx->createBlock();
@@ -218,7 +215,7 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
     // Array allocation
     else if (std::shared_ptr<ASTAllocArrayExp> alloc_exp = std::dynamic_pointer_cast<ASTAllocArrayExp>(node)) {
         // Element size constant
-        Value *elemSize = ConstantInt::get(convertType(ASTIntegerType::get()),
+        Value *elemSize = ConstantInt::get(convertType(ASTIntegerType::get(), ctx.get()),
             ctx->getAlignedSize((alloc_exp->getElemType())));
 
         // Array length
@@ -238,7 +235,7 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
     // Heap allocation
     else if (std::shared_ptr<ASTAllocExp> alloc_exp = std::dynamic_pointer_cast<ASTAllocExp>(node)) {
         // Element size constant
-        Value *elemSize = ConstantInt::get(convertType(ASTIntegerType::get()),
+        Value *elemSize = ConstantInt::get(convertType(ASTIntegerType::get(), ctx.get()),
             ctx->getAlignedSize((alloc_exp->getElemType())));
 
         // Call into runtime allocator
@@ -435,7 +432,7 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
             bodyBuilder->CreateStore(
                 bodyBuilder->CreateBinOp(Instruction::Add,
                     bodyBuilder->CreateLoad(iter),
-                    ConstantInt::get(convertType(ASTIntegerType::get()), 1)),
+                    ConstantInt::get(convertType(ASTIntegerType::get(), ctx.get()), 1)),
                 iter);
 
             ctx->getBuilder()->CreateCondBr(

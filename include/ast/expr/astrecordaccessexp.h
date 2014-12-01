@@ -42,7 +42,6 @@ public:
      */
     std::string getId();
 
-
     /**
      * @brief Get the type of the record we are accessing.
      *        This is set during typechecking.

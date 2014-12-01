@@ -32,7 +32,7 @@ using namespace llvm;
 
 namespace Codegen {
 
-Type *convertType(std::shared_ptr<ASTTypeNode> type, CodegenCtx *c = NULL);
+Type *convertType(std::shared_ptr<ASTTypeNode> type, CodegenCtx *ctx);
 
 }
 

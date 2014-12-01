@@ -62,7 +62,6 @@ public:
 
     /**
      * @brief Check if this type is identical in name to the other record type.
-     *
      */
     virtual bool equal(std::shared_ptr<ASTTypeNode> other) override;
 

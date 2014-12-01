@@ -187,8 +187,7 @@ public:
     std::shared_ptr<IRBuilder<>> getBuilder();
 
     /**
-     * @brief Declare an LLVM record type. It may be retrieved later 
-     * with the getRecordType function.
+     * @brief Declare an LLVM record type. It may be retrieved later with the getRecordType function.
      */
     void createRecord(std::shared_ptr<ASTRecordType> recordInfo);
 
@@ -199,7 +198,7 @@ public:
     Type *getRecordType(std::string name);
 
     /**
-     * @brief Gets the bits needed to hold a type on the heap, with padding.
+     * @brief Gets the bits needed to hold a type, with padding.
      */
     unsigned long getAlignedSize(std::shared_ptr<ASTTypeNode> t);
 };

@@ -22,7 +22,7 @@ private:
 
     SymbolTable<std::shared_ptr<FunctionInfo>> functions;
     SymbolTable<std::shared_ptr<ASTTypeNode>> typedefs;
-    SymbolTable<std::shared_ptr<ASTRecordType>> records;
+    SymbolTable<std::shared_ptr<ASTRecordType>> recordTypes;
 
 public:
 
@@ -66,14 +66,14 @@ public:
      * @param[in] name Name of the record
      * @param[in] type The type object containing field information
      */
-    void addRecord(std::string name, std::shared_ptr<ASTRecordType> type);
+    void addRecordType(std::string name, std::shared_ptr<ASTRecordType> type);
 
     /**
      * @brief Get the type object for a record
      *
      * @param[in] name Name of the record
      */
-    std::shared_ptr<ASTRecordType> getRecord(std::string id);
+    std::shared_ptr<ASTRecordType> getRecordType(std::string id);
 };
 
 #endif

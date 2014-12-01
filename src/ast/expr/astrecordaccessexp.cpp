@@ -30,8 +30,4 @@ void ASTRecordAccessExp::setType(std::shared_ptr<ASTRecordType> t) {
 }
 
 void ASTRecordAccessExp::print(std::ostream & ss) {
-    lvalue->print(ss);
-
-    ss << ".";
-    ss << id;
 }

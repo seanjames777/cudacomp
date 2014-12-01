@@ -223,7 +223,6 @@ IMPL_CLASS(RangeType) {
 }
 
 IMPL_CLASS(RecordType) {
-    HAS_MEMBER(getFields());
 }
 
 IMPL_CLASS(PtrType) {

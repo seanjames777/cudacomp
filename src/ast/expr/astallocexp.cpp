@@ -21,9 +21,4 @@ void ASTAllocExp::setElemType(std::shared_ptr<ASTTypeNode> new_type) {
 
 
 void ASTAllocExp::print(std::ostream & ss) {
-    ss << "alloc(";
-
-    type->print(ss);
-
-    ss << ")";
 }

@@ -39,13 +39,11 @@ std::shared_ptr<ASTTypeNode> TypeResolve::resolveType(std::shared_ptr<ASTTypeNod
     }
     // Record type. Look up the record information, which should already be resolved.
     else if (std::shared_ptr<ASTRecordType> record_type = std::dynamic_pointer_cast<ASTRecordType>(type)) {
-        std::shared_ptr<ASTRecordType> resolved = module->getRecord(record_type->getId());
+        std::shared_ptr<ASTRecordType> resolved = module->getRecordType(record_type->getId());
 
-        // TODO: do I want a separate exception for this?
+        // TODO: Don't want exception b/c undeclared structs are OK. But, not sure if nullptr is correct
         if (!resolved)
-            throw UndeclaredTypeException(record_type->getId());
-
-        record_type->setFields(resolved->getFields());
+            return nullptr;
 
         return resolved;
     }
@@ -55,9 +53,9 @@ std::shared_ptr<ASTTypeNode> TypeResolve::resolveType(std::shared_ptr<ASTTypeNod
 }
 
 void TypeResolve::visitRecordType(std::shared_ptr<ASTRecordType> type) {
-    // We already resolved the record and just have to retrieve the result from a table
-    // No need to visit children of record, which are already resolved
+    // We don't want to resolve any children ; we use cached thing
     resolveType(type);
+    //ASTVisitor::visitTypeNode(type);
 }
 
 void TypeResolve::visitTypeNode(std::shared_ptr<ASTTypeNode> type) {
@@ -116,40 +114,42 @@ void TypeResolve::visitRecordDecl(std::shared_ptr<ASTRecordDecl> recordDecl) {
         return;
 
     // Records cannot be redefined
-    if (module->getRecord(recordDecl->getName()) != nullptr)
+    if (module->getRecordType(recordDecl->getName()) != nullptr)
         throw RedeclaredTypeException(recordDecl->getName());
 
     // TODO : FIX broken handling of recursive structs
     // TODO : ensure no repeat field names, void fields
 
     std::string name = recordDecl->getName();
-    module->addRecord(name, recordDecl->getSignature());
+    module->addRecordType(name, recordDecl->getSignature());
     std::shared_ptr<ASTArgSeqNode> fields = recordDecl->getSignature()->getFields();
 
     ASTVisitor::visitArgSeqNode(fields);
-    //manually weed out recursive structs
-    while(fields) {
-        std::shared_ptr<ASTArgNode> field = fields->getHead();
-        if (std::shared_ptr<ASTRecordType> type = std::dynamic_pointer_cast<ASTRecordType>(field->getType())) {
-            if ((name.compare(type->getId())) == 0)
-                throw IllegalTypeException(); // TODO : better exception?
-        }
-//        else if (std::shared_ptr<ASTPtrType> type = std::dynamic_pointer_cast<ASTPtrType>(field->getType())) {
-//            // Pointers to this record don't need to be resolved
-//            if (std::shared_ptr<ASTRecordType> rcd_type = std::dynamic_pointer_cast<ASTRecordType>(type->getToType())) {
-//                if ((name.compare(rcd_type->getId())) == 0){
-//                    // Nothing to do
-//                }
-//                else {
-//                    visitArgNode(field);
-//                }
-//            }
+    ASTVisitor::visitRecordDecl(recordDecl);
+
+    // Recursive or undefined structs yield exception
+//    while(fields) {
+//        std::shared_ptr<ASTArgNode> field = fields->getHead();
+//        if (std::shared_ptr<ASTRecordType> type = std::dynamic_pointer_cast<ASTRecordType>(field->getType())) {
+//            if ((name.compare(type->getId())) == 0)
+//                throw IllegalTypeException(); // TODO : better exception?
+//            if(!module->getRecordType(type->getId()))
+//                throw IllegalTypeException();
 //        }
-        else{
-            visitNode(field);
-        }
-        fields = fields->getTail();
-    }
+////        else if (std::shared_ptr<ASTPtrType> type = std::dynamic_pointer_cast<ASTPtrType>(field->getType())) {
+////            // Pointers to this record don't need to be resolved
+////            if (std::shared_ptr<ASTRecordType> rcd_type = std::dynamic_pointer_cast<ASTRecordType>(type->getToType())) {
+////                if ((name.compare(rcd_type->getId())) == 0){
+////                    // Nothing to do
+////                }
+////                else {
+////                    visitArgNode(field);
+////                }
+////            }
+////        }
+//        fields = fields->getTail();
+//    }
+
 }
 
 void TypeResolve::visitRangeForStmt(std::shared_ptr<ASTRangeForStmt> forStmt) {
