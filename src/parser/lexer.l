@@ -26,6 +26,11 @@ int comment_depth = 0;
 <COMMENT>"/*"           { comment_depth++; }
 <COMMENT>"*/"           { if (--comment_depth == 0) { BEGIN(INITIAL); } }
 <COMMENT>[*/]           /* ignore */
+<COMMENT><<EOF>>        {
+                            std::stringstream ss;
+                            ss << "Line " << line_num << ": Unterminated comment";
+                            throw Parser::ParseException(ss.str());
+                        }
 
 "//"                    { BEGIN(LINE_COMMENT); }
 <LINE_COMMENT>[^\n]*    /* ignore */
@@ -47,6 +52,14 @@ int comment_depth = 0;
 "to"                    { return TO; }
 "for"                   { return FOR; }
 "@device"               { return DEVICE; }
+"struct"                { return STRUCT; }
+"continue"              { return CONTINUE; }
+"break"                 { return BREAK; }
+"assert"                { return ASSERT; }
+"NULL"                  { return KWNULL; }
+"alloc"                 { return ALLOC; }
+"char"                  { return CHAR; }
+"string"                { return STRING; }
 
 0|[1-9][0-9]*           {
                             unsigned long long int val = strtoull(yytext, NULL, 10);
@@ -118,5 +131,7 @@ int comment_depth = 0;
 
 [ \r\t\v\f]+            /* ignore whitespace */
 "\n"                    { line_num++; }
+
+[^\x00-\x7f]            { throw Parser::ParseException("Illegal character"); }
 
 %%

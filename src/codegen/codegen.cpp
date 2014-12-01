@@ -71,6 +71,7 @@ Value *codegen_binop(
     case ASTBinopExp::SUB:  return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FSub : Instruction::Sub, v1, v2);
     case ASTBinopExp::MUL:  return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FMul : Instruction::Mul, v1, v2);
     case ASTBinopExp::DIV:
+    case ASTBinopExp::MOD:
         // Insert division checks
         if (args->opr_safe) {
             std::vector<Value *> args;
@@ -80,8 +81,10 @@ Value *codegen_binop(
             ctx->getBuilder()->CreateCall(ctx->getDivCheck(), args);
         }
 
-        return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FDiv : Instruction::SDiv, v1, v2);
-    case ASTBinopExp::MOD:  return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FRem : Instruction::SRem, v1, v2);
+        if (op == ASTBinopExp::DIV)
+            return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FDiv : Instruction::SDiv, v1, v2);
+        else
+            return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FRem : Instruction::SRem, v1, v2);
     case ASTBinopExp::SHL:  return ctx->getBuilder()->CreateBinOp(Instruction::Shl, v1, v2);
     case ASTBinopExp::SHR:  return ctx->getBuilder()->CreateBinOp(Instruction::AShr, v1, v2);
     case ASTBinopExp::AND:  return ctx->getBuilder()->CreateBinOp(Instruction::And, v1, v2);
