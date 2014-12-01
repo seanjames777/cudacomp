@@ -71,6 +71,7 @@ add_executable(cc
     src/ast/stmt/astassignstmt.cpp
     src/ast/stmt/astexprstmt.cpp
     src/ast/stmt/astifstmt.cpp
+    src/ast/stmt/astforstmt.cpp
     src/ast/stmt/astrangeforstmt.cpp
     src/ast/stmt/astreturnstmt.cpp
     src/ast/stmt/astscopestmt.cpp

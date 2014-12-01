@@ -50,6 +50,7 @@ IMPL_CLASS(StmtNode) {
     SUB_CLASS(AssignStmt);
     SUB_CLASS(ExprStmt);
     SUB_CLASS(IfStmt);
+    SUB_CLASS(ForStmt);
     SUB_CLASS(RangeForStmt);
     SUB_CLASS(ReturnStmt);
     SUB_CLASS(ScopeStmt);
@@ -136,6 +137,12 @@ IMPL_CLASS(UnopExp) {
 
 IMPL_CLASS(ExprStmt) {
     HAS_MEMBER(getExp());
+}
+
+IMPL_CLASS(ForStmt) {
+    HAS_MEMBER(getInit());
+    HAS_MEMBER(getBody());
+    HAS_MEMBER(getIter());
 }
 
 IMPL_CLASS(IfStmt) {

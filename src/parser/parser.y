@@ -4,6 +4,7 @@
 #include <ast/ast.h>
 #include <parser/parse.h>
 
+
 #define YYERROR_VERBOSE
 
 int yylex(void);
@@ -167,6 +168,7 @@ stmt:
   | WHILE LPAREN exp RPAREN stmt      { $$ = new ASTWhileStmt(std::shared_ptr<ASTExpNode>($3), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($5), nullptr)); }
   | FOR LPAREN type IDENT COLON exp RPAREN stmt
     { $$ = new ASTRangeForStmt(std::shared_ptr<ASTTypeNode>($3), std::string($4), std::shared_ptr<ASTExpNode>($6), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($8), nullptr)); free($4); }
+  | FOR LPAREN stmt 
   ;
 
 elseopt:
