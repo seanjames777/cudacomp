@@ -58,7 +58,7 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 
 %type <exp> exp
 %type <type> type
-%type <stmt> stmt simp
+%type <stmt> stmt simp simpopt
 %type <stmt_seq> stmt_list
 %type <stmt_seq> elseopt
 %type <arg> param
@@ -152,6 +152,10 @@ type:
   | type LBRACKET RBRACKET            { $$ = new ASTArrType(std::shared_ptr<ASTTypeNode>($1)); }
   ;
 
+simpopt:
+    /* empty */                       { $$ = nullptr; }
+  | simp                              { $$ = $1; }
+
 simp:
     type IDENT                        { $$ = new ASTVarDeclStmt(std::shared_ptr<ASTTypeNode>($1), std::string($2), nullptr); free($2); }
   | type IDENT ASSIGN exp             { $$ = new ASTVarDeclStmt(std::shared_ptr<ASTTypeNode>($1), std::string($2), std::shared_ptr<ASTExpNode>($4)); free($2); }
@@ -168,7 +172,8 @@ stmt:
   | WHILE LPAREN exp RPAREN stmt      { $$ = new ASTWhileStmt(std::shared_ptr<ASTExpNode>($3), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($5), nullptr)); }
   | FOR LPAREN type IDENT COLON exp RPAREN stmt
     { $$ = new ASTRangeForStmt(std::shared_ptr<ASTTypeNode>($3), std::string($4), std::shared_ptr<ASTExpNode>($6), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($8), nullptr)); free($4); }
-  | FOR LPAREN stmt 
+  | FOR LPAREN simpopt SEMI exp SEMI simpopt RPAREN stmt
+    { $$ = new ASTForStmt(std::shared_ptr<ASTStmtNode>($3), std::shared_ptr<ASTExpNode>($5), std::shared_ptr<ASTStmtNode>($7), std::shared_ptr<ASTStmtSeqNode>($9)); }
   ;
 
 elseopt:
