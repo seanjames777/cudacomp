@@ -168,6 +168,14 @@ public:
     IllegalLValueException();
 };
 
+/**
+ * @brief Attempted to assign to an illegal lvalue
+ */
+class InvalidEntrypointException : public StaticsException {
+public:
+    InvalidEntrypointException();
+};
+
 }
 
 #endif

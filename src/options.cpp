@@ -15,18 +15,19 @@ struct CCArgs *getOptions() {
 void printHelp(char *argv[]) {
     printf(
         "Usage: %s [-h] [--print-ast] [--emit-device] [-o <file>] [--symbol-prefix <pfx>] [<file>]\n"
-        "    [ --mem-safe ] [ --oper-safe ] [ -S ]\n"
+        "    [ --mem-safe ] [ --oper-safe ] [ -S ] [ --require-entry <name> ]\n"
         "\n"
         "Options:\n"
-        "    -h                    Print this help message and exit\n"
-        "    --print-ast           Print a description of the parsed abstract syntax tree\n"
-        "    --emit-device         Emit the entire program as PTX code, if possible\n"
-        "    -o <file>             Output assembly to a file instead of standard out\n"
-        "    --symbol-prefix <pfx> String to prefix internal function names with\n"
-        "    --mem-safe            Insert memory safety checks\n"
-        "    --oper-safe           Insert operator safety checks (division by 0, etc.)\n"
-        "    -S                    Emit LLVM IR as text instead of bitcode\n"
-        "    <file>                File to parse, instead of standard in\n"
+        "    -h                     Print this help message and exit\n"
+        "    --print-ast            Print a description of the parsed abstract syntax tree\n"
+        "    --emit-device          Emit the entire program as PTX code, if possible\n"
+        "    -o <file>              Output assembly to a file instead of standard out\n"
+        "    --symbol-prefix <pfx>  String to prefix internal function names with\n"
+        "    --mem-safe             Insert memory safety checks\n"
+        "    --oper-safe            Insert operator safety checks (division by 0, etc.)\n"
+        "    -S                     Emit LLVM IR as text instead of bitcode\n"
+        "    --require-entry <name> Require an entrypoint called <name> \n"
+        "    <file>                 File to parse, instead of standard in\n"
         , argv[0]);
 }
 
@@ -55,6 +56,8 @@ void parseArgs(int argc, char *argv[]) {
             args.opr_safe = true;
         else if (strcmp(argv[i], "-S") == 0)
             args.emit_text = true;
+        else if (strcmp(argv[i], "--require-entry") == 0)
+            args.entrypoint = argv[++i];
         else
             args.in_file = argv[i];
     }

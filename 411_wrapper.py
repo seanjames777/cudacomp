@@ -58,7 +58,7 @@ link_runtime = not(autograder) or not(emit_llvm)
 
 # Process each source file
 for source in sources:
-    compiler_args = [ "./cc", "--symbol-prefix", "_c0_" ]
+    compiler_args = [ "./cc", "--symbol-prefix", "_c0_", "--require-entry", "main" ]
 
     outfile_bc = source.rsplit('.', 1)[0] + ".bc"
     outfile_ll = source.rsplit('.', 1)[0] + ".ll"

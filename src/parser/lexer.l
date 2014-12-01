@@ -137,6 +137,11 @@ int comment_depth = 0;
 [ \r\t\v\f]+            /* ignore whitespace */
 "\n"                    { line_num++; }
 
-[^\x00-\x7f]            { throw Parser::ParseException("Illegal character"); }
+.                       {
+                            std::stringstream ss;
+                            ss << "Line " << line_num << ": ";
+                            ss << "Unexpected non-whitespace character '" << yytext << "'";
+                            throw Parser::ParseException(ss.str());
+                        }
 
 %%
