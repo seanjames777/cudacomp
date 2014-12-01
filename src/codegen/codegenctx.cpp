@@ -15,6 +15,7 @@ CodegenCtx::CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo)
       emit_device(emit_device),
       modInfo(modInfo),
       alloc_array(nullptr),
+      alloc(nullptr),
       div_check(nullptr),
       def_bblock(nullptr),
       first_bblock(nullptr),
