@@ -173,7 +173,7 @@ stmt:
   | FOR LPAREN type IDENT COLON exp RPAREN stmt
     { $$ = new ASTRangeForStmt(std::shared_ptr<ASTTypeNode>($3), std::string($4), std::shared_ptr<ASTExpNode>($6), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($8), nullptr)); free($4); }
   | FOR LPAREN simpopt SEMI exp SEMI simpopt RPAREN stmt
-    { $$ = new ASTForStmt(std::shared_ptr<ASTStmtNode>($3), std::shared_ptr<ASTExpNode>($5), std::shared_ptr<ASTStmtNode>($7), std::shared_ptr<ASTStmtSeqNode>($9)); }
+    { $$ = new ASTForStmt(std::shared_ptr<ASTStmtNode>($3), std::shared_ptr<ASTExpNode>($5), std::shared_ptr<ASTStmtNode>($7), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($9), nullptr)); }
   ;
 
 elseopt:
