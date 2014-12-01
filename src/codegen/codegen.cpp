@@ -35,8 +35,6 @@
 namespace Codegen {
 
 Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
-    std::shared_ptr<IRBuilder<>> builder = ctx->getBuilder();
-
     // Identifier reference
     if (std::shared_ptr<ASTIdentifierExp> id_exp = std::dynamic_pointer_cast<ASTIdentifierExp>(node)) {
         Value *id_ptr = ctx->getOrCreateSymbol(id_exp->getId());
@@ -85,8 +83,21 @@ Value *codegen_binop(
             return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FDiv : Instruction::SDiv, v1, v2);
         else
             return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FRem : Instruction::SRem, v1, v2);
-    case ASTBinopExp::SHL:  return ctx->getBuilder()->CreateBinOp(Instruction::Shl, v1, v2);
-    case ASTBinopExp::SHR:  return ctx->getBuilder()->CreateBinOp(Instruction::AShr, v1, v2);
+    case ASTBinopExp::SHL:
+    case ASTBinopExp::SHR:
+        // Insert bounds checks
+        if (args->opr_safe) {
+            std::vector<Value *> args;
+            args.push_back(v1);
+            args.push_back(v2);
+
+            ctx->getBuilder()->CreateCall(ctx->getDivCheck(), args);
+        }
+
+        if (op == ASTBinopExp::SHL)
+            return ctx->getBuilder()->CreateBinOp(Instruction::Shl, v1, v2);
+        else
+            return ctx->getBuilder()->CreateBinOp(Instruction::AShr, v1, v2);
     case ASTBinopExp::AND:  return ctx->getBuilder()->CreateBinOp(Instruction::And, v1, v2);
     case ASTBinopExp::OR:   return ctx->getBuilder()->CreateBinOp(Instruction::Or, v1, v2);
     case ASTBinopExp::BAND: return ctx->getBuilder()->CreateBinOp(Instruction::And, v1, v2);
@@ -246,8 +257,6 @@ bool codegen_stmts(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtSeqNo
 }
 
 bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> head) {
-    std::shared_ptr<IRBuilder<>> builder = ctx->getBuilder();
-
     // Return instruction
     if (std::shared_ptr<ASTReturnStmt> ret_node = std::dynamic_pointer_cast<ASTReturnStmt>(head)) {
         std::shared_ptr<ASTExpNode> ret_exp = ret_node->getExp();
