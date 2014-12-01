@@ -76,6 +76,7 @@ public:
     DECLARE_CLASS(IntegerExp);
     DECLARE_CLASS(RangeExp);
     DECLARE_CLASS(RecordAccessExp);
+    DECLARE_CLASS(TernopExp);
     DECLARE_CLASS(UnopExp);
 
     DECLARE_CLASS(AssignStmt);

@@ -29,6 +29,7 @@
 #include <ast/expr/astintegerexp.h>
 #include <ast/expr/astrecordaccessexp.h>
 #include <ast/expr/astrangeexp.h>
+#include <ast/expr/astternopexp.h>
 #include <ast/expr/astunopexp.h>
 #include <ast/stmt/astexprstmt.h>
 #include <ast/stmt/astifstmt.h>

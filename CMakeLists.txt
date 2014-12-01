@@ -69,6 +69,7 @@ add_executable(cc
     src/ast/expr/astintegerexp.cpp
     src/ast/expr/astrecordaccessexp.cpp
     src/ast/expr/astrangeexp.cpp
+    src/ast/expr/astternopexp.cpp
     src/ast/expr/astunopexp.cpp
     src/ast/sched/astschednode.cpp
     src/ast/stmt/astassignstmt.cpp

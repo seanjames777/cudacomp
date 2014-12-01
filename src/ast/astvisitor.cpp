@@ -47,6 +47,7 @@ IMPL_CLASS(ExpNode) {
     SUB_CLASS(IntegerExp);
     SUB_CLASS(RangeExp);
     SUB_CLASS(RecordAccessExp);
+    SUB_CLASS(TernopExp);
     SUB_CLASS(UnopExp);
 }
 
@@ -149,6 +150,12 @@ IMPL_CLASS(RangeExp) {
 
 IMPL_CLASS(RecordAccessExp) {
     HAS_MEMBER(getLValue());
+}
+
+IMPL_CLASS(TernopExp) {
+    HAS_MEMBER(getCond());
+    HAS_MEMBER(getTrueExp());
+    HAS_MEMBER(getFalseExp());
 }
 
 IMPL_CLASS(UnopExp) {

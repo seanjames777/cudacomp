@@ -80,7 +80,8 @@ int comment_depth = 0;
                             else
                                 return IDENT;
                         }
-
+"?"                     { return QUESTION; }
+":"                     { return COLON; }
 ","                     { return COMMA; }
 "."                     { return DOT; }
 "->"                    { return ARROW; }
@@ -114,6 +115,11 @@ int comment_depth = 0;
 "]"                     { return RBRACKET; }
 "++"                    { return INCR; }
 "--"                    { return DECR; }
+"+="                    { return PLUSEQ; }
+"-="                    { return MINUSEQ; }
+"*="                    { return TIMESEQ; }
+"/="                    { return DIVEQ; }
+"%="                    { return MODEQ; }
 
 [ \r\t\v\f]+            /* ignore whitespace */
 "\n"                    { line_num++; }
