@@ -72,6 +72,7 @@ tests = [
     (SOURCE_DIR + "tests/testFib2.cc", 34),
     (SOURCE_DIR + "tests/testFib3.cc", 34),
     (SOURCE_DIR + "tests/testFib4.cc", 34),
+    (SOURCE_DIR + "tests/testFor1.cc", 10),
     (SOURCE_DIR + "tests/testWhile1.cc", 1),
     (SOURCE_DIR + "tests/testWhile2.cc", 55),
     (SOURCE_DIR + "tests/testWhile3.cc", 1000),
