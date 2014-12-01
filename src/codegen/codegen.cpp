@@ -55,9 +55,51 @@ Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNod
     return nullptr;
 }
 
-Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
+Value *codegen_binop(
+    std::shared_ptr<CodegenCtx> ctx,
+    enum ASTBinopExp::op op,
+    std::shared_ptr<ASTTypeNode> type,
+    Value *v1,
+    Value *v2)
+{
     CCArgs *args = getOptions();
 
+    bool isFloat = type->equal(ASTFloatType::get());
+
+    switch (op) {
+    case ASTBinopExp::ADD:  return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FAdd : Instruction::Add, v1, v2);
+    case ASTBinopExp::SUB:  return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FSub : Instruction::Sub, v1, v2);
+    case ASTBinopExp::MUL:  return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FMul : Instruction::Mul, v1, v2);
+    case ASTBinopExp::DIV:
+        // Insert division checks
+        if (args->opr_safe) {
+            std::vector<Value *> args;
+            args.push_back(v1);
+            args.push_back(v2);
+
+            ctx->getBuilder()->CreateCall(ctx->getDivCheck(), args);
+        }
+
+        return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FDiv : Instruction::SDiv, v1, v2);
+    case ASTBinopExp::MOD:  return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FRem : Instruction::SRem, v1, v2);
+    case ASTBinopExp::SHL:  return ctx->getBuilder()->CreateBinOp(Instruction::Shl, v1, v2);
+    case ASTBinopExp::SHR:  return ctx->getBuilder()->CreateBinOp(Instruction::AShr, v1, v2);
+    case ASTBinopExp::AND:  return ctx->getBuilder()->CreateBinOp(Instruction::And, v1, v2);
+    case ASTBinopExp::OR:   return ctx->getBuilder()->CreateBinOp(Instruction::Or, v1, v2);
+    case ASTBinopExp::BAND: return ctx->getBuilder()->CreateBinOp(Instruction::And, v1, v2);
+    case ASTBinopExp::BOR:  return ctx->getBuilder()->CreateBinOp(Instruction::Or, v1, v2);
+    case ASTBinopExp::BXOR: return ctx->getBuilder()->CreateBinOp(Instruction::Xor, v1, v2);
+    case ASTBinopExp::EQ:   return (isFloat ? ctx->getBuilder()->CreateFCmpOEQ(v1, v2) : ctx->getBuilder()->CreateICmpEQ(v1, v2));
+    case ASTBinopExp::NEQ:  return (isFloat ? ctx->getBuilder()->CreateFCmpONE(v1, v2) : ctx->getBuilder()->CreateICmpNE(v1, v2));
+    case ASTBinopExp::LEQ:  return (isFloat ? ctx->getBuilder()->CreateFCmpOLE(v1, v2) : ctx->getBuilder()->CreateICmpSLE(v1, v2));
+    case ASTBinopExp::GEQ:  return (isFloat ? ctx->getBuilder()->CreateFCmpOGE(v1, v2) : ctx->getBuilder()->CreateICmpSGE(v1, v2));
+    case ASTBinopExp::LT:   return (isFloat ? ctx->getBuilder()->CreateFCmpOLT(v1, v2) : ctx->getBuilder()->CreateICmpSLT(v1, v2));
+    case ASTBinopExp::GT:   return (isFloat ? ctx->getBuilder()->CreateFCmpOGT(v1, v2) : ctx->getBuilder()->CreateICmpSGT(v1, v2));
+    case ASTBinopExp::NONE: throw ASTMalformedException(); return nullptr;
+    }
+}
+
+Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
     // Integer constant
     if (std::shared_ptr<ASTIntegerExp> int_exp = std::dynamic_pointer_cast<ASTIntegerExp>(node))
         return ConstantInt::get(convertType(ASTIntegerType::get()), int_exp->getValue());
@@ -82,40 +124,10 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         Value *v1 = codegen_exp(ctx, binop_exp->getE1());
         Value *v2 = codegen_exp(ctx, binop_exp->getE2());
 
-        // Type is stored by typechecker
-        assert(binop_exp->getType());
-        bool isFloat = binop_exp->getType()->equal(ASTFloatType::get());
+        std::shared_ptr<ASTTypeNode> type = binop_exp->getType();
+        assert(type);
 
-        switch(binop_exp->getOp()) {
-        case ASTBinopExp::ADD:  return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FAdd : Instruction::Add, v1, v2);
-        case ASTBinopExp::SUB:  return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FSub : Instruction::Sub, v1, v2);
-        case ASTBinopExp::MUL:  return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FMul : Instruction::Mul, v1, v2);
-        case ASTBinopExp::DIV:
-            // Insert division checks
-            if (args->opr_safe) {
-                std::vector<Value *> args;
-                args.push_back(v1);
-                args.push_back(v2);
-
-                ctx->getBuilder()->CreateCall(ctx->getDivCheck(), args);
-            }
-
-            return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FDiv : Instruction::SDiv, v1, v2);
-        case ASTBinopExp::MOD:  return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FRem : Instruction::SRem, v1, v2);
-        case ASTBinopExp::SHL:  return ctx->getBuilder()->CreateBinOp(Instruction::Shl, v1, v2);
-        case ASTBinopExp::SHR:  return ctx->getBuilder()->CreateBinOp(Instruction::AShr, v1, v2);
-        case ASTBinopExp::AND:  return ctx->getBuilder()->CreateBinOp(Instruction::And, v1, v2);
-        case ASTBinopExp::OR:   return ctx->getBuilder()->CreateBinOp(Instruction::Or, v1, v2);
-        case ASTBinopExp::BAND: return ctx->getBuilder()->CreateBinOp(Instruction::And, v1, v2);
-        case ASTBinopExp::BOR:  return ctx->getBuilder()->CreateBinOp(Instruction::Or, v1, v2);
-        case ASTBinopExp::BXOR: return ctx->getBuilder()->CreateBinOp(Instruction::Xor, v1, v2);
-        case ASTBinopExp::EQ:   return (isFloat ? ctx->getBuilder()->CreateFCmpOEQ(v1, v2) : ctx->getBuilder()->CreateICmpEQ(v1, v2));
-        case ASTBinopExp::NEQ:  return (isFloat ? ctx->getBuilder()->CreateFCmpONE(v1, v2) : ctx->getBuilder()->CreateICmpNE(v1, v2));
-        case ASTBinopExp::LEQ:  return (isFloat ? ctx->getBuilder()->CreateFCmpOLE(v1, v2) : ctx->getBuilder()->CreateICmpSLE(v1, v2));
-        case ASTBinopExp::GEQ:  return (isFloat ? ctx->getBuilder()->CreateFCmpOGE(v1, v2) : ctx->getBuilder()->CreateICmpSGE(v1, v2));
-        case ASTBinopExp::LT:   return (isFloat ? ctx->getBuilder()->CreateFCmpOLT(v1, v2) : ctx->getBuilder()->CreateICmpSLT(v1, v2));
-        case ASTBinopExp::GT:   return (isFloat ? ctx->getBuilder()->CreateFCmpOGT(v1, v2) : ctx->getBuilder()->CreateICmpSGT(v1, v2));
-        }
+        return codegen_binop(ctx, binop_exp->getOp(), type, v1, v2);
     }
     // Ternary operator
     else if (std::shared_ptr<ASTTernopExp> tern_exp = std::dynamic_pointer_cast<ASTTernopExp>(node)) {
@@ -273,8 +285,22 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
     // local variables as well because they are stack allocated until conversion to SSA.
     else if (std::shared_ptr<ASTAssignStmt> decl_stmt = std::dynamic_pointer_cast<ASTAssignStmt>(head)) {
         Value *lval = codegen_lvalue(ctx, decl_stmt->getLValue());
-        Value *exp_val = codegen_exp(ctx, decl_stmt->getExp());
-        ctx->getBuilder()->CreateStore(exp_val, lval);
+
+        if (decl_stmt->getOp() == ASTBinopExp::NONE) {
+            Value *exp_val = codegen_exp(ctx, decl_stmt->getExp());
+            ctx->getBuilder()->CreateStore(exp_val, lval);
+        }
+        // Compound assignment like +=, etc.
+        else {
+            Value *loadLVal = ctx->getBuilder()->CreateLoad(lval);
+            Value *rhs = codegen_exp(ctx, decl_stmt->getExp());
+
+            std::shared_ptr<ASTTypeNode> type = decl_stmt->getType();
+            assert(type != nullptr);
+
+            Value *newVal = codegen_binop(ctx, decl_stmt->getOp(), type, loadLVal, rhs);
+            ctx->getBuilder()->CreateStore(newVal, lval);
+        }
     }
     // Scope
     else if (std::shared_ptr<ASTScopeStmt> scope_stmt = std::dynamic_pointer_cast<ASTScopeStmt>(head)) {

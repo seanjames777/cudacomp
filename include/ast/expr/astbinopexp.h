@@ -23,6 +23,7 @@ public:
      * @brief Binary operations
      */
     enum op {
+        NONE, //!< No operation
         ADD,  //!< Addition
         SUB,  //!< Subtraction
         MUL,  //!< Multiplication

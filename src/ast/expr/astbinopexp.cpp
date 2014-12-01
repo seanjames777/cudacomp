@@ -12,6 +12,7 @@ ASTBinopExp::ASTBinopExp(enum op op, std::shared_ptr<ASTExpNode> e1, std::shared
       e2(e2),
       type(nullptr)
 {
+    assert(op != NONE);
 }
 
 ASTBinopExp::~ASTBinopExp() {

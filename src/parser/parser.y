@@ -57,6 +57,7 @@ void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
 %token RETURN IF ELSE TYPEDEF WHILE EXTERN ALLOC_ARRAY COLON TO DEVICE FOR QUESTION
 %token LPAREN RPAREN LBRACE RBRACE
 %token EQ NEQ LEQ GEQ LT GT
+%token PLUSEQ MINUSEQ TIMESEQ DIVEQ MODEQ
 
 %type <exp> exp
 %type <type> type
@@ -71,7 +72,7 @@ void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
 %type <exp_seq> arg_list arg_list_follow
 %type <linkage> linkage
 
-%right ASSIGN
+%right ASSIGN PLUSEQ MINUSEQ TIMESEQ DIVEQ MODEQ
 %left TO
 %right QUESTION COLON
 %left OR
@@ -159,7 +160,12 @@ type:
 simp:
     type IDENT                        { $$ = new ASTVarDeclStmt(std::shared_ptr<ASTTypeNode>($1), std::string($2), nullptr); free($2); }
   | type IDENT ASSIGN exp             { $$ = new ASTVarDeclStmt(std::shared_ptr<ASTTypeNode>($1), std::string($2), std::shared_ptr<ASTExpNode>($4)); free($2); }
-  | exp ASSIGN exp                    { $$ = new ASTAssignStmt(std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp ASSIGN exp                    { $$ = new ASTAssignStmt(ASTBinopExp::NONE, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp PLUSEQ exp                    { $$ = new ASTAssignStmt(ASTBinopExp::ADD, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp MINUSEQ exp                   { $$ = new ASTAssignStmt(ASTBinopExp::SUB, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp TIMESEQ exp                   { $$ = new ASTAssignStmt(ASTBinopExp::MUL, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp DIVEQ exp                     { $$ = new ASTAssignStmt(ASTBinopExp::DIV, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp MODEQ exp                     { $$ = new ASTAssignStmt(ASTBinopExp::MOD, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp                               { $$ = new ASTExprStmt(std::shared_ptr<ASTExpNode>($1)); }
   ;
 

@@ -131,6 +131,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             }
 
             throw IllegalTypeException();
+        case ASTBinopExp::NONE: throw ASTMalformedException(); return nullptr;
         case ASTBinopExp::EQ:
         case ASTBinopExp::NEQ:
             // Must have the same type
@@ -155,6 +156,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             }
 
             throw IllegalTypeException();
+            return nullptr;
         }
     }
     // Ternary operator
@@ -299,6 +301,8 @@ void typecheck_stmt(
             // Must assign the same type
             if (!exp_type->equal(decl_type))
                 throw IllegalTypeException();
+
+            defn_stmt->setType(exp_type);
         }
         // Array subscript
         else if (std::shared_ptr<ASTIndexExp> idx_exp = std::dynamic_pointer_cast<ASTIndexExp>(defn_stmt->getLValue())) {
@@ -308,6 +312,8 @@ void typecheck_stmt(
             // Must assign the same type
             if (!lhs_type->equal(rhs_type))
                 throw IllegalTypeException();
+
+            defn_stmt->setType(rhs_type);
         }
         else throw IllegalLValueException();
     }
