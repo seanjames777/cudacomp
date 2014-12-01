@@ -126,6 +126,7 @@ target_link_libraries(cc
 
 add_library(host_rt
     runtime/host_rt.c
+    runtime/host_main.c
 )
 
 if ("${PTX_BACKEND}" MATCHES "TRUE")
