@@ -75,8 +75,9 @@ std::shared_ptr<ASTTypeNode> TypeResolve::resolveType(std::shared_ptr<ASTTypeNod
 }
 
 void TypeResolve::visitRecordType(std::shared_ptr<ASTRecordType> type) {
+    // We already resolved the record and just have to retrieve the result from a table
+    // No need to visit children of record, which are already resolved
     resolveType(type);
-    // We already recursively resolved and just had to retrieve the result from a table
 }
 
 void TypeResolve::visitTypeNode(std::shared_ptr<ASTTypeNode> type) {
@@ -138,9 +139,8 @@ void TypeResolve::visitRecordDecl(std::shared_ptr<ASTRecordDecl> recordDecl) {
     if (module->getRecord(recordDecl->getName()) != nullptr)
         throw RedeclaredTypeException(recordDecl->getName());
 
-    // TODO TODO
-    // We don't want repeat field names, don't want void fields or undefined struct fields, any other type is OK
-    // Also, need to recursively resolve all types inside the struct
+    // TODO : FIX broken handling of recursive structs
+    // TODO : ensure no repeat field names, void fields
 
     std::string name = recordDecl->getName();
     module->addRecord(name, recordDecl->getSignature());

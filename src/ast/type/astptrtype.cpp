@@ -31,7 +31,3 @@ bool ASTPtrType::equal(std::shared_ptr<ASTTypeNode> other) {
 
 void ASTPtrType::print(std::ostream & ss) {
 }
-
-int ASTPtrType::getSize() {
-    return 8;
-}

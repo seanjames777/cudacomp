@@ -28,12 +28,6 @@ public:
      * @param[in] other ASTTypeNode to compare to
      */
     virtual bool equal(std::shared_ptr<ASTTypeNode> other) = 0;
-
-    /**
-     * @brief Get the size of the type, in bytes. TODO : DEPRECATE
-     */
-    virtual int getSize() = 0; 
-
 };
 
 #endif

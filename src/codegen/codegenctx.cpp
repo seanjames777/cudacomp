@@ -228,6 +228,7 @@ Type *CodegenCtx::getRecordType(std::string name) {
 }
 
 void CodegenCtx::createRecord(std::shared_ptr<ASTRecordType> recordInfo){
+    // TODO : evaluate possibility of undesirable name conflicts between "struct foo" and named type foo
     std::string name = recordInfo->getId();
     std::vector<Type *> elems;
     std::shared_ptr<ASTArgSeqNode> fields = recordInfo->getFields();

@@ -32,7 +32,7 @@ public:
      *
      * @param[in] name Record type name
      * @param[in] sig  Record signature
-     * @param[in] defn Is this record was defined or just declared
+     * @param[in] defn Is this record defined, also?
      */
     ASTRecordDecl(std::string name, std::shared_ptr<ASTRecordType> sig, bool defn);
 

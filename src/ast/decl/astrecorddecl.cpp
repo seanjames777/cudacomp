@@ -17,7 +17,7 @@ ASTRecordDecl::~ASTRecordDecl() {
 }
 
 std::string ASTRecordDecl::getName() {
-    return "_struct_" + name;
+    return name;
 }
 
 std::shared_ptr<ASTRecordType> ASTRecordDecl::getSignature() {
@@ -29,6 +29,22 @@ bool ASTRecordDecl::isDefn() {
 }
 
 void ASTRecordDecl::print(std::ostream & ss) {
-    // TODO
-    sig->print(ss);
+    ss << "struct ";
+
+    ss << name;
+
+    ss << "{";
+
+    std::shared_ptr<ASTArgSeqNode> field = sig->getFields();
+
+    while (field != nullptr) {
+        field->print(ss);
+
+        field = field->getTail();
+
+        if (field != nullptr)
+            ss << ", ";
+    }
+
+    ss << "}";
 }

@@ -1,9 +1,9 @@
-struct cat {
-    int meow;
+struct foo {
+    int bar;
 };
 
 int _cc_main() {
-    struct cat * catty = alloc(struct cat);
-    catty->meow = 1;
-    return catty->meow;
+    struct foo * baz = alloc(struct foo);
+    baz->bar = 1;
+    return baz->bar;
 }

@@ -25,10 +25,7 @@ Type *convertType(std::shared_ptr<ASTTypeNode> type, CodegenCtx *c) {
     else if (std::shared_ptr<ASTArrType> arr_type = std::dynamic_pointer_cast<ASTArrType>(type))
         return PointerType::getUnqual(convertType(arr_type->getElemType(), c));
     else if (std::shared_ptr<ASTRecordType> rcd_type = std::dynamic_pointer_cast<ASTRecordType>(type)) {
-        if (c)
-            return c->getRecordType(rcd_type->getId());
-        else
-            throw ASTMalformedException(); 
+        return c->getRecordType(rcd_type->getId());
     }
     else
         throw ASTMalformedException();

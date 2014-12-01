@@ -43,11 +43,15 @@ public:
 
     /**
      * @brief Get the field with the given name
+     *
+     * @param[in] id The name of the desired field
      */
     std::shared_ptr<ASTArgNode> getField(std::string id);
 
     /**
      * @brief Returns n such that the nth field of the record is id.
+     *
+     * @param[in] id The name of the desired field
      */
     int getFieldIndex(std::string id);
 
@@ -57,8 +61,8 @@ public:
     void setFields(std::shared_ptr<ASTArgSeqNode> fields);
 
     /**
-     * @brief Check if this type is structurally equal to another type. Names
-     * of arguments are not considered: only argument types and return type.
+     * @brief Check if this type is identical in name to the other record type.
+     *
      */
     virtual bool equal(std::shared_ptr<ASTTypeNode> other) override;
 
@@ -66,12 +70,6 @@ public:
      * @copydoc ASTNode::print()
      */
     virtual void print(std::ostream & ss) override;
-
-    /**
-     * @copydoc ASTTypeNode::getSize()
-     */
-    virtual int getSize() override;
-
 };
 
 #endif

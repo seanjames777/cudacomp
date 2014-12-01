@@ -14,7 +14,7 @@ ASTRecordType::ASTRecordType(std::string id, std::shared_ptr<ASTArgSeqNode> fiel
 }
 
 std::string ASTRecordType::getId() {
-    return "_struct_" + id;
+    return id;
 }
 
 std::shared_ptr<ASTArgSeqNode> ASTRecordType::getFields() {
@@ -52,7 +52,7 @@ int ASTRecordType::getFieldIndex(std::string field_id) {
         idx++;
     }
     
-    // TODO: raise an exception
+    // TODO: raise an exception?
     return -1;
 }
 
@@ -75,37 +75,5 @@ bool ASTRecordType::equal(std::shared_ptr<ASTTypeNode> other_type) {
 }
 
 void ASTRecordType::print(std::ostream & ss) {
-    ss << "struct ";
-
-    ss << id;
-
-    ss << "(";
-
-    std::shared_ptr<ASTArgSeqNode> field = fields;
-
-    while (field != nullptr) {
-        field->print(ss);
-
-        field = field->getTail();
-
-        if (field != nullptr)
-            ss << ", ";
-    }
-
-    ss << ")";
-}
-
-// TODO: size after alignment ? alignment TODO
-int ASTRecordType::getSize() {
-    std::shared_ptr<ASTArgSeqNode> field = fields;
-    int numfields = 0;
-    int sum = 0;
-    while (field) {
-        sum += field->getHead()->getType()->getSize();
-        numfields++;
-        field = field->getTail();
-    }
-    // Very generous size estimate. TODO: fix sizes by using datalayout.
-    // ALSO this is not necessarily aligned so shit.
-    return sum + 4 * numfields;
+    ss << "struct " + id;
 }

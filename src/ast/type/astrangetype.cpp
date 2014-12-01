@@ -24,7 +24,3 @@ bool ASTRangeType::equal(std::shared_ptr<ASTTypeNode> other) {
 
 void ASTRangeType::print(std::ostream & ss) {
 }
-
-int ASTRangeType::getSize() {
-    throw std::runtime_error("Ranges do not have a size");
-}

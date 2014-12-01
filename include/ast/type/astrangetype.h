@@ -40,12 +40,6 @@ public:
      * @copydoc ASTNode::print()
      */
     virtual void print(std::ostream & ss) override;
-
-    /**
-     * @copydoc ASTTypeNode::getSize()
-     */
-    virtual int getSize() override;
-
 };
 
 #endif

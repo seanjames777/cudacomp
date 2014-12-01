@@ -1,31 +1,31 @@
-struct cat {
-    int cat;
+struct foo {
+    int foo;
 };
 
-struct tiger {
-    struct cat c;
+struct bar {
+    struct foo c;
 };
 
-struct tigger {
-    struct tiger *t;
+struct baz {
+    struct bar *t;
 };
 
-struct quail {
-    struct tigger t1;
-    struct tigger *t2;
+struct buzz {
+    struct baz t1;
+    struct baz *t2;
 };
 
 int _cc_main() {
-    struct cat *catty = alloc(struct cat);
-    catty->cat = 5;
-    struct tiger *verycat = alloc(struct tiger);
-    verycat->c.cat = catty->cat;
-    struct tigger *notcat = alloc(struct tigger);
-    notcat->t = verycat;
-    struct quail *bird = alloc(struct quail);
-    bird->t2 = notcat;
-    bird->t1.t = notcat->t;
-    catty->cat = 10;
+    struct foo *foo_ptr = alloc(struct foo);
+    foo_ptr->foo = 5;
+    struct bar *veryfoo = alloc(struct bar);
+    veryfoo->c.foo = foo_ptr->foo;
+    struct baz *notfoo = alloc(struct baz);
+    notfoo->t = veryfoo;
+    struct buzz *bird = alloc(struct buzz);
+    bird->t2 = notfoo;
+    bird->t1.t = notfoo->t;
+    foo_ptr->foo = 10;
 
-    return bird->t1.t->c.cat + bird->t2->t->c.cat;
+    return bird->t1.t->c.foo + bird->t2->t->c.foo;
 }
