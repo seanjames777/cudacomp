@@ -33,8 +33,15 @@ void printHelp(char *argv[]) {
 }
 
 void parseArgs(int argc, char *argv[]) {
-    memset(&args, 0, sizeof(args));
+    args.emit_device   = false;
+    args.print_ast     = false;
+    args.in_file       = "";
+    args.out_file      = "";
+    args.verbose       = false;
     args.symbol_prefix = "";
+    args.mem_safe      = false;
+    args.opr_safe      = false;
+    args.entrypoint    = "";
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
@@ -46,11 +53,11 @@ void parseArgs(int argc, char *argv[]) {
         else if (strcmp(argv[i], "--print-ast") == 0)
             args.print_ast = true;
         else if (strcmp(argv[i], "-o") == 0)
-            args.out_file = argv[++i];
+            args.out_file = std::string(argv[++i]);
         else if (strcmp(argv[i], "--verbose") == 0)
             args.verbose = true;
         else if (strcmp(argv[i], "--symbol-prefix") == 0)
-            args.symbol_prefix = argv[++i];
+            args.symbol_prefix = std::string(argv[++i]);
         else if (strcmp(argv[i], "--mem-safe") == 0)
             args.mem_safe = true;
         else if (strcmp(argv[i], "--oper-safe") == 0)
@@ -58,8 +65,8 @@ void parseArgs(int argc, char *argv[]) {
         else if (strcmp(argv[i], "-S") == 0)
             args.emit_text = true;
         else if (strcmp(argv[i], "--require-entry") == 0)
-            args.entrypoint = argv[++i];
+            args.entrypoint = std::string(argv[++i]);
         else
-            args.in_file = argv[i];
+            args.in_file = std::string(argv[i]);
     }
 }

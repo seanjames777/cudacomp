@@ -41,4 +41,5 @@ void ASTAssignStmt::setType(std::shared_ptr<ASTTypeNode> type) {
 }
 
 void ASTAssignStmt::print(std::ostream & ss) {
+    ASTBinopExp::printBinop(op, ss);
 }

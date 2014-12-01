@@ -93,6 +93,14 @@ public:
     void setType(std::shared_ptr<ASTTypeNode> type);
 
     /**
+     * @brief Utility for printing operators to a stream
+     *
+     * @param[in] op Operator to print
+     * @param[in] ss Stream to print to
+     */
+    static void printBinop(enum ASTBinopExp::op op, std::ostream & ss);
+
+    /**
      * @copydoc ASTNode::print()
      */
     void print(std::ostream & ss) override;

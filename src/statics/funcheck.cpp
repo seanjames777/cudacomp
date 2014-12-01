@@ -32,7 +32,7 @@ void FunCheck::run(std::shared_ptr<ASTDeclSeqNode> ast) {
     // signature.
     struct CCArgs *args = getOptions();
 
-    if (args->entrypoint) {
+    if (!args->entrypoint.empty()) {
         std::shared_ptr<FunctionInfo> entry = module->getFunction(args->entrypoint);
 
         // Must be present
