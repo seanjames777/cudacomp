@@ -188,7 +188,6 @@ void SymbolCheck::visitForStmt(std::shared_ptr<ASTForStmt> forStmt) {
     // Definitions and declarations inside the body of the loop do NOT propagate out
     decl = old_decl;
     def = old_def;
-
 }
 
 void SymbolCheck::visitFunDecl(std::shared_ptr<ASTFunDecl> funDecl) {

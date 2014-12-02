@@ -474,7 +474,6 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
         // Whether the body of the while loop returns
         bool bodyContinue = codegen_stmts(ctx, for_node->getBody());
 
-
         // Only need to insert looping conditional jump if body didn't return
         if (bodyContinue) {
             codegen_stmt(ctx, for_node->getIter());

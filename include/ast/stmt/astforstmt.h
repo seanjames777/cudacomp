@@ -31,7 +31,7 @@ public:
      * @param[in] bodyStmt Statement sequence to evaluate in a loop while the condition is true
      */
     ASTForStmt(std::shared_ptr<ASTStmtNode> init, std::shared_ptr<ASTExpNode> cond,
-               std::shared_ptr<ASTStmtNode> iter, std::shared_ptr<ASTStmtSeqNode> bodyStmt);
+        std::shared_ptr<ASTStmtNode> iter, std::shared_ptr<ASTStmtSeqNode> bodyStmt);
 
     /**
      * @brief Destructor
