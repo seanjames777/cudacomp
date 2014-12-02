@@ -43,7 +43,7 @@ std::shared_ptr<ASTTypeNode> TypeResolve::resolveType(std::shared_ptr<ASTTypeNod
 
         // TODO: Don't want exception b/c undeclared structs are OK. But, not sure if nullptr is correct
         if (!resolved)
-            return nullptr;
+            return record_type;
 
         return resolved;
     }
@@ -128,27 +128,16 @@ void TypeResolve::visitRecordDecl(std::shared_ptr<ASTRecordDecl> recordDecl) {
     ASTVisitor::visitRecordDecl(recordDecl);
 
     // Recursive or undefined structs yield exception
-//    while(fields) {
-//        std::shared_ptr<ASTArgNode> field = fields->getHead();
-//        if (std::shared_ptr<ASTRecordType> type = std::dynamic_pointer_cast<ASTRecordType>(field->getType())) {
-//            if ((name.compare(type->getId())) == 0)
-//                throw IllegalTypeException(); // TODO : better exception?
-//            if(!module->getRecordType(type->getId()))
-//                throw IllegalTypeException();
-//        }
-////        else if (std::shared_ptr<ASTPtrType> type = std::dynamic_pointer_cast<ASTPtrType>(field->getType())) {
-////            // Pointers to this record don't need to be resolved
-////            if (std::shared_ptr<ASTRecordType> rcd_type = std::dynamic_pointer_cast<ASTRecordType>(type->getToType())) {
-////                if ((name.compare(rcd_type->getId())) == 0){
-////                    // Nothing to do
-////                }
-////                else {
-////                    visitArgNode(field);
-////                }
-////            }
-////        }
-//        fields = fields->getTail();
-//    }
+    while(fields) {
+        std::shared_ptr<ASTArgNode> field = fields->getHead();
+        if (std::shared_ptr<ASTRecordType> type = std::dynamic_pointer_cast<ASTRecordType>(field->getType())) {
+            if ((name.compare(type->getId())) == 0)
+                throw IllegalTypeException(); // TODO : better exception?
+            if(!module->getRecordType(type->getId()))
+                throw IllegalTypeException();
+        }
+        fields = fields->getTail();
+    }
 
 }
 

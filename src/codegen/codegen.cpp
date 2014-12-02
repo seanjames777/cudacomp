@@ -50,12 +50,12 @@ Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNod
     else if (std::shared_ptr<ASTRecordAccessExp> rcd_exp = std::dynamic_pointer_cast<ASTRecordAccessExp>(node)) { 
         Value *lhs = codegen_lvalue(ctx, rcd_exp->getLValue());
         int field_idx = rcd_exp->getType()->getFieldIndex(rcd_exp->getId());
-        return builder->CreateConstGEP2_32(lhs, 0, field_idx);
+        return ctx->getBuilder()->CreateConstGEP2_32(lhs, 0, field_idx);
     }
     // Pointer dereference
     else if (std::shared_ptr<ASTDerefExp> ptr_exp = std::dynamic_pointer_cast<ASTDerefExp>(node)) {
         Value *subexp = codegen_exp(ctx, ptr_exp->getExp());
-        return builder->CreateGEP(subexp, ConstantInt::get(convertType(ASTIntegerType::get(), ctx.get()), 0));
+        return ctx->getBuilder()->CreateGEP(subexp, ConstantInt::get(convertType(ASTIntegerType::get(), ctx.get()), 0));
     }
     else
         throw new ASTMalformedException();
