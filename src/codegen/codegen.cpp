@@ -111,6 +111,9 @@ Value *codegen_binop(
     case ASTBinopExp::GT:   return (isFloat ? ctx->getBuilder()->CreateFCmpOGT(v1, v2) : ctx->getBuilder()->CreateICmpSGT(v1, v2));
     case ASTBinopExp::NONE: throw ASTMalformedException(); return nullptr;
     }
+
+    throw ASTMalformedException();
+    return nullptr;
 }
 
 Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
@@ -237,6 +240,9 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         Value *lval_ptr = codegen_lvalue(ctx, node);
         return ctx->getBuilder()->CreateLoad(lval_ptr);
     }
+
+    throw ASTMalformedException();
+    return nullptr;
 }
 
 bool codegen_stmts(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtSeqNode> seq_node) {

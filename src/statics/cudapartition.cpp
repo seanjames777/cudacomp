@@ -9,16 +9,17 @@
 CudaPartition::CudaPartition(std::shared_ptr<ModuleInfo> module)
     : module(module)
 {
-    struct CCArgs *args = getOptions();
-    emitDevice = args->emit_device;
+    args = getOptions();
 
-    inDeviceMode = emitDevice;
+    inDeviceMode = args->emit_device;
 }
 
 void CudaPartition::run(std::shared_ptr<ASTDeclSeqNode> ast) {
     visitNode(ast);
 
     std::shared_ptr<ASTDeclSeqNode> decls = ast;
+
+    std::string entrypt = args->symbol_prefix + args->entrypoint;
 
     // Determine which functions are global functions
     while (decls != nullptr) {
@@ -31,8 +32,8 @@ void CudaPartition::run(std::shared_ptr<ASTDeclSeqNode> ast) {
                 if (sig->getDimArgs() != nullptr)
                     info->setUsage(FunctionInfo::Global);
                 // The _cc_main function is always global in device-only mode
-                else if (info->getName() == "_cc_main") {
-                    if (emitDevice)
+                else if (info->getName() == entrypt) {
+                    if (args->emit_device)
                         info->setUsage(FunctionInfo::Global);
                     else
                         info->setUsage(FunctionInfo::Host);
@@ -53,7 +54,7 @@ void CudaPartition::visitCallExp(std::shared_ptr<ASTCallExp> call) {
     if (info->getSignature()->getDimArgs() != nullptr) {
         inDeviceMode = true;
         ASTVisitor::visitCallExp(call);
-        inDeviceMode = emitDevice;
+        inDeviceMode = args->emit_device;
     }
     else {
         enum FunctionInfo::CudaUsage usage = info->getUsage();

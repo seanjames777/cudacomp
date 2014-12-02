@@ -43,10 +43,8 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    std::ofstream out;
-
     if (!args->emit_device) {
-        out = std::ofstream(args->out_hfile, std::ios::out);
+        std::ofstream out(args->out_hfile, std::ios::out);
 
         if (!out) {
             std::cout << "\033[31;1m" << "Error opening " << args->out_dfile << "\033[0m" << std::endl;
@@ -59,7 +57,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (moduleInfo->hasCudaFunctions()) {
-        out = std::ofstream(args->out_dfile, std::ios::out);
+        std::ofstream out(args->out_dfile, std::ios::out);
 
         if (!out) {
             std::cout << "\033[31;1m" << "Error opening " << args->out_dfile << "\033[0m" << std::endl;

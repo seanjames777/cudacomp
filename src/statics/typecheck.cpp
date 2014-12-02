@@ -235,8 +235,9 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         // Returns an array of elemTypes
         return std::make_shared<ASTArrType>(elemType);
     }
-    else
-        throw ASTMalformedException();
+
+    throw ASTMalformedException();
+    return nullptr;
 }
 
 void typecheck_stmts(

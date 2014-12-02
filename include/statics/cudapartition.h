@@ -24,6 +24,7 @@ private:
     std::shared_ptr<ModuleInfo> module;
     bool emitDevice;
     bool inDeviceMode;
+    struct CCArgs *args;
 
 public:
 

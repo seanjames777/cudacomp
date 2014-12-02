@@ -43,7 +43,7 @@ void parseArgs(int argc, char *argv[]) {
     args.symbol_prefix = "";
     args.mem_safe      = false;
     args.opr_safe      = false;
-    args.entrypoint    = "";
+    args.entrypoint    = "_cc_main";
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
