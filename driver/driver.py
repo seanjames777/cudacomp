@@ -214,7 +214,7 @@ for (name, expected, runfor) in tests:
 
     # If the compiler crashed, fail
     if cc_stat != 0 and cc_stat != 255:
-        print "\033[31;1m    FAILED: compiler crashed (" + str(stat) + ")\033[0m"
+        print "\033[31;1m    FAILED: compiler crashed (" + str(cc_stat) + ")\033[0m"
         continue
 
     # If we expected an error, check
