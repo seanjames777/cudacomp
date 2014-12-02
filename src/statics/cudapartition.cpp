@@ -31,10 +31,12 @@ void CudaPartition::run(std::shared_ptr<ASTDeclSeqNode> ast) {
                 if (sig->getDimArgs() != nullptr)
                     info->setUsage(FunctionInfo::Global);
                 // The _cc_main function is always global in device-only mode
-                else if (emitDevice && info->getName() == "_cc_main")
-                    info->setUsage(FunctionInfo::Global);
-                else
-                    info->setUsage(FunctionInfo::Host);
+                else if (info->getName() == "_cc_main") {
+                    if (emitDevice)
+                        info->setUsage(FunctionInfo::Global);
+                    else
+                        info->setUsage(FunctionInfo::Host);
+                }
 
                 // TODO: make sure global functions are never called directly
             }
@@ -82,7 +84,7 @@ void CudaPartition::visitRangeForStmt(std::shared_ptr<ASTRangeForStmt> rangeFor)
 
             inDeviceMode = true;
             visitNode(rangeFor->getBody());
-            inDeviceMode = false;
+            inDeviceMode = emitDevice;
         }
     }
 }

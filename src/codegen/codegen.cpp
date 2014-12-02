@@ -204,9 +204,8 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
 
         if (!ctx->getEmitDevice() || !(funcInfo->getUsage() & FunctionInfo::Global))
             ret_val = call;
-        else if (!isVoid) {
+        else if (!isVoid)
             ret_val = ctx->getBuilder()->CreateLoad(ret_val);
-        }
 
         // If the function has a void return type, we'll return nullptr, but this should have
         // already been handled by the type checker: can't assign a void expression to any
