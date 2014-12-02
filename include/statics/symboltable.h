@@ -37,6 +37,11 @@ private:
 public:
 
     /**
+     * @brief Iterator type
+     */
+    typedef typename std::unordered_map<Symbol, T>::iterator iterator;
+
+    /**
      * @brief Constructor
      */
     SymbolTable() {
@@ -79,6 +84,20 @@ public:
      */
     void clear() {
         table.clear();
+    }
+
+    /**
+     * @brief Get an iterator to the beginning of the table
+     */
+    iterator begin() {
+        return table.begin();
+    }
+
+    /**
+     * @brief Get an iterator to the end of the table
+     */
+    iterator end() {
+        return table.end();
     }
 
 };

@@ -111,6 +111,7 @@ add_executable(cc
     src/statics/funcheck.cpp
     src/statics/exceptions.cpp
     src/statics/symbolmangle.cpp
+    src/statics/cudapartition.cpp
     ${BISON_parser_OUTPUTS}
     ${FLEX_lexer_OUTPUTS}
 )

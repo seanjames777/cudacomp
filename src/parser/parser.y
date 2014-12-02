@@ -61,7 +61,7 @@ void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
 %token LPAREN RPAREN LBRACE RBRACE
 %token EQ NEQ LEQ GEQ LT GT
 %token PLUSEQ MINUSEQ TIMESEQ DIVEQ MODEQ
-%token STRUCT BREAK CONTINUE ASSERT KWNULL ALLOC CHAR STRING
+%token STRUCT BREAK CONTINUE ASSERT KWNULL ALLOC CHAR STRING DIML DIMR
 
 %type <exp> exp
 %type <type> type
@@ -70,11 +70,11 @@ void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
 %type <stmt> stmt simp simpopt
 %type <stmt_seq> stmt_list elseopt
 %type <arg> param
-%type <arg_seq> param_list param_list_follow
+%type <arg_seq> param_list param_list_follow dim_param_list_opt
 %type <top> top
 %type <top_seq> top_list
 %type <top> fundecl typedecl
-%type <exp_seq> arg_list arg_list_follow
+%type <exp_seq> arg_list arg_list_follow dim_arg_list_opt
 %type <linkage> linkage
 
 %right ASSIGN PLUSEQ MINUSEQ TIMESEQ DIVEQ MODEQ
@@ -143,7 +143,8 @@ exp:
   | NOT exp                           { $$ = new ASTUnopExp(ASTUnopExp::NOT, std::shared_ptr<ASTExpNode>($2)); }
   | BNOT exp                          { $$ = new ASTUnopExp(ASTUnopExp::BNOT, std::shared_ptr<ASTExpNode>($2)); }
   | MINUS exp %prec UMINUS            { $$ = new ASTUnopExp(ASTUnopExp::NEG, std::shared_ptr<ASTExpNode>($2)); }
-  | IDENT LPAREN arg_list RPAREN      { $$ = new ASTCallExp(std::string($1), std::shared_ptr<ASTExpSeqNode>($3)); free($1); }
+  | IDENT dim_arg_list_opt LPAREN arg_list RPAREN
+    { $$ = new ASTCallExp(std::string($1), std::shared_ptr<ASTExpSeqNode>($2), std::shared_ptr<ASTExpSeqNode>($4)); free($1); }
   | IDENT                             { $$ = new ASTIdentifierExp(std::string($1)); free($1); }
   | LPAREN exp RPAREN                 { $$ = $2; }
   | exp LBRACKET exp RBRACKET         { $$ = new ASTIndexExp(std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
@@ -235,10 +236,20 @@ linkage:
   ;
 
 fundecl:
-    linkage type IDENT LPAREN param_list RPAREN LBRACE stmt_list RBRACE
-    { $$ = new ASTFunDecl(std::string($3), std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($2), std::shared_ptr<ASTArgSeqNode>($5)), true, $1, std::shared_ptr<ASTStmtSeqNode>($8)); free($3); }
-  | linkage type IDENT LPAREN param_list RPAREN SEMI
-    { $$ = new ASTFunDecl(std::string($3), std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($2), std::shared_ptr<ASTArgSeqNode>($5)), false, $1, nullptr); free($3); }
+    linkage type IDENT dim_param_list_opt LPAREN param_list RPAREN LBRACE stmt_list RBRACE
+    { $$ = new ASTFunDecl(std::string($3), std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($2), std::shared_ptr<ASTArgSeqNode>($4), std::shared_ptr<ASTArgSeqNode>($6)), true, $1, std::shared_ptr<ASTStmtSeqNode>($9)); free($3); }
+  | linkage type IDENT dim_param_list_opt LPAREN param_list RPAREN SEMI
+    { $$ = new ASTFunDecl(std::string($3), std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($2), std::shared_ptr<ASTArgSeqNode>($4), std::shared_ptr<ASTArgSeqNode>($6)), false, $1, nullptr); free($3); }
+  ;
+
+dim_param_list_opt:
+    /* empty */                       { $$ = nullptr; }
+  | DIML param_list DIMR              { $$ = $2; }
+  ;
+
+dim_arg_list_opt:
+    /* empty */                       { $$ = nullptr; }
+  | DIML arg_list DIMR                { $$ = $2; }
   ;
 
 arg_list_follow:

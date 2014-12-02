@@ -43,20 +43,33 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    if (!args->out_file.empty()) {
-        std::ofstream out(args->out_file, std::ios::out);
+    std::ofstream out;
+
+    if (!args->emit_device) {
+        out = std::ofstream(args->out_hfile, std::ios::out);
 
         if (!out) {
-            std::cout << "\033[31;1m" << "Error opening " << args->out_file << "\033[0m" << std::endl;
+            std::cout << "\033[31;1m" << "Error opening " << args->out_dfile << "\033[0m" << std::endl;
             return -1;
         }
 
-        Codegen::codegen_tops(moduleInfo, node, args->emit_device, out);
+        Codegen::codegen_tops(moduleInfo, node, false, out);
 
         out.close();
     }
-    else
-        Codegen::codegen_tops(moduleInfo, node, args->emit_device, std::cout);
+
+    if (moduleInfo->hasCudaFunctions()) {
+        out = std::ofstream(args->out_dfile, std::ios::out);
+
+        if (!out) {
+            std::cout << "\033[31;1m" << "Error opening " << args->out_dfile << "\033[0m" << std::endl;
+            return -1;
+        }
+
+        Codegen::codegen_tops(moduleInfo, node, true, out);
+
+        out.close();
+    }
 
     return 0;
 }

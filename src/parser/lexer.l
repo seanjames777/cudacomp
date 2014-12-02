@@ -128,6 +128,8 @@ int comment_depth = 0;
 "*="                    { return TIMESEQ; }
 "/="                    { return DIVEQ; }
 "%="                    { return MODEQ; }
+"<<<"                   { return DIML; }
+">>>"                   { return DIMR; }
 
 [ \r\t\v\f]+            /* ignore whitespace */
 "\n"                    { line_num++; }

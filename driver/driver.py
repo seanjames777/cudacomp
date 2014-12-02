@@ -19,106 +19,106 @@ INSTALL_DIR = "@CMAKE_INSTALL_PREFIX@/"
 LLC = "@LLVM_LLC@"
 
 tests = [
-    (SOURCE_DIR + "tests/testBinOps1.cc", 14),
-    (SOURCE_DIR + "tests/testBinOps2.cc", 2),
-    (SOURCE_DIR + "tests/testCmp1.cc", 1),
-    (SOURCE_DIR + "tests/testUndeclared.cc", "error"),
-    (SOURCE_DIR + "tests/testUndefined.cc", "error"),
-    (SOURCE_DIR + "tests/testRedeclared.cc", "error"),
-    (SOURCE_DIR + "tests/testId1.cc", 10),
-    (SOURCE_DIR + "tests/testId2.cc", 20),
-    (SOURCE_DIR + "tests/testId3.cc", "error"),
-    (SOURCE_DIR + "tests/testId4.cc", 20),
-    (SOURCE_DIR + "tests/testId5.cc", "error"),
-    (SOURCE_DIR + "tests/testId6.cc", 100),
-    (SOURCE_DIR + "tests/testReturnDeclDef.cc", 5),
-    (SOURCE_DIR + "tests/testUnOps1.cc", -1),
-    (SOURCE_DIR + "tests/testUnOps2.cc", -1),
-    (SOURCE_DIR + "tests/testUnOps3.cc", 2),
-    (SOURCE_DIR + "tests/testScope1.cc", 10),
-    (SOURCE_DIR + "tests/testScope2.cc", "error"),
-    (SOURCE_DIR + "tests/testScope3.cc", 10),
-    (SOURCE_DIR + "tests/testScope4.cc", 10),
-    (SOURCE_DIR + "tests/testScope5.cc", 10),
-    (SOURCE_DIR + "tests/testIf1.cc", 10),
-    (SOURCE_DIR + "tests/testIf2.cc", 20),
-    (SOURCE_DIR + "tests/testIf3.cc", 10),
-    (SOURCE_DIR + "tests/testIf4.cc", "error"),
-    (SOURCE_DIR + "tests/testIf5.cc", 10),
-    (SOURCE_DIR + "tests/testIf6.cc", 10),
-    (SOURCE_DIR + "tests/testReturnCheck1.cc", "error"),
-    (SOURCE_DIR + "tests/testReturnCheck2.cc", 10),
-    (SOURCE_DIR + "tests/testReturnCheck3.cc", 10),
-    (SOURCE_DIR + "tests/testReturnCheck4.cc", 10),
-    (SOURCE_DIR + "tests/testReturnCheck5.cc", "error"),
-    (SOURCE_DIR + "tests/testReturnCheck6.cc", 10),
-    (SOURCE_DIR + "tests/testCall1.cc", 5),
-    (SOURCE_DIR + "tests/testCall2.cc", "error"),
-    (SOURCE_DIR + "tests/testCall3.cc", "error"),
-    (SOURCE_DIR + "tests/testCall4.cc", "error"),
-    (SOURCE_DIR + "tests/testCall5.cc", 5),
-    (SOURCE_DIR + "tests/testCall6.cc", "error"),
-    (SOURCE_DIR + "tests/testCall7.cc", "error"),
-    (SOURCE_DIR + "tests/testCall8.cc", 20),
-    (SOURCE_DIR + "tests/testCall9.cc", 5),
-    (SOURCE_DIR + "tests/testCall10.cc", "error"),
-    (SOURCE_DIR + "tests/testCall11.cc", "error"),
-    (SOURCE_DIR + "tests/testCall12.cc", 5),
-    (SOURCE_DIR + "tests/testCall13.cc", 11),
-    (SOURCE_DIR + "tests/testCall14.cc", "error"),
-    (SOURCE_DIR + "tests/testCall15.cc", "error"),
-    (SOURCE_DIR + "tests/testCall16.cc", 0),
-    (SOURCE_DIR + "tests/testFib1.cc", 34),
-    (SOURCE_DIR + "tests/testFib2.cc", 34),
-    (SOURCE_DIR + "tests/testFib3.cc", 34),
-    (SOURCE_DIR + "tests/testFib4.cc", 34),
-    (SOURCE_DIR + "tests/testFor1.cc", 10),
-    (SOURCE_DIR + "tests/testFor2.cc", 10),
-    (SOURCE_DIR + "tests/testFor3.cc", 0),
-    (SOURCE_DIR + "tests/testFor4.cc", 63),
-    (SOURCE_DIR + "tests/testFor5.cc", 900),
-    (SOURCE_DIR + "tests/testFor6.cc", 0),
-    (SOURCE_DIR + "tests/testFor7.cc", "error"),
-    (SOURCE_DIR + "tests/testWhile1.cc", 1),
-    (SOURCE_DIR + "tests/testWhile2.cc", 55),
-    (SOURCE_DIR + "tests/testWhile3.cc", 1000),
-    (SOURCE_DIR + "tests/testWhile4.cc", "error"),
-    (SOURCE_DIR + "tests/testWhile5.cc", "error"),
-    (SOURCE_DIR + "tests/testWhile6.cc", "error"),
-    (SOURCE_DIR + "tests/testWhile7.cc", 0),
-    (SOURCE_DIR + "tests/testTypeDef1.cc", 5),
-    (SOURCE_DIR + "tests/testTypeDef2.cc", "error"),
-    (SOURCE_DIR + "tests/testTypeDef3.cc", 5),
-    (SOURCE_DIR + "tests/testTypeDef4.cc", "error"),
-    (SOURCE_DIR + "tests/testTypeDef5.cc", "error"),
-    (SOURCE_DIR + "tests/testTypeDef6.cc", 5),
-    (SOURCE_DIR + "tests/testFunDecl1.cc", 5),
-    (SOURCE_DIR + "tests/testFunDecl2.cc", 5),
-    (SOURCE_DIR + "tests/testFunDecl3.cc", "error"),
-    (SOURCE_DIR + "tests/testFunDecl4.cc", "error"),
-    (SOURCE_DIR + "tests/testFunDecl5.cc", "error"),
-    (SOURCE_DIR + "tests/testFunDecl6.cc", "error"),
-    (SOURCE_DIR + "tests/testFunDecl7.cc", "error"),
-    (SOURCE_DIR + "tests/testFunDecl8.cc", "error"),
-    (SOURCE_DIR + "tests/testFunDecl9.cc", 5),
-    (SOURCE_DIR + "tests/testFunDecl10.cc", "error"),
-    (SOURCE_DIR + "tests/testFunDecl11.cc", 5),
-    (SOURCE_DIR + "tests/testFunDecl12.cc", "error"),
-    (SOURCE_DIR + "tests/testFunDecl13.cc", 518),
-    (SOURCE_DIR + "tests/testArr1.cc", 5),
-    (SOURCE_DIR + "tests/testArr2.cc", 0),
-    (SOURCE_DIR + "tests/testArr3.cc", 5),
-    (SOURCE_DIR + "tests/testArr4.cc", 19),
-    (SOURCE_DIR + "tests/testArr5.cc", 10),
-    (SOURCE_DIR + "tests/testArr6.cc", 5),
-    (SOURCE_DIR + "tests/testArr7.cc", "error"),
-    (SOURCE_DIR + "tests/testArr8.cc", "error"),
-    (SOURCE_DIR + "tests/testArr9.cc", "error"),
-    (SOURCE_DIR + "tests/testLValue1.cc", "error"),
-    (SOURCE_DIR + "tests/testRange1.cc", 33),
-    (SOURCE_DIR + "tests/testRange2.cc", 10),
-    (SOURCE_DIR + "tests/testRange3.cc", 4950),
-    (SOURCE_DIR + "tests/testFloat1.cc", 10),
+    (SOURCE_DIR + "tests/testBinOps1.cc", 14, "both"),
+    (SOURCE_DIR + "tests/testBinOps2.cc", 2, "both"),
+    (SOURCE_DIR + "tests/testCmp1.cc", 1, "both"),
+    (SOURCE_DIR + "tests/testUndeclared.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testUndefined.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testRedeclared.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testId1.cc", 10, "both"),
+    (SOURCE_DIR + "tests/testId2.cc", 20, "both"),
+    (SOURCE_DIR + "tests/testId3.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testId4.cc", 20, "both"),
+    (SOURCE_DIR + "tests/testId5.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testId6.cc", 100, "both"),
+    (SOURCE_DIR + "tests/testReturnDeclDef.cc", 5, "both"),
+    (SOURCE_DIR + "tests/testUnOps1.cc", -1, "both"),
+    (SOURCE_DIR + "tests/testUnOps2.cc", -1, "both"),
+    (SOURCE_DIR + "tests/testUnOps3.cc", 2, "both"),
+    (SOURCE_DIR + "tests/testScope1.cc", 10, "both"),
+    (SOURCE_DIR + "tests/testScope2.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testScope3.cc", 10, "both"),
+    (SOURCE_DIR + "tests/testScope4.cc", 10, "both"),
+    (SOURCE_DIR + "tests/testScope5.cc", 10, "both"),
+    (SOURCE_DIR + "tests/testIf1.cc", 10, "both"),
+    (SOURCE_DIR + "tests/testIf2.cc", 20, "both"),
+    (SOURCE_DIR + "tests/testIf3.cc", 10, "both"),
+    (SOURCE_DIR + "tests/testIf4.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testIf5.cc", 10, "both"),
+    (SOURCE_DIR + "tests/testIf6.cc", 10, "both"),
+    (SOURCE_DIR + "tests/testReturnCheck1.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testReturnCheck2.cc", 10, "both"),
+    (SOURCE_DIR + "tests/testReturnCheck3.cc", 10, "both"),
+    (SOURCE_DIR + "tests/testReturnCheck4.cc", 10, "both"),
+    (SOURCE_DIR + "tests/testReturnCheck5.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testReturnCheck6.cc", 10, "both"),
+    (SOURCE_DIR + "tests/testCall1.cc", 5, "both"),
+    (SOURCE_DIR + "tests/testCall2.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testCall3.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testCall4.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testCall5.cc", 5, "both"),
+    (SOURCE_DIR + "tests/testCall6.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testCall7.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testCall8.cc", 20, "both"),
+    (SOURCE_DIR + "tests/testCall9.cc", 5, "both"),
+    (SOURCE_DIR + "tests/testCall10.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testCall11.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testCall12.cc", 5, "both"),
+    (SOURCE_DIR + "tests/testCall13.cc", 11, "both"),
+    (SOURCE_DIR + "tests/testCall14.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testCall15.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testCall16.cc", 0, "both"),
+    (SOURCE_DIR + "tests/testFib1.cc", 34, "both"),
+    (SOURCE_DIR + "tests/testFib2.cc", 34, "both"),
+    (SOURCE_DIR + "tests/testFib3.cc", 34, "both"),
+    (SOURCE_DIR + "tests/testFib4.cc", 34, "both"),
+    (SOURCE_DIR + "tests/testWhile1.cc", 1, "both"),
+    (SOURCE_DIR + "tests/testWhile2.cc", 55, "both"),
+    (SOURCE_DIR + "tests/testWhile3.cc", 1000, "both"),
+    (SOURCE_DIR + "tests/testWhile4.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testWhile5.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testWhile6.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testWhile7.cc", 0, "both"),
+    (SOURCE_DIR + "tests/testFor1.cc", 10, "both"),
+    (SOURCE_DIR + "tests/testFor2.cc", 10, "both"),
+    (SOURCE_DIR + "tests/testFor3.cc", 0, "both"),
+    (SOURCE_DIR + "tests/testFor4.cc", 63, "both"),
+    (SOURCE_DIR + "tests/testFor5.cc", 900, "both"),
+    (SOURCE_DIR + "tests/testFor6.cc", 0, "both"),
+    (SOURCE_DIR + "tests/testFor7.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testTypeDef1.cc", 5, "both"),
+    (SOURCE_DIR + "tests/testTypeDef2.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testTypeDef3.cc", 5, "both"),
+    (SOURCE_DIR + "tests/testTypeDef4.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testTypeDef5.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testTypeDef6.cc", 5, "both"),
+    (SOURCE_DIR + "tests/testFunDecl1.cc", 5, "both"),
+    (SOURCE_DIR + "tests/testFunDecl2.cc", 5, "both"),
+    (SOURCE_DIR + "tests/testFunDecl3.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testFunDecl4.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testFunDecl5.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testFunDecl6.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testFunDecl7.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testFunDecl8.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testFunDecl9.cc", 5, "both"),
+    (SOURCE_DIR + "tests/testFunDecl10.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testFunDecl11.cc", 5, "both"),
+    (SOURCE_DIR + "tests/testFunDecl12.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testFunDecl13.cc", 518, "both"),
+    (SOURCE_DIR + "tests/testArr1.cc", 5, "both"),
+    (SOURCE_DIR + "tests/testArr2.cc", 0, "both"),
+    (SOURCE_DIR + "tests/testArr3.cc", 5, "both"),
+    (SOURCE_DIR + "tests/testArr4.cc", 19, "both"),
+    (SOURCE_DIR + "tests/testArr5.cc", 10, "both"),
+    (SOURCE_DIR + "tests/testArr6.cc", 5, "both"),
+    (SOURCE_DIR + "tests/testArr7.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testArr8.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testArr9.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testLValue1.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testRange1.cc", 33, "both"),
+    (SOURCE_DIR + "tests/testRange2.cc", 10, "both"),
+    (SOURCE_DIR + "tests/testRange3.cc", 4950, "both"),
+    (SOURCE_DIR + "tests/testFloat1.cc", 10, "both"),
 ]
 
 # TODO: actually test type checking...
@@ -174,14 +174,18 @@ print "\033[34;1m***************************************************\033[0m"
 run = 0
 passed = 0
 
+run_shell([ "rm", "-rf", "tmp" ])
 run_shell([ "mkdir", "-p", "tmp" ])
 
 def print_verbose(s):
     if verbose:
         print "\033[37;1m    " + s + "\033[0m"
 
-for (name, expected) in tests:
+for (name, expected, runfor) in tests:
     if len(run_list) > 0 and not(os.path.basename(name) in run_list):
+        continue
+
+    if target != runfor and runfor != "both":
         continue
 
     temp = "tmp/" + md5.new(name).hexdigest()
@@ -194,55 +198,89 @@ for (name, expected) in tests:
     stat = -1
     output = []
 
-    if target == "host":
-        print_verbose("Compiling...")
-        (cc_stat, cc_out) = run_shell([ INSTALL_DIR + "bin/cc", "-o", temp + "_host.bc", name ])
-        if cc_stat == 0:
-            print_verbose("Assembling...")
-            run_shell([ LLC, "-o", temp + "_host.o", "-filetype=obj", temp + "_host.bc" ])
-            print_verbose("Linking...")
-            run_shell([ "clang", "-o", temp + "_host", temp + "_host.o", INSTALL_DIR + "lib/libhost_rt.a" ])
-            print_verbose("Executing...")
-            (stat, output) = run_shell([ temp + "_host" ])
-        else:
-            (stat, output) = (cc_stat, cc_out)
-    else:
-        (cc_stat, cc_out) = run_shell([ INSTALL_DIR + "bin/cc", "-o", temp + "_device.bc", "--emit-device", name ])
-        if cc_stat == 0:
-            run_shell([ LLC, "-o", temp + "_device.ptx", temp + "_device.bc" ])
-            run_shell([ "nvcc", "-arch=sm_30", "-cubin", "-dc", "-o", temp + "_device.cubin", temp + "_device.ptx" ])
-            run_shell([ "nvcc", "-arch=sm_30", "-cubin", "-dlink", "-o", temp + "_link.cubin", temp + "_device.cubin", BINARY_DIR + "device_rt_kernel.cubin" ])
-            run_shell([ "clang", "-o", temp + "_device", INSTALL_DIR + "lib/libdevice_rt.a", "-framework", "CUDA",
-                "-sectcreate", "__TEXT", "__kernels", temp + "_link.cubin",
-                "-sectalign", "__TEXT", "__kernels", "8" ])
-            (stat, output) = run_shell([ temp + "_device" ])
-        else:
-            (stat, output) = (cc_stat, cc_out)
-
     run = run + 1
 
-    # stat == 0 => compiled OK, -1 => compiler caught an error
-    if stat != 0 and stat != 255:
+    # Compile host and possibly device code to LLVM bitcode
+    print_verbose("Compiling...")
+
+    compile_flags = [ INSTALL_DIR + "bin/cc", "-o", temp + "_host.bc", "-od", temp + "_device.bc" ]
+
+    if target == "device":
+        compile_flags.append("--emit-device")
+
+    compile_flags.append(name)
+
+    (cc_stat, cc_out) = run_shell(compile_flags)
+
+    # If the compiler crashed, fail
+    if cc_stat != 0 and cc_stat != 255:
         print "\033[31;1m    FAILED: compiler crashed (" + str(stat) + ")\033[0m"
-    elif type(expected) is int:
-        try:
-            outval = int(output[0])
+        continue
 
-            if outval == expected:
-                print "\033[32;1m    PASS:", expected, "\033[0m"
-                passed = passed + 1
-            else:
-                print "\033[31;1m    FAILED: expected", expected, "- returned", outval, "\033[0m"
-        except ValueError:
-            print "\033[31;1m    FAILED: expected", expected, "- returned", output[0], "\033[0m"
-    else:
-        try:
-            output = int(output[0])
-
+    # If we expected an error, check
+    if not(type(expected) is int):
+        if cc_stat == 0:
             print "\033[31;1m    FAILED: expected", expected, "\033[0m"
-        except:
+        else:
             print "\033[32;1m    PASS:", expected, "\033[0m"
             passed = passed + 1
+        continue
+
+    has_host = os.path.isfile(temp + "_host.bc")
+    has_device = os.path.isfile(temp + "_device.bc")
+
+    print_verbose("Assembling...")
+
+    # Assemble host code
+    if has_host:
+        run_shell([ LLC, "-o", temp + "_host.o", "-filetype=obj", temp + "_host.bc" ])
+
+    # Assemble device code, link with device runtime kernels
+    if has_device:
+        run_shell([ LLC, "-o", temp + "_device.ptx", temp + "_device.bc" ])
+        run_shell([ "nvcc", "-arch=sm_30", "-cubin", "-dc", "-o", temp + "_device.cubin", temp + "_device.ptx" ])
+        run_shell([ "nvcc", "-arch=sm_30", "-cubin", "-dlink", "-o", temp + "_link.cubin", temp + "_device.cubin", BINARY_DIR + "device_rt_kernel.cubin" ])
+
+    print_verbose("Linking...")
+
+    # Link host/device code
+    link_args = [ "clang", "-o", temp ]
+
+    # The host/device runtime has already been compiled and linked
+    if target == "host":
+        link_args.append(INSTALL_DIR + "lib/libhost_rt.a")
+    else:
+        link_args.append(INSTALL_DIR + "lib/libdevice_rt.a")
+
+    # Link host code
+    if has_host:
+        link_args.append(temp + "_host.o")
+
+    # Embed kernels in executable
+    if has_device:
+        link_args.append("-framework")
+        link_args.append("CUDA")
+        link_args.append("-sectcreate")
+        link_args.append("__TEXT")
+        link_args.append("__kernels")
+        link_args.append(temp + "_link.cubin")
+
+    run_shell(link_args)
+
+    # Execute
+    (stat, output) = run_shell([ temp ])
+
+    if stat != 0:
+        print "\033[31;1m    FAILED: executable returned non-zero exit status\033[0m"
+        continue
+
+    outval = int(output[0])
+
+    if outval == expected:
+        print "\033[32;1m    PASS:", expected, "\033[0m"
+        passed = passed + 1
+    else:
+        print "\033[31;1m    FAILED: expected", expected, "- returned", outval, "\033[0m"
 
 if not(dump_temp):
     run_shell([ "rm", "-rf", "tmp" ])

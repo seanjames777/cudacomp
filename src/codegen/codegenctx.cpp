@@ -16,6 +16,10 @@ CodegenCtx::CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo)
       emit_device(emit_device),
       modInfo(modInfo),
       alloc_array(nullptr),
+      alloc_device(nullptr),
+      cpy_h2d(nullptr),
+      cpy_d2h(nullptr),
+      invoke_kernel(nullptr),
       div_check(nullptr),
       def_bblock(nullptr),
       first_bblock(nullptr),
@@ -40,6 +44,67 @@ Function *CodegenCtx::getAllocArray() {
     }
 
     return alloc_array;
+}
+
+Function *CodegenCtx::getAllocDevice() {
+    // Only declare it if it's used, to make small programs simpler
+    if (!alloc_device) {
+        // Construct a declaration of the runtime's alloc_device function
+        std::vector<Type *> argTypes;
+        argTypes.push_back(Type::getInt32Ty(context));
+
+        FunctionType *ftype = FunctionType::get(PointerType::getUnqual(Type::getInt8Ty(context)), argTypes, false);
+        alloc_device = Function::Create(ftype, GlobalValue::ExternalLinkage, "_rt_alloc_device", module.get());
+    }
+
+    return alloc_device;
+}
+
+Function *CodegenCtx::getCopyHostToDevice() {
+    // Only declare it if it's used, to make small programs simpler
+    if (!cpy_h2d) {
+        // Construct a declaration of the runtime's cpy_h2d function
+        std::vector<Type *> argTypes;
+        argTypes.push_back(PointerType::getUnqual(Type::getInt8Ty(context)));
+        argTypes.push_back(PointerType::getUnqual(Type::getInt8Ty(context)));
+        argTypes.push_back(Type::getInt32Ty(context));
+
+        FunctionType *ftype = FunctionType::get(Type::getVoidTy(context), argTypes, false);
+        cpy_h2d = Function::Create(ftype, GlobalValue::ExternalLinkage, "_rt_cpy_h2d", module.get());
+    }
+
+    return cpy_h2d;
+}
+
+Function *CodegenCtx::getCopyDeviceToHost() {
+    // Only declare it if it's used, to make small programs simpler
+    if (!cpy_d2h) {
+        // Construct a declaration of the runtime's cpy_d2h function
+        std::vector<Type *> argTypes;
+        argTypes.push_back(PointerType::getUnqual(Type::getInt8Ty(context)));
+        argTypes.push_back(PointerType::getUnqual(Type::getInt8Ty(context)));
+        argTypes.push_back(Type::getInt32Ty(context));
+
+        FunctionType *ftype = FunctionType::get(Type::getVoidTy(context), argTypes, false);
+        cpy_d2h = Function::Create(ftype, GlobalValue::ExternalLinkage, "_rt_cpy_d2h", module.get());
+    }
+
+    return cpy_d2h;
+}
+
+Function *CodegenCtx::getInvokeKernel() {
+    // Only declare it if it's used, to make small programs simpler
+    if (!invoke_kernel) {
+        // Construct a declaration of the runtime's invoke_kernel function
+        std::vector<Type *> argTypes;
+        argTypes.push_back(PointerType::getUnqual(Type::getInt8Ty(context)));
+        argTypes.push_back(PointerType::getUnqual(PointerType::getUnqual(Type::getInt8Ty(context))));
+
+        FunctionType *ftype = FunctionType::get(Type::getVoidTy(context), argTypes, false);
+        invoke_kernel = Function::Create(ftype, GlobalValue::ExternalLinkage, "_rt_invoke_kernel", module.get());
+    }
+
+    return invoke_kernel;
 }
 
 Function *CodegenCtx::getDivCheck() {

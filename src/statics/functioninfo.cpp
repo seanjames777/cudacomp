@@ -39,6 +39,10 @@ enum FunctionInfo::CudaUsage FunctionInfo::getUsage() {
     return usage;
 }
 
+void FunctionInfo::setUsage(FunctionInfo::CudaUsage usage) {
+    this->usage = usage;
+}
+
 void FunctionInfo::addLocal(std::string id, std::shared_ptr<ASTTypeNode> type) {
     locals.set(id, type);
 }
@@ -48,7 +52,17 @@ bool FunctionInfo::hasLocal(std::string id) {
 }
 
 void FunctionInfo::copyArgumentsToLocals() {
-    std::shared_ptr<ASTArgSeqNode> args = signature->getArgs();
+    // TODO: need to check somewhere that arguments have different names
+
+    std::shared_ptr<ASTArgSeqNode> args = signature->getDimArgs();
+
+    while (args != nullptr) {
+        std::shared_ptr<ASTArgNode> arg = args->getHead();
+        addLocal(arg->getName(), arg->getType());
+        args = args->getTail();
+    }
+
+    args = signature->getArgs();
 
     while (args != nullptr) {
         std::shared_ptr<ASTArgNode> arg = args->getHead();

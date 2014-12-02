@@ -6,8 +6,12 @@
 
 #include <ast/expr/astcallexp.h>
 
-ASTCallExp::ASTCallExp(std::string id, std::shared_ptr<ASTExpSeqNode> args)
+ASTCallExp::ASTCallExp(
+    std::string id,
+    std::shared_ptr<ASTExpSeqNode> dim_args,
+    std::shared_ptr<ASTExpSeqNode> args)
     : id(id),
+      dim_args(dim_args),
       args(args)
 {
 }
@@ -21,6 +25,10 @@ std::string ASTCallExp::getId() {
 
 void ASTCallExp::setId(std::string id) {
     this->id = id;
+}
+
+std::shared_ptr<ASTExpSeqNode> ASTCallExp::getDimArgs() {
+    return dim_args;
 }
 
 std::shared_ptr<ASTExpSeqNode> ASTCallExp::getArgs() {

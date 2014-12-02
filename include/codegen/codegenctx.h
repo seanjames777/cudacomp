@@ -40,22 +40,26 @@ class CodegenCtx {
 private:
 
     // Whole module
-    std::shared_ptr<Module>        module;       // LLVM module for all functions
-    LLVMContext                   &context;      // LLVM context
-    bool                           emit_device;  // Should we emit GPU code
-    SymbolTable<Function *>        functions;    // Mapping from function names to LLVM functions
-    std::shared_ptr<ModuleInfo>    modInfo;      // Information about module
-    Function                      *alloc_array;  // Runtime alloc_array function
-    Function                      *div_check;    // Runtime division safety check
+    std::shared_ptr<Module>        module;        // LLVM module for all functions
+    LLVMContext                   &context;       // LLVM context
+    bool                           emit_device;   // Should we emit GPU code
+    SymbolTable<Function *>        functions;     // Mapping from function names to LLVM functions
+    std::shared_ptr<ModuleInfo>    modInfo;       // Information about module
+    Function                      *alloc_array;   // Runtime alloc_array function
+    Function                      *alloc_device;  // Allocate untyped device memory
+    Function                      *cpy_h2d;       // Copy from host to device
+    Function                      *cpy_d2h;       // Copy from device to host
+    Function                      *invoke_kernel; // Invoke a kernel
+    Function                      *div_check;     // Runtime division safety check
 
     // Current function
-    BasicBlock                    *def_bblock;   // Locals definition block, assists with SSA
-    BasicBlock                    *first_bblock; // First block (after def block)
-    std::shared_ptr<IRBuilder<>>   def_builder;  // IRBuilder for def block
-    SymbolTable<Value *>           symbols;      // Mapping from local symbols to LLVM values
-    Function                      *function;     // LLVM function
-    std::vector<BasicBlock *>      blocks;       // Stack of basic blocks
-    std::shared_ptr<FunctionInfo>  funcInfo;     // Information about current function
+    BasicBlock                    *def_bblock;    // Locals definition block, assists with SSA
+    BasicBlock                    *first_bblock;  // First block (after def block)
+    std::shared_ptr<IRBuilder<>>   def_builder;   // IRBuilder for def block
+    SymbolTable<Value *>           symbols;       // Mapping from local symbols to LLVM values
+    Function                      *function;      // LLVM function
+    std::vector<BasicBlock *>      blocks;        // Stack of basic blocks
+    std::shared_ptr<FunctionInfo>  funcInfo;      // Information about current function
 
     // Current basic block
     std::shared_ptr<IRBuilder<>>   body_builder; // IRBuilder for current block
@@ -74,6 +78,26 @@ public:
      * @brief Get the 'alloc_array' runtime function
      */
     Function *getAllocArray();
+
+    /**
+     * @brief Get the 'alloc_array' runtime function
+     */
+    Function *getAllocDevice();
+
+    /**
+     * @brief Get the 'alloc_array' runtime function
+     */
+    Function *getCopyHostToDevice();
+
+    /**
+     * @brief Get the 'alloc_array' runtime function
+     */
+    Function *getCopyDeviceToHost();
+
+    /**
+     * @brief Get the 'alloc_array' runtime function
+     */
+    Function *getInvokeKernel();
 
     /**
      * @brief Get the 'div_check' runtime function

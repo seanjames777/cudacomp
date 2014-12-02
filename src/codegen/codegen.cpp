@@ -256,6 +256,79 @@ bool codegen_stmts(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtSeqNo
     return true;
 }
 
+Value *genDeviceAlloc(std::shared_ptr<CodegenCtx> ctx, int size) {
+    std::vector<Value *> args;
+    args.push_back(ConstantInt::get(convertType(ASTIntegerType::get()), size));
+
+    return ctx->getBuilder()->CreateCall(ctx->getAllocDevice(), args);
+}
+
+Value *genCopyHostToDevice(std::shared_ptr<CodegenCtx> ctx, Value *dst, Value *src, int size) {
+    std::vector<Value *> args;
+    args.push_back(dst);
+    // Cast to char *
+    args.push_back(ctx->getBuilder()->CreatePointerCast(
+        src,
+        PointerType::getUnqual(Type::getInt8Ty(ctx->getContext()))));
+    args.push_back(ConstantInt::get(convertType(ASTIntegerType::get()), size));
+
+    return ctx->getBuilder()->CreateCall(ctx->getCopyHostToDevice(), args);
+}
+
+void codegen_cudacall(
+    std::shared_ptr<CodegenCtx> ctx,
+    Value *min,
+    Value *max,
+    std::shared_ptr<ASTCallExp> call)
+{
+    std::shared_ptr<FunctionInfo> fun = ctx->getModuleInfo()->getFunction(call->getId());
+    std::shared_ptr<ASTFunType> funType = fun->getSignature();
+
+    std::vector<Value *> argPtrs;
+
+    Value *arg_buff = ctx->getBuilder()->CreateAlloca(
+        PointerType::getUnqual(Type::getInt8Ty(ctx->getContext())),
+        ConstantInt::get(convertType(ASTIntegerType::get()), funType->getNumArgs()));
+
+    std::shared_ptr<ASTArgSeqNode> args_sig = funType->getArgs();
+    std::shared_ptr<ASTExpSeqNode> args_val = call->getArgs();
+    int argIdx = 0;
+
+    // TODO: return value
+
+    // Generate code for arguments and copy them to GPU memory
+    while (args_sig != nullptr) {
+        std::shared_ptr<ASTArgNode> arg_sig = args_sig->getHead();
+        std::shared_ptr<ASTExpNode> arg_exp = args_val->getHead();
+
+        // Generate code for the argument, allocate room for it, and copy it
+        // The 'source' is a pointer to a stack location, so we don't need to
+        // take its address to copy it.
+        Value *arg_src = codegen_exp(ctx, arg_exp);
+        Value *arg_dst = genDeviceAlloc(ctx, arg_sig->getType()->getSize());
+        genCopyHostToDevice(ctx, arg_dst, arg_src, arg_sig->getType()->getSize());
+        //argPtrs.push_back(arg_dst);
+
+        // Store pointer into argument buffer
+        Value *argIdxVal = ConstantInt::get(convertType(ASTIntegerType::get()), argIdx++);
+        Value *argDstPtr = ctx->getBuilder()->CreateGEP(arg_buff, argIdxVal);
+        ctx->getBuilder()->CreateStore(arg_dst, argDstPtr);
+
+        args_sig = args_sig->getTail();
+        args_val = args_val->getTail();
+    }
+
+    // Invoke the kernel
+    std::vector<Value *> invokeArgs;
+    // TODO: names get duplicated
+    invokeArgs.push_back(ctx->getBuilder()->CreateGlobalStringPtr(call->getId()));
+    invokeArgs.push_back(arg_buff);
+
+    ctx->getBuilder()->CreateCall(ctx->getInvokeKernel(), invokeArgs);
+
+    // TODO: copy back to host, free
+}
+
 bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> head) {
     // Return instruction
     if (std::shared_ptr<ASTReturnStmt> ret_node = std::dynamic_pointer_cast<ASTReturnStmt>(head)) {
@@ -428,38 +501,52 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
         Value *min = codegen_exp(ctx, range->getMin());
         Value *max = codegen_exp(ctx, range->getMax());
 
-        Value *iter = ctx->getOrCreateSymbol(range_node->getIteratorId());
-        ctx->getBuilder()->CreateStore(min, iter);
+        // If there is a schedule node, it must be @device, so run it in parallel on the GPU
+        if (std::shared_ptr<ASTSchedSeqNode> sched = range_node->getSchedule()) {
+            // Only support function calls right now
+            std::shared_ptr<ASTStmtSeqNode> body = range_node->getBody();
+            assert(body);
+            std::shared_ptr<ASTExprStmt> expr = std::dynamic_pointer_cast<ASTExprStmt>(body->getHead());
+            assert(expr);
+            std::shared_ptr<ASTCallExp> call = std::dynamic_pointer_cast<ASTCallExp>(expr->getExp());
+            assert(call);
 
-        BasicBlock *bodyBlock = ctx->createBlock();
-        BasicBlock *doneBlock = ctx->createBlock();
+            codegen_cudacall(ctx, min, max, call);
+        }
+        // Otherwise, treat as a standard loop
+        else {
+            Value *iter = ctx->getOrCreateSymbol(range_node->getIteratorId());
+            ctx->getBuilder()->CreateStore(min, iter);
 
-        // Use 'min' as an iterator for now
-        ctx->getBuilder()->CreateCondBr(
-            ctx->getBuilder()->CreateICmpSGE(ctx->getBuilder()->CreateLoad(iter), max),
-            doneBlock,
-            bodyBlock);
-
-        ctx->pushBlock(bodyBlock);
-
-        if (codegen_stmts(ctx, range_node->getBody())) {
-            std::shared_ptr<IRBuilder<>> bodyBuilder = ctx->getBuilder();
-
-            bodyBuilder->CreateStore(
-                bodyBuilder->CreateBinOp(Instruction::Add,
-                    bodyBuilder->CreateLoad(iter),
-                    ConstantInt::get(convertType(ASTIntegerType::get()), 1)),
-                iter);
+            BasicBlock *bodyBlock = ctx->createBlock();
+            BasicBlock *doneBlock = ctx->createBlock();
 
             ctx->getBuilder()->CreateCondBr(
-                ctx->getBuilder()->CreateICmpSGE(
-                    bodyBuilder->CreateLoad(iter),
-                    max),
+                ctx->getBuilder()->CreateICmpSGE(ctx->getBuilder()->CreateLoad(iter), max),
                 doneBlock,
                 bodyBlock);
-        }
 
-        ctx->pushBlock(doneBlock);
+            ctx->pushBlock(bodyBlock);
+
+            if (codegen_stmts(ctx, range_node->getBody())) {
+                std::shared_ptr<IRBuilder<>> bodyBuilder = ctx->getBuilder();
+
+                bodyBuilder->CreateStore(
+                    bodyBuilder->CreateBinOp(Instruction::Add,
+                        bodyBuilder->CreateLoad(iter),
+                        ConstantInt::get(convertType(ASTIntegerType::get()), 1)),
+                    iter);
+
+                ctx->getBuilder()->CreateCondBr(
+                    ctx->getBuilder()->CreateICmpSGE(
+                        bodyBuilder->CreateLoad(iter),
+                        max),
+                    doneBlock,
+                    bodyBlock);
+            }
+
+            ctx->pushBlock(doneBlock);
+        }
     }
     // Expression statement
     else if (std::shared_ptr<ASTExprStmt> exp_stmt = std::dynamic_pointer_cast<ASTExprStmt>(head))
@@ -468,6 +555,27 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
         throw new ASTMalformedException();
 
     return true;
+}
+
+bool shouldGenerateCodeForFunction(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTFunDecl> decl) {
+    bool declare = true;
+
+    std::shared_ptr<FunctionInfo> func = ctx->getModuleInfo()->getFunction(decl->getName());
+
+    // Skip declarations that don't define bodies
+    // TODO: ignore multiple declarations of external functions
+    if (!decl->isDefn())
+        declare = false;
+
+    // Skip global and device functions in host mode
+    if (!ctx->getEmitDevice() && !(func->getUsage() & FunctionInfo::Host))
+        declare = false;
+
+    // Skip host functions in device mode
+    if (ctx->getEmitDevice() && !(func->getUsage() & (FunctionInfo::Global | FunctionInfo::Device)))
+        declare = false;
+
+    return declare;
 }
 
 void codegen_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTDeclSeqNode> nodes, bool emitDevice, std::ostream & out) {
@@ -480,8 +588,7 @@ void codegen_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTDeclSeq
 
         // Create LLVM functions for each function
         if (std::shared_ptr<ASTFunDecl> funDefn = std::dynamic_pointer_cast<ASTFunDecl>(top_node)) {
-            // Skip declarations that don't define bodies
-            if (funDefn->isDefn() || funDefn->getLinkage() == ASTDeclNode::External) {
+            if (shouldGenerateCodeForFunction(ctx, funDefn) || funDefn->getLinkage() == ASTDeclNode::External) {
                 std::shared_ptr<FunctionInfo> funInfo = module->getFunction(funDefn->getName());
                 ctx->createFunction(funInfo);
             }
@@ -500,27 +607,81 @@ void codegen_tops(std::shared_ptr<ModuleInfo> module, std::shared_ptr<ASTDeclSeq
     ctx->emit(out);
 }
 
+void codegen_dim_vars(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTFunDecl> funDefn) {
+    std::shared_ptr<FunctionInfo> func = ctx->getModuleInfo()->getFunction(funDefn->getName());
+
+    std::shared_ptr<ASTArgSeqNode> rangeArgs = funDefn->getSignature()->getDimArgs();
+
+    int argIdx = 0;
+
+    std::vector<Type *> argTypes;
+    FunctionType *intrinType = FunctionType::get(Type::getInt32Ty(ctx->getContext()), argTypes, false);
+
+    while (rangeArgs != nullptr) {
+        std::shared_ptr<ASTArgNode> arg = rangeArgs->getHead();
+        Value *local = ctx->getOrCreateSymbol(arg->getName());
+
+        Constant *getTID = nullptr;
+        Constant *getNTID = nullptr;
+        Constant *getCTAID = nullptr;
+
+        switch(argIdx++) {
+        case 0:
+            getTID = ctx->getModule()->getOrInsertFunction("llvm.nvvm.read.ptx.sreg.tid.x", intrinType);
+            getNTID = ctx->getModule()->getOrInsertFunction("llvm.nvvm.read.ptx.sreg.ntid.x", intrinType);
+            getCTAID = ctx->getModule()->getOrInsertFunction("llvm.nvvm.read.ptx.sreg.ctaid.x", intrinType);
+            break;
+        case 1:
+            getTID = ctx->getModule()->getOrInsertFunction("llvm.nvvm.read.ptx.sreg.tid.y", intrinType);
+            getNTID = ctx->getModule()->getOrInsertFunction("llvm.nvvm.read.ptx.sreg.ntid.y", intrinType);
+            getCTAID = ctx->getModule()->getOrInsertFunction("llvm.nvvm.read.ptx.sreg.ctaid.y", intrinType);
+            break;
+        case 2:
+            getTID = ctx->getModule()->getOrInsertFunction("llvm.nvvm.read.ptx.sreg.tid.z", intrinType);
+            getNTID = ctx->getModule()->getOrInsertFunction("llvm.nvvm.read.ptx.sreg.ntid.z", intrinType);
+            getCTAID = ctx->getModule()->getOrInsertFunction("llvm.nvvm.read.ptx.sreg.ctaid.z", intrinType);
+            break;
+        default:
+            throw ASTMalformedException();
+        }
+
+        Value *tid = ctx->getBuilder()->CreateCall(getTID);
+        Value *ntid = ctx->getBuilder()->CreateCall(getNTID);
+        Value *ctaid = ctx->getBuilder()->CreateCall(getCTAID);
+
+        Value *threadId =
+            ctx->getBuilder()->CreateBinOp(Instruction::Add,
+                tid,
+                ctx->getBuilder()->CreateBinOp(Instruction::Mul, ctaid, ntid));
+
+        ctx->getBuilder()->CreateStore(threadId, local);
+
+        rangeArgs = rangeArgs->getTail();
+    }
+}
+
 void codegen_top(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTDeclNode> node) {
     if (std::shared_ptr<ASTFunDecl> funDefn = std::dynamic_pointer_cast<ASTFunDecl>(node)) {
-        // Skip declarations that don't define bodies
-        if (!funDefn->isDefn())
+        if (!shouldGenerateCodeForFunction(ctx, funDefn))
+            return;
+
+        if (funDefn->getLinkage() == ASTDeclNode::External)
             return;
 
         std::shared_ptr<FunctionInfo> func = ctx->getModuleInfo()->getFunction(funDefn->getName());
 
         ctx->startFunction(func->getName());
+
+        if (func->getUsage() & FunctionInfo::Global)
+            codegen_dim_vars(ctx, funDefn);
+
         codegen_stmts(ctx, funDefn->getBody());
 
-        if (ctx->getEmitDevice() && (func->getUsage() & FunctionInfo::Global))
+        if (func->getUsage() & FunctionInfo::Global)
             ctx->markKernel(ctx->getFunction(func->getName()));
 
         ctx->finishFunction();
     }
-    else if (std::shared_ptr<ASTTypeDecl> typeDefn = std::dynamic_pointer_cast<ASTTypeDecl>(node)) {
-        // Skip it
-    }
-    else
-        throw new ASTMalformedException();
 }
 
 }
