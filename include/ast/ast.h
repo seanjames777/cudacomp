@@ -31,6 +31,7 @@
 #include <ast/sched/astschednode.h>
 #include <ast/stmt/astexprstmt.h>
 #include <ast/stmt/astifstmt.h>
+#include <ast/stmt/astforstmt.h>
 #include <ast/stmt/astrangeforstmt.h>
 #include <ast/stmt/astreturnstmt.h>
 #include <ast/stmt/astscopestmt.h>

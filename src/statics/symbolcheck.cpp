@@ -178,6 +178,19 @@ void SymbolCheck::visitWhileStmt(std::shared_ptr<ASTWhileStmt> whileStmt) {
     def = old_def;
 }
 
+void SymbolCheck::visitForStmt(std::shared_ptr<ASTForStmt> forStmt) {
+    // Treat body as scope
+    SymbolSet old_decl = decl;
+    SymbolSet old_def = def;
+
+    ASTVisitor::visitForStmt(forStmt);
+    
+    // Definitions and declarations inside the body of the loop do NOT propagate out
+    decl = old_decl;
+    def = old_def;
+
+}
+
 void SymbolCheck::visitRangeForStmt(std::shared_ptr<ASTRangeForStmt> rangeStmt) {
     // Check the condtion
     visitNode(rangeStmt->getRange());

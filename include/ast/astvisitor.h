@@ -81,6 +81,7 @@ public:
 
     DECLARE_CLASS(AssignStmt);
     DECLARE_CLASS(ExprStmt);
+    DECLARE_CLASS(ForStmt);
     DECLARE_CLASS(IfStmt);
     DECLARE_CLASS(RangeForStmt);
     DECLARE_CLASS(ReturnStmt);
