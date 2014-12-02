@@ -21,6 +21,7 @@ CodegenCtx::CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo)
       cpy_d2h(nullptr),
       invoke_kernel(nullptr),
       div_check(nullptr),
+      shift_check(nullptr),
       def_bblock(nullptr),
       first_bblock(nullptr),
       def_builder(nullptr),
@@ -120,6 +121,20 @@ Function *CodegenCtx::getDivCheck() {
     }
 
     return div_check;
+}
+
+Function *CodegenCtx::getShiftCheck() {
+    // Only declare it if it's used, to make small programs simpler
+    if (!shift_check) {
+        // Construct a declaration of the runtime's shift_check function
+        std::vector<Type *> argTypes;
+        argTypes.push_back(Type::getInt32Ty(context));
+
+        FunctionType *ftype = FunctionType::get(Type::getVoidTy(context), argTypes, false);
+        shift_check = Function::Create(ftype, GlobalValue::ExternalLinkage, "_rt_shift_check", module.get());
+    }
+
+    return shift_check;
 }
 
 std::shared_ptr<ModuleInfo> CodegenCtx::getModuleInfo() {

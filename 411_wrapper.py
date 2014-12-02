@@ -92,6 +92,7 @@ for source in sources:
     # We don't have an x86 backend, so if we're compiling to x86, use llc
     if not(emit_llvm):
         outfile = source.rsplit('.', 1)[0] + ".s"
+
         stat = run_shell([ "llc", "-o", outfile, outfile_ll ])
 
         if stat != 0:

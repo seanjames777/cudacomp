@@ -88,10 +88,9 @@ Value *codegen_binop(
         // Insert bounds checks
         if (args->opr_safe) {
             std::vector<Value *> args;
-            args.push_back(v1);
             args.push_back(v2);
 
-            ctx->getBuilder()->CreateCall(ctx->getDivCheck(), args);
+            ctx->getBuilder()->CreateCall(ctx->getShiftCheck(), args);
         }
 
         if (op == ASTBinopExp::SHL)

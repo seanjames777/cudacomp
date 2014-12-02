@@ -18,6 +18,12 @@ void _rt_div_check(int n, int d) {
         raise(SIGFPE);
 }
 
+void _rt_shift_check(int s) {
+    // Handles negative as well
+    if ((unsigned int)s > 31)
+        raise(SIGFPE);
+}
+
 // Used for our own testing
 
 void print_float(float x) {
