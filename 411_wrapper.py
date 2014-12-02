@@ -5,6 +5,7 @@ import sys, subprocess, os, getpass
 emit_llvm = False
 safe_mode = True
 optimize = 2
+print_ast = False
 
 headers = []
 sources = []
@@ -31,6 +32,8 @@ for arg in sys.argv:
         optimize = 2
     elif arg == "-l":
         next_is_header = True
+    elif arg == "--print-ast":
+        print_ast = True
     else:
         if next_is_header:
             headers.append(arg)
@@ -59,6 +62,9 @@ link_runtime = not(autograder) or not(emit_llvm)
 # Process each source file
 for source in sources:
     compiler_args = [ "./cc", "--symbol-prefix", "_c0_", "--require-entry", "main" ]
+
+    if print_ast:
+        compiler_args.append("--print-ast")
 
     outfile_bc = source.rsplit('.', 1)[0] + ".bc"
     outfile_ll = source.rsplit('.', 1)[0] + ".ll"

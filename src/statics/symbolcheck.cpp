@@ -183,11 +183,23 @@ void SymbolCheck::visitForStmt(std::shared_ptr<ASTForStmt> forStmt) {
     SymbolSet old_decl = decl;
     SymbolSet old_def = def;
 
-    ASTVisitor::visitForStmt(forStmt);
+    visitNode(forStmt->getInit());
+
+    SymbolSet new_def;
+
+    // The intializer can define things that have already been declared
+    std::set_intersection(def.begin(), def.end(),
+        old_decl.begin(), old_decl.end(),
+        std::inserter(new_def, new_def.end()));
+
+    // TODO: make sure there isn't a need for scoping around the body or something
+    visitNode(forStmt->getCond());
+    visitNode(forStmt->getBody());
+    visitNode(forStmt->getIter());
 
     // Definitions and declarations inside the body of the loop do NOT propagate out
     decl = old_decl;
-    def = old_def;
+    def = new_def;
 }
 
 void SymbolCheck::visitFunDecl(std::shared_ptr<ASTFunDecl> funDecl) {
