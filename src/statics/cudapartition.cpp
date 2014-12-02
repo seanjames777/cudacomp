@@ -51,7 +51,9 @@ void CudaPartition::visitCallExp(std::shared_ptr<ASTCallExp> call) {
 
     // Skip global functions
     if (info->getSignature()->getDimArgs() != nullptr) {
+        inDeviceMode = true;
         ASTVisitor::visitCallExp(call);
+        inDeviceMode = emitDevice;
     }
     else {
         enum FunctionInfo::CudaUsage usage = info->getUsage();
@@ -65,26 +67,5 @@ void CudaPartition::visitCallExp(std::shared_ptr<ASTCallExp> call) {
         info->setUsage(usage);
 
         ASTVisitor::visitCallExp(call);
-    }
-}
-
-void CudaPartition::visitRangeForStmt(std::shared_ptr<ASTRangeForStmt> rangeFor) {
-    // If we're always emitting device code, then this isn't anything special
-    if (emitDevice) {
-        ASTVisitor::visitRangeForStmt(rangeFor);
-    }
-    else {
-        // TODO: Reject @device for loops when in device mode
-
-        // Otherwise, we enter device mode from "range for" statements
-        if (std::shared_ptr<ASTSchedSeqNode> sched = rangeFor->getSchedule()) {
-            visitNode(rangeFor->getSchedule());
-            visitNode(rangeFor->getIteratorType());
-            visitNode(rangeFor->getRange());
-
-            inDeviceMode = true;
-            visitNode(rangeFor->getBody());
-            inDeviceMode = emitDevice;
-        }
     }
 }

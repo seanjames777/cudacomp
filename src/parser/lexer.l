@@ -49,9 +49,7 @@ int comment_depth = 0;
 "typedef"               { return TYPEDEF; }
 "extern"                { return EXTERN; }
 "alloc_array"           { return ALLOC_ARRAY; }
-"to"                    { return TO; }
 "for"                   { return FOR; }
-"@device"               { return DEVICE; }
 "struct"                { return STRUCT; }
 "continue"              { return CONTINUE; }
 "break"                 { return BREAK; }

@@ -19,14 +19,12 @@
 IMPL_CLASS(Node) {
     SUB_CLASS(DeclNode);
     SUB_CLASS(ExpNode);
-    SUB_CLASS(SchedNode);
     SUB_CLASS(StmtNode);
     SUB_CLASS(ArgNode);
     SUB_CLASS(TypeNode);
 
     SUB_CLASS(DeclSeqNode);
     SUB_CLASS(ExpSeqNode);
-    SUB_CLASS(SchedSeqNode);
     SUB_CLASS(StmtSeqNode);
     SUB_CLASS(ArgSeqNode);
 }
@@ -44,20 +42,14 @@ IMPL_CLASS(ExpNode) {
     SUB_CLASS(IdentifierExp);
     SUB_CLASS(IndexExp);
     SUB_CLASS(IntegerExp);
-    SUB_CLASS(RangeExp);
     SUB_CLASS(TernopExp);
     SUB_CLASS(UnopExp);
-}
-
-IMPL_CLASS(SchedNode) {
-    SUB_CLASS(DeviceSched);
 }
 
 IMPL_CLASS(StmtNode) {
     SUB_CLASS(AssignStmt);
     SUB_CLASS(ExprStmt);
     SUB_CLASS(IfStmt);
-    SUB_CLASS(RangeForStmt);
     SUB_CLASS(ReturnStmt);
     SUB_CLASS(ScopeStmt);
     SUB_CLASS(VarDeclStmt);
@@ -74,7 +66,6 @@ IMPL_CLASS(TypeNode) {
     SUB_CLASS(FunType);
     SUB_CLASS(IdType);
     SUB_CLASS(IntegerType);
-    SUB_CLASS(RangeType);
     SUB_CLASS(PtrType);
     SUB_CLASS(VoidType);
 }
@@ -85,10 +76,6 @@ IMPL_CLASS(DeclSeqNode) {
 
 IMPL_CLASS(ExpSeqNode) {
     SEQ_CLASS(ExpNode);
-}
-
-IMPL_CLASS(SchedSeqNode) {
-    SEQ_CLASS(StmtNode);
 }
 
 IMPL_CLASS(StmtSeqNode) {
@@ -136,11 +123,6 @@ IMPL_CLASS(IndexExp) {
 IMPL_CLASS(IntegerExp) {
 }
 
-IMPL_CLASS(RangeExp) {
-    HAS_MEMBER(getMin());
-    HAS_MEMBER(getMax());
-}
-
 IMPL_CLASS(TernopExp) {
     HAS_MEMBER(getCond());
     HAS_MEMBER(getTrueExp());
@@ -149,9 +131,6 @@ IMPL_CLASS(TernopExp) {
 
 IMPL_CLASS(UnopExp) {
     HAS_MEMBER(getExp());
-}
-
-IMPL_CLASS(DeviceSched) {
 }
 
 IMPL_CLASS(ExprStmt) {
@@ -166,13 +145,6 @@ IMPL_CLASS(IfStmt) {
 
 IMPL_CLASS(WhileStmt) {
     HAS_MEMBER(getCond());
-    HAS_MEMBER(getBody());
-}
-
-IMPL_CLASS(RangeForStmt) {
-    HAS_MEMBER(getSchedule());
-    HAS_MEMBER(getIteratorType());
-    HAS_MEMBER(getRange());
     HAS_MEMBER(getBody());
 }
 
@@ -210,9 +182,6 @@ IMPL_CLASS(IntegerType) {
 
 IMPL_CLASS(ArrType) {
     HAS_MEMBER(getElemType());
-}
-
-IMPL_CLASS(RangeType) {
 }
 
 IMPL_CLASS(PtrType) {

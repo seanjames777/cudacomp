@@ -232,12 +232,6 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         return ctx->getBuilder()->CreatePointerCast(buff,
             PointerType::getUnqual(convertType(alloc_exp->getElemType())));
     }
-    // Range. We can evaluate the endpoints for their effects
-    else if (std::shared_ptr<ASTRangeExp> range_exp = std::dynamic_pointer_cast<ASTRangeExp>(node)) {
-        codegen_exp(ctx, range_exp->getMin());
-        codegen_exp(ctx, range_exp->getMax());
-        return nullptr;
-    }
     // Otherwise, it's an lvalue. Get the address and dereference it.
     else {
         Value *lval_ptr = codegen_lvalue(ctx, node);
@@ -459,60 +453,6 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
         ctx->pushBlock(doneBlock);
 
         return true;
-    }
-    // Range for loop statement
-    else if (std::shared_ptr<ASTRangeForStmt> range_node = std::dynamic_pointer_cast<ASTRangeForStmt>(head)) {
-        std::shared_ptr<ASTRangeExp> range = std::dynamic_pointer_cast<ASTRangeExp>(range_node->getRange());
-
-        Value *min = codegen_exp(ctx, range->getMin());
-        Value *max = codegen_exp(ctx, range->getMax());
-
-        // If there is a schedule node, it must be @device, so run it in parallel on the GPU
-        if (std::shared_ptr<ASTSchedSeqNode> sched = range_node->getSchedule()) {
-            // Only support function calls right now
-            std::shared_ptr<ASTStmtSeqNode> body = range_node->getBody();
-            assert(body);
-            std::shared_ptr<ASTExprStmt> expr = std::dynamic_pointer_cast<ASTExprStmt>(body->getHead());
-            assert(expr);
-            std::shared_ptr<ASTCallExp> call = std::dynamic_pointer_cast<ASTCallExp>(expr->getExp());
-            assert(call);
-
-            codegen_cudacall(ctx, min, max, call);
-        }
-        // Otherwise, treat as a standard loop
-        else {
-            Value *iter = ctx->getOrCreateSymbol(range_node->getIteratorId());
-            ctx->getBuilder()->CreateStore(min, iter);
-
-            BasicBlock *bodyBlock = ctx->createBlock();
-            BasicBlock *doneBlock = ctx->createBlock();
-
-            ctx->getBuilder()->CreateCondBr(
-                ctx->getBuilder()->CreateICmpSGE(ctx->getBuilder()->CreateLoad(iter), max),
-                doneBlock,
-                bodyBlock);
-
-            ctx->pushBlock(bodyBlock);
-
-            if (codegen_stmts(ctx, range_node->getBody())) {
-                std::shared_ptr<IRBuilder<>> bodyBuilder = ctx->getBuilder();
-
-                bodyBuilder->CreateStore(
-                    bodyBuilder->CreateBinOp(Instruction::Add,
-                        bodyBuilder->CreateLoad(iter),
-                        ConstantInt::get(convertType(ASTIntegerType::get()), 1)),
-                    iter);
-
-                ctx->getBuilder()->CreateCondBr(
-                    ctx->getBuilder()->CreateICmpSGE(
-                        bodyBuilder->CreateLoad(iter),
-                        max),
-                    doneBlock,
-                    bodyBlock);
-            }
-
-            ctx->pushBlock(doneBlock);
-        }
     }
     // Expression statement
     else if (std::shared_ptr<ASTExprStmt> exp_stmt = std::dynamic_pointer_cast<ASTExprStmt>(head))

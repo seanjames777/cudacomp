@@ -235,19 +235,6 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         // Returns an array of elemTypes
         return std::make_shared<ASTArrType>(elemType);
     }
-    // Range
-    else if (std::shared_ptr<ASTRangeExp> range_exp = std::dynamic_pointer_cast<ASTRangeExp>(node)) {
-        std::shared_ptr<ASTTypeNode> minType = typecheck_exp(mod, func, range_exp->getMin());
-        std::shared_ptr<ASTTypeNode> maxType = typecheck_exp(mod, func, range_exp->getMax());
-
-        if (!minType->equal(ASTIntegerType::get()))
-            throw IllegalTypeException();
-
-        if (!maxType->equal(ASTIntegerType::get()))
-            throw IllegalTypeException();
-
-        return ASTRangeType::get();
-    }
     else
         throw ASTMalformedException();
 }
@@ -366,25 +353,6 @@ void typecheck_stmt(
             throw IllegalTypeException();
 
         typecheck_stmts(mod, func, while_node->getBody());
-    }
-    // Range for loop
-    else if (std::shared_ptr<ASTRangeForStmt> range_node = std::dynamic_pointer_cast<ASTRangeForStmt>(head)) {
-        std::shared_ptr<ASTTypeNode> range_type = typecheck_exp(mod, func, range_node->getRange());
-
-        // Range must be a range
-        if (!range_type->equal(ASTRangeType::get()))
-            throw IllegalTypeException();
-
-        // Iterator must be an integer
-        if (!range_node->getIteratorType()->equal(ASTIntegerType::get()))
-            throw IllegalTypeException();
-
-        // Define the iterator variable
-        // TODO: ID -> Id
-        func->addLocal(range_node->getIteratorId(), ASTIntegerType::get());
-
-        // Check the body
-        typecheck_stmts(mod, func, range_node->getBody());
     }
     // Expression statement
     else if (std::shared_ptr<ASTExprStmt> exp_stmt = std::dynamic_pointer_cast<ASTExprStmt>(head))

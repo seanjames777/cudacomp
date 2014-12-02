@@ -52,14 +52,12 @@ public:
 
     DECLARE_CLASS(DeclNode);
     DECLARE_CLASS(ExpNode);
-    DECLARE_CLASS(SchedNode);
     DECLARE_CLASS(StmtNode);
     DECLARE_CLASS(ArgNode);
     DECLARE_CLASS(TypeNode);
 
     DECLARE_CLASS(DeclSeqNode);
     DECLARE_CLASS(ExpSeqNode);
-    DECLARE_CLASS(SchedSeqNode);
     DECLARE_CLASS(StmtSeqNode);
     DECLARE_CLASS(ArgSeqNode);
 
@@ -73,16 +71,12 @@ public:
     DECLARE_CLASS(IdentifierExp);
     DECLARE_CLASS(IndexExp);
     DECLARE_CLASS(IntegerExp);
-    DECLARE_CLASS(RangeExp);
     DECLARE_CLASS(TernopExp);
     DECLARE_CLASS(UnopExp);
-
-    DECLARE_CLASS(DeviceSched);
 
     DECLARE_CLASS(AssignStmt);
     DECLARE_CLASS(ExprStmt);
     DECLARE_CLASS(IfStmt);
-    DECLARE_CLASS(RangeForStmt);
     DECLARE_CLASS(ReturnStmt);
     DECLARE_CLASS(ScopeStmt);
     DECLARE_CLASS(VarDeclStmt);
@@ -93,7 +87,6 @@ public:
     DECLARE_CLASS(FunType);
     DECLARE_CLASS(IdType);
     DECLARE_CLASS(IntegerType);
-    DECLARE_CLASS(RangeType);
     DECLARE_CLASS(PtrType);
     DECLARE_CLASS(VoidType);
 

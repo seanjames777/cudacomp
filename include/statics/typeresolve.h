@@ -40,8 +40,6 @@ public:
 
     virtual void visitTypeDecl(std::shared_ptr<ASTTypeDecl> typeDecl) override;
 
-    virtual void visitRangeForStmt(std::shared_ptr<ASTRangeForStmt> forStmt) override;
-
     void run(std::shared_ptr<ASTDeclSeqNode> ast);
 
 };

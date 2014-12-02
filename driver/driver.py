@@ -107,9 +107,6 @@ tests = [
     (SOURCE_DIR + "tests/testArr8.cc", "error", "both"),
     (SOURCE_DIR + "tests/testArr9.cc", "error", "both"),
     (SOURCE_DIR + "tests/testLValue1.cc", "error", "both"),
-    (SOURCE_DIR + "tests/testRange1.cc", 33, "both"),
-    (SOURCE_DIR + "tests/testRange2.cc", 10, "both"),
-    (SOURCE_DIR + "tests/testRange3.cc", 4950, "both"),
     (SOURCE_DIR + "tests/testFloat1.cc", 10, "both"),
 ]
 

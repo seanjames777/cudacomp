@@ -65,15 +65,11 @@ add_executable(cc
     src/ast/expr/astidentifierexp.cpp
     src/ast/expr/astindexexp.cpp
     src/ast/expr/astintegerexp.cpp
-    src/ast/expr/astrangeexp.cpp
     src/ast/expr/astternopexp.cpp
     src/ast/expr/astunopexp.cpp
-    src/ast/sched/astdevicesched.cpp
-    src/ast/sched/astschednode.cpp
     src/ast/stmt/astassignstmt.cpp
     src/ast/stmt/astexprstmt.cpp
     src/ast/stmt/astifstmt.cpp
-    src/ast/stmt/astrangeforstmt.cpp
     src/ast/stmt/astreturnstmt.cpp
     src/ast/stmt/astscopestmt.cpp
     src/ast/stmt/aststmtnode.cpp
@@ -89,7 +85,6 @@ add_executable(cc
     src/ast/type/astfuntype.cpp
     src/ast/type/astidtype.cpp
     src/ast/type/astintegertype.cpp
-    src/ast/type/astrangetype.cpp
     src/ast/type/astptrtype.cpp
     src/ast/type/asttypenode.cpp
     src/ast/type/astvoidtype.cpp

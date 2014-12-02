@@ -33,8 +33,6 @@ public:
 
     virtual void visitCallExp(std::shared_ptr<ASTCallExp> call) override;
 
-    virtual void visitRangeForStmt(std::shared_ptr<ASTRangeForStmt> rangeFor) override;
-
 };
 
 #endif

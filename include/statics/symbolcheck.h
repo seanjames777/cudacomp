@@ -49,8 +49,6 @@ public:
 
     virtual void visitWhileStmt(std::shared_ptr<ASTWhileStmt> whileStmt) override;
 
-    virtual void visitRangeForStmt(std::shared_ptr<ASTRangeForStmt> rangeStmt) override;
-
     virtual void visitFunDecl(std::shared_ptr<ASTFunDecl> funDecl) override;
 
 };
