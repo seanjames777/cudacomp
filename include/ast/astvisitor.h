@@ -76,6 +76,7 @@ public:
 
     DECLARE_CLASS(AssignStmt);
     DECLARE_CLASS(ExprStmt);
+    DECLARE_CLASS(ForStmt);
     DECLARE_CLASS(IfStmt);
     DECLARE_CLASS(ReturnStmt);
     DECLARE_CLASS(ScopeStmt);

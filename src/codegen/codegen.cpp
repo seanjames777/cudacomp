@@ -454,6 +454,39 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
 
         return true;
     }
+    // For statement
+    else if (std::shared_ptr<ASTForStmt> for_node = std::dynamic_pointer_cast<ASTForStmt>(head)) {
+        // Generate the initialization code
+        codegen_stmt(ctx, for_node->getInit());
+
+        // Generate the condition
+        Value *cond = codegen_exp(ctx, for_node->getCond());
+
+        BasicBlock *bodyBlock = ctx->createBlock();
+        BasicBlock *doneBlock = ctx->createBlock();
+
+        // Generate conditional jump
+        ctx->getBuilder()->CreateCondBr(cond, bodyBlock, doneBlock);
+
+        // Generate while's 'body' branch
+        ctx->pushBlock(bodyBlock);
+
+        // Whether the body of the while loop returns
+        bool bodyContinue = codegen_stmts(ctx, for_node->getBody());
+
+
+        // Only need to insert looping conditional jump if body didn't return
+        if (bodyContinue) {
+            codegen_stmt(ctx, for_node->getIter());
+            Value *body_cond = codegen_exp(ctx, for_node->getCond());
+            ctx->getBuilder()->CreateCondBr(body_cond, bodyBlock, doneBlock);
+        }
+
+        // 'doneBlock' remains on the stack
+        ctx->pushBlock(doneBlock);
+
+        return true;
+    }
     // Expression statement
     else if (std::shared_ptr<ASTExprStmt> exp_stmt = std::dynamic_pointer_cast<ASTExprStmt>(head))
         codegen_exp(ctx, exp_stmt->getExp());

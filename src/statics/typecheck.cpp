@@ -354,6 +354,24 @@ void typecheck_stmt(
 
         typecheck_stmts(mod, func, while_node->getBody());
     }
+    // For loop
+    else if (std::shared_ptr<ASTForStmt> for_node = std::dynamic_pointer_cast<ASTForStmt>(head)) {
+        // Evaluate the initialization statement
+        typecheck_stmt(mod, func, for_node->getInit());
+
+        //Condition must be a boolean
+        std::shared_ptr<ASTTypeNode> cond_type = typecheck_exp(mod, func, for_node->getCond());
+
+        if (!cond_type->equal(ASTBooleanType::get()))
+            throw IllegalTypeException();
+
+        // TODO: additional checks on the iter statement
+        // Evaluate the iter statement
+        typecheck_stmt(mod, func, for_node->getIter());
+
+        // Evaluate the body of the loop
+        typecheck_stmts(mod, func, for_node->getBody());
+    }
     // Expression statement
     else if (std::shared_ptr<ASTExprStmt> exp_stmt = std::dynamic_pointer_cast<ASTExprStmt>(head))
         typecheck_exp(mod, func, exp_stmt->getExp());

@@ -62,7 +62,7 @@ void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
 
 %type <exp> exp
 %type <type> type
-%type <stmt> stmt simp
+%type <stmt> stmt simp simpopt
 %type <stmt_seq> stmt_list elseopt
 %type <arg> param
 %type <arg_seq> param_list param_list_follow dim_param_list_opt
@@ -156,6 +156,10 @@ type:
   | type LBRACKET RBRACKET            { $$ = new ASTArrType(std::shared_ptr<ASTTypeNode>($1)); }
   ;
 
+simpopt:
+    /* empty */                       { $$ = nullptr; }
+  | simp                              { $$ = $1; }
+
 simp:
     type IDENT                        { $$ = new ASTVarDeclStmt(std::shared_ptr<ASTTypeNode>($1), std::string($2), nullptr); free($2); }
   | type IDENT ASSIGN exp             { $$ = new ASTVarDeclStmt(std::shared_ptr<ASTTypeNode>($1), std::string($2), std::shared_ptr<ASTExpNode>($4)); free($2); }
@@ -177,6 +181,8 @@ stmt:
   | LBRACE stmt_list RBRACE           { $$ = new ASTScopeStmt(std::shared_ptr<ASTStmtSeqNode>($2)); }
   | IF LPAREN exp RPAREN stmt elseopt { $$ = new ASTIfStmt(std::shared_ptr<ASTExpNode>($3), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($5), nullptr), std::shared_ptr<ASTStmtSeqNode>($6)); }
   | WHILE LPAREN exp RPAREN stmt      { $$ = new ASTWhileStmt(std::shared_ptr<ASTExpNode>($3), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($5), nullptr)); }
+  | FOR LPAREN simpopt SEMI exp SEMI simpopt RPAREN stmt
+    { $$ = new ASTForStmt(std::shared_ptr<ASTStmtNode>($3), std::shared_ptr<ASTExpNode>($5), std::shared_ptr<ASTStmtNode>($7), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($9), nullptr)); }
   ;
 
 elseopt:
