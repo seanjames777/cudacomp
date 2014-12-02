@@ -18,7 +18,8 @@ struct CCArgs {
     bool        emit_device;   //!< Whether to emit PTX code
     bool        print_ast;     //!< Whether to print the AST
     std::string in_file;       //!< Input file, possibly null to indicate stdin
-    std::string out_file;      //!< Output file, possibly null to indicate stdout
+    std::string out_hfile;     //!< Output host code file
+    std::string out_dfile;     //!< Output device code file
     bool        verbose;       //!< Whether to print verbose output
     std::string symbol_prefix; //!< String to prefix intern function names with
     bool        mem_safe;      //!< Whether to insert memory safety checks

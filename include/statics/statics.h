@@ -19,6 +19,7 @@
 #include <statics/exceptions.h>
 #include <statics/symbolcheck.h>
 #include <statics/symbolmangle.h>
+#include <statics/cudapartition.h>
 #include <ast/astprint.h>
 #include <options.h>
 

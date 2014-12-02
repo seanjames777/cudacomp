@@ -25,6 +25,7 @@ public:
      * @brief CUDA function usage flags
      */
     enum CudaUsage {
+        None = 0,
         Host = 1,
         Device = 2,
         Global = 4,
@@ -83,6 +84,11 @@ public:
      * @brief Get CUDA function usage
      */
     enum CudaUsage getUsage();
+
+    /**
+     * @brief Set CUDA function usage
+     */
+    void setUsage(enum CudaUsage usage);
 
     /**
      * @brief Get the type of a symbol in the function's body

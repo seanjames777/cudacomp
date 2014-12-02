@@ -58,6 +58,11 @@ public:
      */
     std::shared_ptr<ASTTypeNode> getType(std::string id);
 
+    /**
+     * @brief Check whether any functions are marked as global or device
+     */
+    bool hasCudaFunctions();
+
 };
 
 #endif

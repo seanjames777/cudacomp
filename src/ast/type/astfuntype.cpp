@@ -6,8 +6,12 @@
 
 #include <ast/type/astfuntype.h>
 
-ASTFunType::ASTFunType(std::shared_ptr<ASTTypeNode> returnType, std::shared_ptr<ASTArgSeqNode> args)
+ASTFunType::ASTFunType(
+    std::shared_ptr<ASTTypeNode> returnType,
+    std::shared_ptr<ASTArgSeqNode> dim_args,
+    std::shared_ptr<ASTArgSeqNode> args)
     : returnType(returnType),
+      dim_args(dim_args),
       args(args)
 {
 }
@@ -20,8 +24,25 @@ void ASTFunType::setReturnType(std::shared_ptr<ASTTypeNode> returnType) {
     this->returnType = returnType;
 }
 
+std::shared_ptr<ASTArgSeqNode> ASTFunType::getDimArgs() {
+    return dim_args;
+}
+
 std::shared_ptr<ASTArgSeqNode> ASTFunType::getArgs() {
     return args;
+}
+
+int ASTFunType::getNumArgs() {
+    std::shared_ptr<ASTArgSeqNode> seq = args;
+
+    int n = 0;
+
+    while (seq != nullptr) {
+        n++;
+        seq = seq->getTail();
+    }
+
+    return n;
 }
 
 bool ASTFunType::equal(std::shared_ptr<ASTTypeNode> other_type) {

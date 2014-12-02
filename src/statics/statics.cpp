@@ -40,6 +40,12 @@ std::shared_ptr<ModuleInfo> run(std::shared_ptr<ASTDeclSeqNode> node) {
     typecheck_tops(module, node);
     returncheck_tops(module, node);
 
+    if (args->verbose)
+        std::cout << "Partitioning CUDA functions..." << std::endl;
+
+    CudaPartition part(module);
+    part.run(node);
+
     return module;
 }
 

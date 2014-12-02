@@ -18,6 +18,7 @@ class ASTCallExp : public ASTExpNode {
 private:
 
     std::string id;
+    std::shared_ptr<ASTExpSeqNode> dim_args;
     std::shared_ptr<ASTExpSeqNode> args;
 
 public:
@@ -25,10 +26,14 @@ public:
     /**
      * @brief Constructor
      *
-     * @param[in] id   Name of function to call
-     * @param[in] args Sequence of argument expressions
+     * @param[in] id       Name of function to call
+     * @param[in] dim_args Sequence of dimensional argument expressions
+     * @param[in] args     Sequence of argument expressions
      */
-    ASTCallExp(std::string id, std::shared_ptr<ASTExpSeqNode> args);
+    ASTCallExp(
+        std::string id,
+        std::shared_ptr<ASTExpSeqNode> dim_args,
+        std::shared_ptr<ASTExpSeqNode> args);
 
     /**
      * @brief Destructor
@@ -44,6 +49,11 @@ public:
      * @brief Set name of function to call
      */
     void setId(std::string id);
+
+    /**
+     * @brief Get argument sequence to function call
+     */
+    std::shared_ptr<ASTExpSeqNode> getDimArgs();
 
     /**
      * @brief Get argument sequence to function call

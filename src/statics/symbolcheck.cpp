@@ -208,7 +208,18 @@ void SymbolCheck::visitFunDecl(std::shared_ptr<ASTFunDecl> funDecl) {
     symbolCounter = 0;
 
     // Mark all arguments as declared and defined.
-    std::shared_ptr<ASTArgSeqNode> args = funDecl->getSignature()->getArgs();
+    std::shared_ptr<ASTArgSeqNode> args = funDecl->getSignature()->getDimArgs();
+
+    while (args != nullptr) {
+        std::shared_ptr<ASTArgNode> arg = args->getHead();
+
+        Symbol uniqueName = makeUniqueSymbol(arg->getName(), true);
+        arg->setName(uniqueName);
+
+        args = args->getTail();
+    }
+
+    args = funDecl->getSignature()->getArgs();
 
     while (args != nullptr) {
         std::shared_ptr<ASTArgNode> arg = args->getHead();

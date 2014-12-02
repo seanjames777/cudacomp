@@ -14,12 +14,13 @@ struct CCArgs *getOptions() {
 
 void printHelp(char *argv[]) {
     printf(
-        "Usage: %s [-S] [-o <file>] [<file>]\n"
+        "Usage: %s [-S] [-o[d] <file>] [<file>]\n"
         "\n"
         "Basic Options:\n"
         "    -h                     Print this help message and exit\n"
         "    -S                     Emit LLVM IR as text instead of bitcode\n"
-        "    -o <file>              Output assembly to a file instead of standard out\n"
+        "    -o <file>              Output (host) assembly to a file\n"
+        "    -od <file>             Output (device) assembly to a file\n"
         "    <file>                 File to parse, instead of standard in\n"
         "\n"
         "Additional Options:\n"
@@ -36,7 +37,8 @@ void parseArgs(int argc, char *argv[]) {
     args.emit_device   = false;
     args.print_ast     = false;
     args.in_file       = "";
-    args.out_file      = "";
+    args.out_hfile     = "";
+    args.out_dfile     = "";
     args.verbose       = false;
     args.symbol_prefix = "";
     args.mem_safe      = false;
@@ -53,7 +55,9 @@ void parseArgs(int argc, char *argv[]) {
         else if (strcmp(argv[i], "--print-ast") == 0)
             args.print_ast = true;
         else if (strcmp(argv[i], "-o") == 0)
-            args.out_file = std::string(argv[++i]);
+            args.out_hfile = std::string(argv[++i]);
+        else if (strcmp(argv[i], "-od") == 0)
+            args.out_dfile = std::string(argv[++i]);
         else if (strcmp(argv[i], "--verbose") == 0)
             args.verbose = true;
         else if (strcmp(argv[i], "--symbol-prefix") == 0)
@@ -69,4 +73,10 @@ void parseArgs(int argc, char *argv[]) {
         else
             args.in_file = std::string(argv[i]);
     }
+
+    if (args.out_hfile.empty())
+        args.out_hfile = args.emit_text ? "host.ll" : "host.bc";
+
+    if (args.out_dfile.empty())
+        args.out_dfile = args.emit_text ? "device.ll" : "device.bc";
 }

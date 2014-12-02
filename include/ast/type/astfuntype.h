@@ -20,6 +20,7 @@ class ASTFunType : public ASTTypeNode {
 private:
 
     std::shared_ptr<ASTTypeNode> returnType;
+    std::shared_ptr<ASTArgSeqNode> dim_args;
     std::shared_ptr<ASTArgSeqNode> args;
 
 public:
@@ -28,9 +29,13 @@ public:
      * @brief Constructor
      *
      * @param[in] returnType Return type
+     * @param[in] dim_args   Dimensional argument names and type sequence
      * @param[in] args       Argument names and types sequence
      */
-    ASTFunType(std::shared_ptr<ASTTypeNode> returnType, std::shared_ptr<ASTArgSeqNode> args);
+    ASTFunType(
+        std::shared_ptr<ASTTypeNode> returnType,
+        std::shared_ptr<ASTArgSeqNode> dim_args,
+        std::shared_ptr<ASTArgSeqNode> args);
 
     /**
      * @brief Get return type
@@ -43,9 +48,19 @@ public:
     void setReturnType(std::shared_ptr<ASTTypeNode> returnType);
 
     /**
+     * @brief Get dimensional argument name and types sequence
+     */
+    std::shared_ptr<ASTArgSeqNode> getDimArgs();
+
+    /**
      * @brief Get argument name and types sequence
      */
     std::shared_ptr<ASTArgSeqNode> getArgs();
+
+    /**
+     * @brief Get number of arguments
+     */
+    int getNumArgs();
 
     /**
      * @brief Check if this type is structurally equal to another type. Names

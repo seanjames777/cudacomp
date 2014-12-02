@@ -30,3 +30,11 @@ std::shared_ptr<ASTTypeNode> ModuleInfo::getType(std::string id) {
 
     return typedefs.get(id);
 }
+
+bool ModuleInfo::hasCudaFunctions() {
+    for (auto it : functions)
+        if (it.second->getUsage() & (FunctionInfo::Global | FunctionInfo::Device))
+            return true;
+
+    return false;
+}
