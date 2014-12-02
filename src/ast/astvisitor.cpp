@@ -161,6 +161,7 @@ IMPL_CLASS(ExprStmt) {
 
 IMPL_CLASS(ForStmt) {
     HAS_MEMBER(getInit());
+    HAS_MEMBER(getCond());
     HAS_MEMBER(getBody());
     HAS_MEMBER(getIter());
 }

@@ -183,11 +183,8 @@ void SymbolCheck::visitForStmt(std::shared_ptr<ASTForStmt> forStmt) {
     SymbolSet old_decl = decl;
     SymbolSet old_def = def;
 
-    visitNode(forStmt->getInit());
-    visitNode(forStmt->getCond());
-    visitNode(forStmt->getIter());
-    visitNode(forStmt->getBody());
-
+    ASTVisitor::visitForStmt(forStmt);
+    
     // Definitions and declarations inside the body of the loop do NOT propagate out
     decl = old_decl;
     def = old_def;
