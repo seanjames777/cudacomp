@@ -23,6 +23,7 @@ public:
      * @brief Binary operations
      */
     enum op {
+        NONE, //!< No operation
         ADD,  //!< Addition
         SUB,  //!< Subtraction
         MUL,  //!< Multiplication
@@ -90,6 +91,14 @@ public:
      * @brief Set the operation type.
      */
     void setType(std::shared_ptr<ASTTypeNode> type);
+
+    /**
+     * @brief Utility for printing operators to a stream
+     *
+     * @param[in] op Operator to print
+     * @param[in] ss Stream to print to
+     */
+    static void printBinop(enum ASTBinopExp::op op, std::ostream & ss);
 
     /**
      * @copydoc ASTNode::print()

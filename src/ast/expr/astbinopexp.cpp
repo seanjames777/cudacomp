@@ -12,6 +12,7 @@ ASTBinopExp::ASTBinopExp(enum op op, std::shared_ptr<ASTExpNode> e1, std::shared
       e2(e2),
       type(nullptr)
 {
+    assert(op != NONE);
 }
 
 ASTBinopExp::~ASTBinopExp() {
@@ -37,7 +38,7 @@ void ASTBinopExp::setType(std::shared_ptr<ASTTypeNode> type) {
     this->type = type;
 }
 
-void ASTBinopExp::print(std::ostream & ss) {
+void ASTBinopExp::printBinop(enum ASTBinopExp::op op, std::ostream & ss) {
     switch(op) {
     case ADD:
         ss << "+";
@@ -93,7 +94,14 @@ void ASTBinopExp::print(std::ostream & ss) {
     case NEQ:
         ss << "!=";
         break;
+    case NONE:
+        ss << "=";
+        break;
     }
+}
+
+void ASTBinopExp::print(std::ostream & ss) {
+    printBinop(op, ss);
 
     // TODO: If the AST was printed after all the statics, then we would know the
     // types, lvalues, etc.

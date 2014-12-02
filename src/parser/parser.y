@@ -7,6 +7,9 @@
 
 #define YYERROR_VERBOSE
 
+int line_num = 1;
+std::unordered_map<std::string, ASTTypeNode *> typedefs;
+
 int yylex(void);
 
 int yywrap() {
@@ -14,10 +17,10 @@ int yywrap() {
 }
 
 void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
-    throw Parser::ParseException(std::string(str));
+    std::stringstream ss;
+    ss << "Line " << line_num << ": " << str;
+    throw Parser::ParseException(ss.str());
 }
-
-std::unordered_map<std::string, ASTTypeNode *> typedefs;
 
 %}
 
@@ -31,6 +34,8 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %union {
     ASTDeclNode *top;
     ASTDeclSeqNode *top_seq;
+    ASTSchedNode *sched;
+    ASTSchedSeqNode *sched_seq;
     ASTStmtNode *stmt;
     ASTStmtSeqNode *stmt_seq;
     ASTExpNode *exp;
@@ -50,17 +55,20 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %token <string> IDENT IDTYPE
 %token <boolean> TRUE FALSE
 %token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR NOT BNOT
-%token ASSIGN SEMI COMMA LBRACKET RBRACKET
+%token ASSIGN SEMI COMMA LBRACKET RBRACKET INCR DECR
 %token INT BOOL VOID FLOAT
-%token RETURN IF ELSE TYPEDEF WHILE EXTERN ALLOC_ARRAY COLON TO DEVICE FOR
+%token RETURN IF ELSE TYPEDEF WHILE EXTERN ALLOC_ARRAY COLON TO DEVICE FOR QUESTION
 %token LPAREN RPAREN LBRACE RBRACE
 %token EQ NEQ LEQ GEQ LT GT
+%token PLUSEQ MINUSEQ TIMESEQ DIVEQ MODEQ
+%token STRUCT BREAK CONTINUE ASSERT KWNULL ALLOC CHAR STRING
 
 %type <exp> exp
 %type <type> type
+%type <sched> sched
+%type <sched_seq> sched_list
 %type <stmt> stmt simp simpopt
-%type <stmt_seq> stmt_list
-%type <stmt_seq> elseopt
+%type <stmt_seq> stmt_list elseopt
 %type <arg> param
 %type <arg_seq> param_list param_list_follow
 %type <top> top
@@ -69,8 +77,9 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 %type <exp_seq> arg_list arg_list_follow
 %type <linkage> linkage
 
-%right ASSIGN
+%right ASSIGN PLUSEQ MINUSEQ TIMESEQ DIVEQ MODEQ
 %left TO
+%right QUESTION COLON
 %left OR
 %left AND
 %left BOR
@@ -140,7 +149,7 @@ exp:
   | exp LBRACKET exp RBRACKET         { $$ = new ASTIndexExp(std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | ALLOC_ARRAY LPAREN type COMMA exp RPAREN
     { $$ = new ASTAllocArrayExp(std::shared_ptr<ASTTypeNode>($3), std::shared_ptr<ASTExpNode>($5)); }
-  // | DEVICE exp                        { $$ = new ASTDeviceSched(std::shared_ptr<ASTExpNode>($2)); }
+  | exp QUESTION exp COLON exp        { $$ = new ASTTernopExp(std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3), std::shared_ptr<ASTExpNode>($5)); }
   ;
 
 type:
@@ -159,7 +168,14 @@ simpopt:
 simp:
     type IDENT                        { $$ = new ASTVarDeclStmt(std::shared_ptr<ASTTypeNode>($1), std::string($2), nullptr); free($2); }
   | type IDENT ASSIGN exp             { $$ = new ASTVarDeclStmt(std::shared_ptr<ASTTypeNode>($1), std::string($2), std::shared_ptr<ASTExpNode>($4)); free($2); }
-  | exp ASSIGN exp                    { $$ = new ASTAssignStmt(std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp ASSIGN exp                    { $$ = new ASTAssignStmt(ASTBinopExp::NONE, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp PLUSEQ exp                    { $$ = new ASTAssignStmt(ASTBinopExp::ADD, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp MINUSEQ exp                   { $$ = new ASTAssignStmt(ASTBinopExp::SUB, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp TIMESEQ exp                   { $$ = new ASTAssignStmt(ASTBinopExp::MUL, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp DIVEQ exp                     { $$ = new ASTAssignStmt(ASTBinopExp::DIV, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp MODEQ exp                     { $$ = new ASTAssignStmt(ASTBinopExp::MOD, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp INCR                          { $$ = new ASTAssignStmt(ASTBinopExp::ADD, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>(new ASTIntegerExp(1))); }
+  | exp DECR                          { $$ = new ASTAssignStmt(ASTBinopExp::SUB, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>(new ASTIntegerExp(1))); }
   | exp                               { $$ = new ASTExprStmt(std::shared_ptr<ASTExpNode>($1)); }
   ;
 
@@ -170,11 +186,19 @@ stmt:
   | LBRACE stmt_list RBRACE           { $$ = new ASTScopeStmt(std::shared_ptr<ASTStmtSeqNode>($2)); }
   | IF LPAREN exp RPAREN stmt elseopt { $$ = new ASTIfStmt(std::shared_ptr<ASTExpNode>($3), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($5), nullptr), std::shared_ptr<ASTStmtSeqNode>($6)); }
   | WHILE LPAREN exp RPAREN stmt      { $$ = new ASTWhileStmt(std::shared_ptr<ASTExpNode>($3), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($5), nullptr)); }
-  | FOR LPAREN type IDENT COLON exp RPAREN stmt
-    { $$ = new ASTRangeForStmt(std::shared_ptr<ASTTypeNode>($3), std::string($4), std::shared_ptr<ASTExpNode>($6), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($8), nullptr)); free($4); }
   | FOR LPAREN simpopt SEMI exp SEMI simpopt RPAREN stmt
     { $$ = new ASTForStmt(std::shared_ptr<ASTStmtNode>($3), std::shared_ptr<ASTExpNode>($5), std::shared_ptr<ASTStmtNode>($7), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($9), nullptr)); }
+  | sched_list FOR LPAREN type IDENT COLON exp RPAREN stmt
+    { $$ = new ASTRangeForStmt(std::shared_ptr<ASTSchedSeqNode>($1), std::shared_ptr<ASTTypeNode>($4), std::string($5), std::shared_ptr<ASTExpNode>($7), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($9), nullptr)); free($5); }
   ;
+
+sched:
+    DEVICE                            { $$ = new ASTDeviceSched(); }
+  ;
+
+sched_list:
+    /* empty */                       { $$ = nullptr; }
+  | sched sched_list                    { $$ = new ASTSchedSeqNode(std::shared_ptr<ASTSchedNode>($1), std::shared_ptr<ASTSchedSeqNode>($2)); }
 
 elseopt:
     /* empty */                       { $$ = nullptr; }

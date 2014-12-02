@@ -22,13 +22,13 @@ void SymbolCheck::visitIdentifierExp(std::shared_ptr<ASTIdentifierExp> id) {
     if (decl.find(id->getId()) == decl.end())
         throw UndeclaredIdentifierException(id->getId());
 
-    // Must be defined
     if (!id->isLValue() && def.find(id->getId()) == def.end())
         throw UndefinedIdentifierException(id->getId());
-    else
+    else {
         // Mark as defined
         if (def.find(id->getId()) == def.end())
             def.insert(id->getId());
+    }
 
     // Rename to a unique symbol
     id->setId(rename.get(id->getId()));
@@ -81,10 +81,14 @@ void SymbolCheck::visitAssignStmt(std::shared_ptr<ASTAssignStmt> assign) {
     // visit to the identifier will handle everything for us. Specifically, it won't
     // require that the identifier be defined yet, because we are defining it here.
     if (std::shared_ptr<ASTIdentifierExp> id_exp = std::dynamic_pointer_cast<ASTIdentifierExp>(assign->getLValue())) {
-        id_exp->setIsLValue(true);
+        // The 'isLValue' value means that the identifier doesn't have to be
+        // defined to be assigned to. It must be defined if this is a compound
+        // assignment.
+        id_exp->setIsLValue(assign->getOp() == ASTBinopExp::NONE);
 
-        // Check recursively
-        ASTVisitor::visitAssignStmt(assign);
+        // Make sure the right hand side is valid before assigning
+        visitNode(assign->getExp());
+        visitNode(assign->getLValue());
     }
     // Otherwise proceed normally
     else

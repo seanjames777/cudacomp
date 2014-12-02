@@ -66,7 +66,9 @@ add_executable(cc
     src/ast/expr/astindexexp.cpp
     src/ast/expr/astintegerexp.cpp
     src/ast/expr/astrangeexp.cpp
+    src/ast/expr/astternopexp.cpp
     src/ast/expr/astunopexp.cpp
+    src/ast/sched/astdevicesched.cpp
     src/ast/sched/astschednode.cpp
     src/ast/stmt/astassignstmt.cpp
     src/ast/stmt/astexprstmt.cpp
@@ -96,6 +98,7 @@ add_executable(cc
     src/codegen/codegenctx.cpp
     src/codegen/converttype.cpp
     src/main.cpp
+    src/options.cpp
     src/parser/parse.cpp
     src/statics/functioninfo.cpp
     src/statics/moduleinfo.cpp
@@ -107,6 +110,7 @@ add_executable(cc
     src/statics/typeresolve.cpp
     src/statics/funcheck.cpp
     src/statics/exceptions.cpp
+    src/statics/symbolmangle.cpp
     ${BISON_parser_OUTPUTS}
     ${FLEX_lexer_OUTPUTS}
 )
@@ -125,6 +129,7 @@ target_link_libraries(cc
 
 add_library(host_rt
     runtime/host_rt.c
+    runtime/host_main.c
 )
 
 if ("${PTX_BACKEND}" MATCHES "TRUE")
@@ -174,11 +179,15 @@ endif ("${PTX_BACKEND}" MATCHES "TRUE")
 
 # Autolab support
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/runtime/host_rt.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/l4lib.c)
+
 add_custom_target(l4c
-    DEPENDS cc host_rt
+    DEPENDS cc
     COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/bin/
     COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/cc ${CMAKE_CURRENT_BINARY_DIR}/bin/cc
     COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/411_wrapper.py ${CMAKE_CURRENT_BINARY_DIR}/bin/l4c
+    COMMAND clang -emit-llvm -o l4lib.bc -c runtime/host_rt.c
 )
 
 add_custom_target(clean

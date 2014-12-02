@@ -2,15 +2,16 @@
 #include <iostream>
 #include <string>
 #include <ast/ast.h>
+#include <parser/parse.h>
 
 #define YY_STACK_USED
 #include "parser.hpp"
 
+// TODO: Might be able to get the line number more easily
 extern std::unordered_map<std::string, ASTTypeNode *> typedefs;
+extern int line_num;
 
 int comment_depth = 0;
-
-// TODO: should freak out when we can't fit a number in a type
 
 %}
 
@@ -20,14 +21,20 @@ int comment_depth = 0;
 %%
 
 "/*"                    { BEGIN(COMMENT); comment_depth++; }
-<COMMENT>[^*/]*         /* ignore */
+<COMMENT>[^\n*/]*         /* ignore */
+<COMMENT>"\n"           { line_num++; }
 <COMMENT>"/*"           { comment_depth++; }
 <COMMENT>"*/"           { if (--comment_depth == 0) { BEGIN(INITIAL); } }
 <COMMENT>[*/]           /* ignore */
+<COMMENT><<EOF>>        {
+                            std::stringstream ss;
+                            ss << "Line " << line_num << ": Unterminated comment";
+                            throw Parser::ParseException(ss.str());
+                        }
 
 "//"                    { BEGIN(LINE_COMMENT); }
 <LINE_COMMENT>[^\n]*    /* ignore */
-<LINE_COMMENT>"\n"      { BEGIN(INITIAL); }
+<LINE_COMMENT>"\n"      { BEGIN(INITIAL); line_num++; }
 
 "return"                { return RETURN; }
 "while"                 { return WHILE; }
@@ -42,14 +49,39 @@ int comment_depth = 0;
 "typedef"               { return TYPEDEF; }
 "extern"                { return EXTERN; }
 "alloc_array"           { return ALLOC_ARRAY; }
-":"                     { return COLON; }
 "to"                    { return TO; }
 "for"                   { return FOR; }
 "@device"               { return DEVICE; }
+"struct"                { return STRUCT; }
+"continue"              { return CONTINUE; }
+"break"                 { return BREAK; }
+"assert"                { return ASSERT; }
+"NULL"                  { return KWNULL; }
+"alloc"                 { return ALLOC; }
+"char"                  { return CHAR; }
+"string"                { return STRING; }
 
-[0-9]+                  { yylval.int32 = strtol(yytext, NULL, 10); return INT32; }
-0[xX][0-9A-Fa-f]+       { yylval.int32 = strtol(yytext, NULL, 16); return INT32; }
-[0-9]*\.[0-9]+           { yylval.float32 = strtod(yytext, NULL); return FLOAT32; }
+0|[1-9][0-9]*           {
+                            unsigned long long int val = strtoull(yytext, NULL, 10);
+                            if (val > (1UL << 31)) {
+                                std::stringstream ss;
+                                ss << "Line " << line_num << ": Constant too large: " << yytext;
+                                throw Parser::ParseException(ss.str());
+                            }
+                            yylval.int32 = val;
+                            return INT32;
+                        }
+0[xX][0-9A-Fa-f]+       {
+                            unsigned long long int val = strtoull(yytext, NULL, 16);
+                            if (val > 0xFFFFFFFFUL) {
+                                std::stringstream ss;
+                                ss << "Line " << line_num << ": Constant too large: " << yytext;
+                                throw Parser::ParseException(ss.str());
+                            }
+                            yylval.int32 = val;
+                            return INT32;
+                        }
+[0-9]*\.[0-9]+          { yylval.float32 = strtod(yytext, NULL); return FLOAT32; }
 [_a-zA-Z][_a-zA-Z0-9]*  {
                             yylval.string = strdup(yytext);
 
@@ -58,7 +90,8 @@ int comment_depth = 0;
                             else
                                 return IDENT;
                         }
-
+"?"                     { return QUESTION; }
+":"                     { return COLON; }
 ","                     { return COMMA; }
 "+"                     { return PLUS; }
 "*"                     { return TIMES; }
@@ -88,7 +121,22 @@ int comment_depth = 0;
 "}"                     { return RBRACE; }
 "["                     { return LBRACKET; }
 "]"                     { return RBRACKET; }
+"++"                    { return INCR; }
+"--"                    { return DECR; }
+"+="                    { return PLUSEQ; }
+"-="                    { return MINUSEQ; }
+"*="                    { return TIMESEQ; }
+"/="                    { return DIVEQ; }
+"%="                    { return MODEQ; }
 
-[ \r\n\t]+              /* ignore whitespace */
+[ \r\t\v\f]+            /* ignore whitespace */
+"\n"                    { line_num++; }
+
+.                       {
+                            std::stringstream ss;
+                            ss << "Line " << line_num << ": ";
+                            ss << "Unexpected non-whitespace character '" << yytext << "'";
+                            throw Parser::ParseException(ss.str());
+                        }
 
 %%

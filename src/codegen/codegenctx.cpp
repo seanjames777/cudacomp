@@ -16,6 +16,7 @@ CodegenCtx::CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo)
       emit_device(emit_device),
       modInfo(modInfo),
       alloc_array(nullptr),
+      div_check(nullptr),
       def_bblock(nullptr),
       first_bblock(nullptr),
       def_builder(nullptr),
@@ -39,6 +40,21 @@ Function *CodegenCtx::getAllocArray() {
     }
 
     return alloc_array;
+}
+
+Function *CodegenCtx::getDivCheck() {
+    // Only declare it if it's used, to make small programs simpler
+    if (!div_check) {
+        // Construct a declaration of the runtime's div_check function
+        std::vector<Type *> argTypes;
+        argTypes.push_back(Type::getInt32Ty(context));
+        argTypes.push_back(Type::getInt32Ty(context));
+
+        FunctionType *ftype = FunctionType::get(Type::getVoidTy(context), argTypes, false);
+        div_check = Function::Create(ftype, GlobalValue::ExternalLinkage, "_rt_div_check", module.get());
+    }
+
+    return div_check;
 }
 
 std::shared_ptr<ModuleInfo> CodegenCtx::getModuleInfo() {
@@ -77,9 +93,15 @@ void CodegenCtx::emit(std::ostream & out) {
 
     pm.run(*module);
 
+    CCArgs *args = getOptions();
+
     // Finally, print the result to the output stream
     raw_os_ostream outs(out);
-    outs << *module;
+
+    if (args->emit_text)
+        outs << *module;
+    else
+        WriteBitcodeToFile(module.get(), outs);
 }
 
 Function *CodegenCtx::getFunction(std::string id) {
@@ -104,7 +126,7 @@ Function *CodegenCtx::createFunction(std::shared_ptr<FunctionInfo> funcInfo) {
 
     bool isVoid = sig->getReturnType()->equal(ASTVoidType::get());
 
-    if (emit_device && funcInfo->isCudaGlobal() && !isVoid) {
+    if (emit_device && (funcInfo->getUsage() & FunctionInfo::Global) && !isVoid) {
         argTypes.push_back(PointerType::getUnqual(returnType));
         returnType = Type::getVoidTy(context);
     }
@@ -141,7 +163,7 @@ void CodegenCtx::startFunction(std::string id) {
     std::shared_ptr<ASTArgSeqNode> args = sig->getArgs();
     auto arg_iter = function->arg_begin();
 
-    if (emit_device && funcInfo->isCudaGlobal() && !sig->getReturnType()->equal(ASTVoidType::get()))
+    if (emit_device && (funcInfo->getUsage() & FunctionInfo::Global) && !sig->getReturnType()->equal(ASTVoidType::get()))
         arg_iter++;
 
     // Map arguments to symbol table. Move arguments into alloca's functions
@@ -184,8 +206,8 @@ void CodegenCtx::markKernel(Function *kernel) {
     meta.push_back(ConstantInt::get(Type::getInt32Ty(context), 1));
     MDNode *node = MDNode::get(context, meta);
 
-    NamedMDNode *cat = module->getOrInsertNamedMetadata("nvvm.annotations");
-    cat->addOperand(node);
+    NamedMDNode *nvvm = module->getOrInsertNamedMetadata("nvvm.annotations");
+    nvvm->addOperand(node);
 }
 
 void CodegenCtx::finishFunction() {

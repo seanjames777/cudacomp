@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import sys, subprocess
+import sys, subprocess, os, getpass
 
 emit_llvm = False
 safe_mode = True
@@ -52,12 +52,55 @@ def run_shell(command):
 
     return stat
 
+# If we are not the autograder we need to compile the runtime library ourself...
+autograder = getpass.getuser() == "autograder"
+link_runtime = not(autograder) or not(emit_llvm)
+
 # Process each source file
 for source in sources:
-    outfile_llvm = source.rsplit('.', 1)[0] + ".ll"
+    compiler_args = [ "./cc", "--symbol-prefix", "_c0_", "--require-entry", "main" ]
 
-    run_shell([ "./cc", "-o", outfile_llvm, source ])
+    outfile_bc = source.rsplit('.', 1)[0] + ".bc"
+    outfile_ll = source.rsplit('.', 1)[0] + ".ll"
+
+    if not(link_runtime):
+        compiler_args.append("-S")
+        compiler_args.append("-o")
+        compiler_args.append(outfile_ll)
+    else:
+        compiler_args.append("-o")
+        compiler_args.append(outfile_bc)
+
+    if safe_mode:
+        compiler_args.append("--mem-safe")
+        compiler_args.append("--oper-safe")
+
+    compiler_args.append(source)
+
+    stat = run_shell(compiler_args)
+
+    if stat != 0:
+        exit(stat)
+
+    if link_runtime:
+        # Link with the compiled C0
+        stat = run_shell([ "llvm-link", "-S", "-o", outfile_ll, "l4lib.bc", outfile_bc ])
+
+        if stat != 0:
+            exit(stat)
+
+    # We don't have an x86 backend, so if we're compiling to x86, use llc
+    if not(emit_llvm):
+        outfile = source.rsplit('.', 1)[0] + ".s"
+        stat = run_shell([ "llc", "-o", outfile, outfile_ll ])
+
+        if stat != 0:
+            exit(stat)
+
+    if link_runtime:
+        run_shell([ "rm", outfile_bc ])
 
     if not(emit_llvm):
-        outfile = source.rsplit('.')[0] + ".s"
-        run_shell([ "llc", "-o", outfile, outfile_llvm ])
+        run_shell([ "rm", outfile_ll ])
+
+exit(0)

@@ -27,6 +27,28 @@ void FunCheck::run(std::shared_ptr<ASTDeclSeqNode> ast) {
 
     for (auto id : undef)
         throw UndefinedFunctionException(id);
+
+    // If there is a required entrypoint name, make sure it exsts and has the right
+    // signature.
+    struct CCArgs *args = getOptions();
+
+    if (!args->entrypoint.empty()) {
+        std::shared_ptr<FunctionInfo> entry = module->getFunction(args->entrypoint);
+
+        // Must be present
+        if (!entry)
+            throw InvalidEntrypointException();
+
+        std::shared_ptr<ASTFunType> sig = entry->getSignature();
+
+        // Must return an integer
+        if (!sig->getReturnType()->equal(ASTIntegerType::get()))
+            throw InvalidEntrypointException();
+
+        // Must not take any arguments
+        if (sig->getArgs() != nullptr)
+            throw InvalidEntrypointException();
+    }
 }
 
 void FunCheck::visitCallExp(std::shared_ptr<ASTCallExp> call_exp) {
@@ -70,7 +92,7 @@ void FunCheck::visitFunDecl(std::shared_ptr<ASTFunDecl> funDefn) {
         // Add the new function to the module
         funInfo = std::make_shared<FunctionInfo>(funDefn->getName(),
             funDefn->getSignature(), funDefn->getLinkage(),
-            funDefn->getName() == "_cc_main");
+            funDefn->getName() == "_cc_main" ? FunctionInfo::Global : FunctionInfo::Host);
         module->addFunction(funInfo);
     }
 

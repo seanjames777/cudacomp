@@ -7,16 +7,20 @@
 #include <statics/functioninfo.h>
 
 FunctionInfo::FunctionInfo(std::string name, std::shared_ptr<ASTFunType> signature,
-    enum ASTDeclNode::Linkage linkage, bool cudaGlobal)
+    enum ASTDeclNode::Linkage linkage, enum FunctionInfo::CudaUsage usage)
     : signature(signature),
       name(name),
       linkage(linkage),
-      cudaGlobal(cudaGlobal)
+      usage(usage)
 {
 }
 
 std::string FunctionInfo::getName() {
     return name;
+}
+
+void FunctionInfo::setName(std::string name) {
+    this->name = name;
 }
 
 enum ASTDeclNode::Linkage FunctionInfo::getLinkage() {
@@ -31,8 +35,8 @@ std::shared_ptr<ASTTypeNode> FunctionInfo::getLocalType(std::string id) {
     return locals.get(id);
 }
 
-bool FunctionInfo::isCudaGlobal() {
-    return cudaGlobal;
+enum FunctionInfo::CudaUsage FunctionInfo::getUsage() {
+    return usage;
 }
 
 void FunctionInfo::addLocal(std::string id, std::shared_ptr<ASTTypeNode> type) {
@@ -48,7 +52,6 @@ void FunctionInfo::copyArgumentsToLocals() {
 
     while (args != nullptr) {
         std::shared_ptr<ASTArgNode> arg = args->getHead();
-        std::cout << "Add arg " << arg->getName() << std::endl;
         addLocal(arg->getName(), arg->getType());
         args = args->getTail();
     }

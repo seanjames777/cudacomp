@@ -131,6 +131,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             }
 
             throw IllegalTypeException();
+        case ASTBinopExp::NONE: throw ASTMalformedException(); return nullptr;
         case ASTBinopExp::EQ:
         case ASTBinopExp::NEQ:
             // Must have the same type
@@ -155,7 +156,27 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             }
 
             throw IllegalTypeException();
+            return nullptr;
         }
+    }
+    // Ternary operator
+    else if (std::shared_ptr<ASTTernopExp> tern_exp = std::dynamic_pointer_cast<ASTTernopExp>(node)) {
+        // Condition must be a boolean
+        std::shared_ptr<ASTTypeNode> condType = typecheck_exp(mod, func, tern_exp->getCond());
+
+        if (!condType->equal(ASTBooleanType::get()))
+            throw IllegalTypeException();
+
+        // Each side must have the same type
+        std::shared_ptr<ASTTypeNode> leftType = typecheck_exp(mod, func, tern_exp->getTrueExp());
+        std::shared_ptr<ASTTypeNode> rightType = typecheck_exp(mod, func, tern_exp->getFalseExp());
+
+        if (!leftType->equal(rightType))
+            throw IllegalTypeException();
+
+        tern_exp->setType(leftType);
+
+        return leftType;
     }
     // Function call
     else if (std::shared_ptr<ASTCallExp> call_exp = std::dynamic_pointer_cast<ASTCallExp>(node)) {
@@ -280,6 +301,8 @@ void typecheck_stmt(
             // Must assign the same type
             if (!exp_type->equal(decl_type))
                 throw IllegalTypeException();
+
+            defn_stmt->setType(exp_type);
         }
         // Array subscript
         else if (std::shared_ptr<ASTIndexExp> idx_exp = std::dynamic_pointer_cast<ASTIndexExp>(defn_stmt->getLValue())) {
@@ -289,6 +312,8 @@ void typecheck_stmt(
             // Must assign the same type
             if (!lhs_type->equal(rhs_type))
                 throw IllegalTypeException();
+
+            defn_stmt->setType(rhs_type);
         }
         else throw IllegalLValueException();
     }

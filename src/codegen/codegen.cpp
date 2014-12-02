@@ -27,11 +27,14 @@
 
 // TODO: Alloca alignment
 
+// Note: This file makes heavy use of ctx->getBuilder(). This is an easy way to ensure
+// that the IR builder used to create an instruction always refers to the correct
+// basic block. The same builder is reused until it is no longer valid, so this is not
+// terribly inefficient.
+
 namespace Codegen {
 
 Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
-    std::shared_ptr<IRBuilder<>> builder = ctx->getBuilder();
-
     // Identifier reference
     if (std::shared_ptr<ASTIdentifierExp> id_exp = std::dynamic_pointer_cast<ASTIdentifierExp>(node)) {
         Value *id_ptr = ctx->getOrCreateSymbol(id_exp->getId());
@@ -42,7 +45,7 @@ Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNod
         Value *lhs = codegen_exp(ctx, idx_exp->getLValue());
         Value *sub = codegen_exp(ctx, idx_exp->getSubscript());
 
-        return builder->CreateGEP(lhs, sub);
+        return ctx->getBuilder()->CreateGEP(lhs, sub);
     }
     else
         throw new ASTMalformedException();
@@ -50,9 +53,67 @@ Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNod
     return nullptr;
 }
 
-Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
-    std::shared_ptr<IRBuilder<>> builder = ctx->getBuilder();
+Value *codegen_binop(
+    std::shared_ptr<CodegenCtx> ctx,
+    enum ASTBinopExp::op op,
+    std::shared_ptr<ASTTypeNode> type,
+    Value *v1,
+    Value *v2)
+{
+    CCArgs *args = getOptions();
 
+    bool isFloat = type->equal(ASTFloatType::get());
+
+    switch (op) {
+    case ASTBinopExp::ADD:  return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FAdd : Instruction::Add, v1, v2);
+    case ASTBinopExp::SUB:  return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FSub : Instruction::Sub, v1, v2);
+    case ASTBinopExp::MUL:  return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FMul : Instruction::Mul, v1, v2);
+    case ASTBinopExp::DIV:
+    case ASTBinopExp::MOD:
+        // Insert division checks
+        if (args->opr_safe) {
+            std::vector<Value *> args;
+            args.push_back(v1);
+            args.push_back(v2);
+
+            ctx->getBuilder()->CreateCall(ctx->getDivCheck(), args);
+        }
+
+        if (op == ASTBinopExp::DIV)
+            return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FDiv : Instruction::SDiv, v1, v2);
+        else
+            return ctx->getBuilder()->CreateBinOp(isFloat ? Instruction::FRem : Instruction::SRem, v1, v2);
+    case ASTBinopExp::SHL:
+    case ASTBinopExp::SHR:
+        // Insert bounds checks
+        if (args->opr_safe) {
+            std::vector<Value *> args;
+            args.push_back(v1);
+            args.push_back(v2);
+
+            ctx->getBuilder()->CreateCall(ctx->getDivCheck(), args);
+        }
+
+        if (op == ASTBinopExp::SHL)
+            return ctx->getBuilder()->CreateBinOp(Instruction::Shl, v1, v2);
+        else
+            return ctx->getBuilder()->CreateBinOp(Instruction::AShr, v1, v2);
+    case ASTBinopExp::AND:  return ctx->getBuilder()->CreateBinOp(Instruction::And, v1, v2);
+    case ASTBinopExp::OR:   return ctx->getBuilder()->CreateBinOp(Instruction::Or, v1, v2);
+    case ASTBinopExp::BAND: return ctx->getBuilder()->CreateBinOp(Instruction::And, v1, v2);
+    case ASTBinopExp::BOR:  return ctx->getBuilder()->CreateBinOp(Instruction::Or, v1, v2);
+    case ASTBinopExp::BXOR: return ctx->getBuilder()->CreateBinOp(Instruction::Xor, v1, v2);
+    case ASTBinopExp::EQ:   return (isFloat ? ctx->getBuilder()->CreateFCmpOEQ(v1, v2) : ctx->getBuilder()->CreateICmpEQ(v1, v2));
+    case ASTBinopExp::NEQ:  return (isFloat ? ctx->getBuilder()->CreateFCmpONE(v1, v2) : ctx->getBuilder()->CreateICmpNE(v1, v2));
+    case ASTBinopExp::LEQ:  return (isFloat ? ctx->getBuilder()->CreateFCmpOLE(v1, v2) : ctx->getBuilder()->CreateICmpSLE(v1, v2));
+    case ASTBinopExp::GEQ:  return (isFloat ? ctx->getBuilder()->CreateFCmpOGE(v1, v2) : ctx->getBuilder()->CreateICmpSGE(v1, v2));
+    case ASTBinopExp::LT:   return (isFloat ? ctx->getBuilder()->CreateFCmpOLT(v1, v2) : ctx->getBuilder()->CreateICmpSLT(v1, v2));
+    case ASTBinopExp::GT:   return (isFloat ? ctx->getBuilder()->CreateFCmpOGT(v1, v2) : ctx->getBuilder()->CreateICmpSGT(v1, v2));
+    case ASTBinopExp::NONE: throw ASTMalformedException(); return nullptr;
+    }
+}
+
+Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
     // Integer constant
     if (std::shared_ptr<ASTIntegerExp> int_exp = std::dynamic_pointer_cast<ASTIntegerExp>(node))
         return ConstantInt::get(convertType(ASTIntegerType::get()), int_exp->getValue());
@@ -67,9 +128,9 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         Value *v = codegen_exp(ctx, unop_exp->getExp());
 
         switch(unop_exp->getOp()) {
-        case ASTUnopExp::NOT:  return builder->CreateBinOp(Instruction::Xor, v, v);
-        case ASTUnopExp::BNOT: return builder->CreateNot(v);
-        case ASTUnopExp::NEG:  return builder->CreateNeg(v); // TODO investigate x86
+        case ASTUnopExp::NOT:  return ctx->getBuilder()->CreateBinOp(Instruction::Xor, v, v);
+        case ASTUnopExp::BNOT: return ctx->getBuilder()->CreateNot(v);
+        case ASTUnopExp::NEG:  return ctx->getBuilder()->CreateNeg(v); // TODO investigate x86
         }
     }
     // Binary operator
@@ -77,30 +138,41 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         Value *v1 = codegen_exp(ctx, binop_exp->getE1());
         Value *v2 = codegen_exp(ctx, binop_exp->getE2());
 
-        // Type is stored by typechecker
-        assert(binop_exp->getType());
-        bool isFloat = binop_exp->getType()->equal(ASTFloatType::get());
+        std::shared_ptr<ASTTypeNode> type = binop_exp->getType();
+        assert(type);
 
-        switch(binop_exp->getOp()) {
-        case ASTBinopExp::ADD:  return builder->CreateBinOp(isFloat ? Instruction::FAdd : Instruction::Add, v1, v2);
-        case ASTBinopExp::SUB:  return builder->CreateBinOp(isFloat ? Instruction::FSub : Instruction::Sub, v1, v2);
-        case ASTBinopExp::MUL:  return builder->CreateBinOp(isFloat ? Instruction::FMul : Instruction::Mul, v1, v2);
-        case ASTBinopExp::DIV:  return builder->CreateBinOp(isFloat ? Instruction::FDiv : Instruction::SDiv, v1, v2);
-        case ASTBinopExp::MOD:  return builder->CreateBinOp(isFloat ? Instruction::FRem : Instruction::SRem, v1, v2);
-        case ASTBinopExp::SHL:  return builder->CreateBinOp(Instruction::Shl, v1, v2);
-        case ASTBinopExp::SHR:  return builder->CreateBinOp(Instruction::AShr, v1, v2);
-        case ASTBinopExp::AND:  return builder->CreateBinOp(Instruction::And, v1, v2);
-        case ASTBinopExp::OR:   return builder->CreateBinOp(Instruction::Or, v1, v2);
-        case ASTBinopExp::BAND: return builder->CreateBinOp(Instruction::And, v1, v2);
-        case ASTBinopExp::BOR:  return builder->CreateBinOp(Instruction::Or, v1, v2);
-        case ASTBinopExp::BXOR: return builder->CreateBinOp(Instruction::Xor, v1, v2);
-        case ASTBinopExp::EQ:   return (isFloat ? builder->CreateFCmpOEQ(v1, v2) : builder->CreateICmpEQ(v1, v2));
-        case ASTBinopExp::NEQ:  return (isFloat ? builder->CreateFCmpONE(v1, v2) : builder->CreateICmpNE(v1, v2));
-        case ASTBinopExp::LEQ:  return (isFloat ? builder->CreateFCmpOLE(v1, v2) : builder->CreateICmpSLE(v1, v2));
-        case ASTBinopExp::GEQ:  return (isFloat ? builder->CreateFCmpOGE(v1, v2) : builder->CreateICmpSGE(v1, v2));
-        case ASTBinopExp::LT:   return (isFloat ? builder->CreateFCmpOLT(v1, v2) : builder->CreateICmpSLT(v1, v2));
-        case ASTBinopExp::GT:   return (isFloat ? builder->CreateFCmpOGT(v1, v2) : builder->CreateICmpSGT(v1, v2));
-        }
+        return codegen_binop(ctx, binop_exp->getOp(), type, v1, v2);
+    }
+    // Ternary operator
+    else if (std::shared_ptr<ASTTernopExp> tern_exp = std::dynamic_pointer_cast<ASTTernopExp>(node)) {
+        Value *cond = codegen_exp(ctx, tern_exp->getCond());
+
+        std::shared_ptr<ASTTypeNode> expType = tern_exp->getType();
+        assert(expType != nullptr);
+        Value *result = ctx->createTemp(convertType(expType));
+
+        BasicBlock *trueBlock = ctx->createBlock();
+        BasicBlock *falseBlock = ctx->createBlock();
+        BasicBlock *doneBlock = ctx->createBlock();
+
+        // Generate conditional jump
+        ctx->getBuilder()->CreateCondBr(cond, trueBlock, falseBlock);
+
+        // Generate 'true' branch
+        ctx->pushBlock(trueBlock);
+        Value *trueVal = codegen_exp(ctx, tern_exp->getTrueExp());
+        ctx->getBuilder()->CreateStore(trueVal, result);
+        ctx->getBuilder()->CreateBr(doneBlock);
+
+        // Generate 'false' branch
+        ctx->pushBlock(falseBlock);
+        Value *falseVal = codegen_exp(ctx, tern_exp->getFalseExp());
+        ctx->getBuilder()->CreateStore(falseVal, result);
+        ctx->getBuilder()->CreateBr(doneBlock);
+
+        ctx->pushBlock(doneBlock);
+
+        return ctx->getBuilder()->CreateLoad(result);
     }
     // Function call
     else if (std::shared_ptr<ASTCallExp> call_exp = std::dynamic_pointer_cast<ASTCallExp>(node)) {
@@ -113,7 +185,7 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         bool isVoid = sig->getReturnType()->equal(ASTVoidType::get());
 
         // In device mode, add a pointer to a new temp to get the return value
-        if (ctx->getEmitDevice() && funcInfo->isCudaGlobal() && !isVoid) {
+        if (ctx->getEmitDevice() && (funcInfo->getUsage() & FunctionInfo::Global) && !isVoid) {
             // TODO use an address of instead maybe
             ret_val = ctx->createTemp(convertType(sig->getReturnType()));
             args.push_back(ret_val);
@@ -128,12 +200,12 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
             exp_args = exp_args->getTail();
         }
 
-        Value *call = builder->CreateCall(ctx->getFunction(call_exp->getId()), args);
+        Value *call = ctx->getBuilder()->CreateCall(ctx->getFunction(call_exp->getId()), args);
 
-        if (!ctx->getEmitDevice() || !funcInfo->isCudaGlobal())
+        if (!ctx->getEmitDevice() || !(funcInfo->getUsage() & FunctionInfo::Global))
             ret_val = call;
         else if (!isVoid) {
-            ret_val = builder->CreateLoad(ret_val);
+            ret_val = ctx->getBuilder()->CreateLoad(ret_val);
         }
 
         // If the function has a void return type, we'll return nullptr, but this should have
@@ -155,10 +227,10 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         args.push_back(elemSize);
         args.push_back(length);
 
-        Value *buff = builder->CreateCall(ctx->getAllocArray(), args);
+        Value *buff = ctx->getBuilder()->CreateCall(ctx->getAllocArray(), args);
 
         // Cast the result to the right type
-        return builder->CreatePointerCast(buff,
+        return ctx->getBuilder()->CreatePointerCast(buff,
             PointerType::getUnqual(convertType(alloc_exp->getElemType())));
     }
     // Range. We can evaluate the endpoints for their effects
@@ -170,7 +242,7 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
     // Otherwise, it's an lvalue. Get the address and dereference it.
     else {
         Value *lval_ptr = codegen_lvalue(ctx, node);
-        return builder->CreateLoad(lval_ptr);
+        return ctx->getBuilder()->CreateLoad(lval_ptr);
     }
 }
 
@@ -185,8 +257,6 @@ bool codegen_stmts(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtSeqNo
 }
 
 bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> head) {
-    std::shared_ptr<IRBuilder<>> builder = ctx->getBuilder();
-
     // Return instruction
     if (std::shared_ptr<ASTReturnStmt> ret_node = std::dynamic_pointer_cast<ASTReturnStmt>(head)) {
         std::shared_ptr<ASTExpNode> ret_exp = ret_node->getExp();
@@ -197,17 +267,17 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
 
             // In device mode, have to move into return value argument because kernels
             // must return void
-            if (ctx->getEmitDevice() && ctx->getCurrentFunctionInfo()->isCudaGlobal()) {
+            if (ctx->getEmitDevice() && (ctx->getCurrentFunctionInfo()->getUsage() & FunctionInfo::Global)) {
                 Value *out_arg = ctx->getCurrentFunction()->arg_begin();
 
-                builder->CreateStore(ret_val, out_arg);
-                builder->CreateRet(nullptr);
+                ctx->getBuilder()->CreateStore(ret_val, out_arg);
+                ctx->getBuilder()->CreateRet(nullptr);
             }
             else
-                builder->CreateRet(ret_val);
+                ctx->getBuilder()->CreateRet(ret_val);
         }
         else
-            builder->CreateRet(nullptr);
+            ctx->getBuilder()->CreateRet(nullptr);
 
         // Don't keep generating code because we've returned and we can't add a basic block
         // after the return anyway.
@@ -220,15 +290,29 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
 
         if (decl_stmt->getExp()) {
             Value *exp_val = codegen_exp(ctx, decl_stmt->getExp());
-            builder->CreateStore(exp_val, mem);
+            ctx->getBuilder()->CreateStore(exp_val, mem);
         }
     }
     // Assignment to an lvalue. Get the address and write to it. Note that this works for
     // local variables as well because they are stack allocated until conversion to SSA.
     else if (std::shared_ptr<ASTAssignStmt> decl_stmt = std::dynamic_pointer_cast<ASTAssignStmt>(head)) {
         Value *lval = codegen_lvalue(ctx, decl_stmt->getLValue());
-        Value *exp_val = codegen_exp(ctx, decl_stmt->getExp());
-        builder->CreateStore(exp_val, lval);
+
+        if (decl_stmt->getOp() == ASTBinopExp::NONE) {
+            Value *exp_val = codegen_exp(ctx, decl_stmt->getExp());
+            ctx->getBuilder()->CreateStore(exp_val, lval);
+        }
+        // Compound assignment like +=, etc.
+        else {
+            Value *loadLVal = ctx->getBuilder()->CreateLoad(lval);
+            Value *rhs = codegen_exp(ctx, decl_stmt->getExp());
+
+            std::shared_ptr<ASTTypeNode> type = decl_stmt->getType();
+            assert(type != nullptr);
+
+            Value *newVal = codegen_binop(ctx, decl_stmt->getOp(), type, loadLVal, rhs);
+            ctx->getBuilder()->CreateStore(newVal, lval);
+        }
     }
     // Scope
     else if (std::shared_ptr<ASTScopeStmt> scope_stmt = std::dynamic_pointer_cast<ASTScopeStmt>(head)) {
@@ -346,14 +430,14 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
         Value *max = codegen_exp(ctx, range->getMax());
 
         Value *iter = ctx->getOrCreateSymbol(range_node->getIteratorId());
-        builder->CreateStore(min, iter);
+        ctx->getBuilder()->CreateStore(min, iter);
 
         BasicBlock *bodyBlock = ctx->createBlock();
         BasicBlock *doneBlock = ctx->createBlock();
 
         // Use 'min' as an iterator for now
-        builder->CreateCondBr(
-            ctx->getBuilder()->CreateICmpSGE(builder->CreateLoad(iter), max),
+        ctx->getBuilder()->CreateCondBr(
+            ctx->getBuilder()->CreateICmpSGE(ctx->getBuilder()->CreateLoad(iter), max),
             doneBlock,
             bodyBlock);
 
@@ -428,7 +512,7 @@ void codegen_top(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTDeclNode> n
         ctx->startFunction(func->getName());
         codegen_stmts(ctx, funDefn->getBody());
 
-        if (ctx->getEmitDevice() && func->isCudaGlobal()) // TODO require this function
+        if (ctx->getEmitDevice() && (func->getUsage() & FunctionInfo::Global))
             ctx->markKernel(ctx->getFunction(func->getName()));
 
         ctx->finishFunction();
