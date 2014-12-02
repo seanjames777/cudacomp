@@ -369,8 +369,12 @@ void typecheck_stmt(
 
         // TODO: additional checks on the iter statement
         // Evaluate the iter statement
-        if (for_node->getIter())
+        if (for_node->getIter()) {
+            if (std::shared_ptr<ASTVarDeclStmt> decl = std::dynamic_pointer_cast<ASTVarDeclStmt>(for_node->getIter()))
+                throw IllegalTypeException(); // TODO: Better exception
+
             typecheck_stmt(mod, func, for_node->getIter());
+        }
 
         // Evaluate the body of the loop
         typecheck_stmts(mod, func, for_node->getBody());
