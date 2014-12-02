@@ -57,7 +57,7 @@ void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
 %token RETURN IF ELSE TYPEDEF WHILE EXTERN ALLOC_ARRAY COLON FOR QUESTION
 %token LPAREN RPAREN LBRACE RBRACE
 %token EQ NEQ LEQ GEQ LT GT
-%token PLUSEQ MINUSEQ TIMESEQ DIVEQ MODEQ
+%token PLUSEQ MINUSEQ TIMESEQ DIVEQ MODEQ SALEQ SAREQ OREQ ANDEQ XOREQ
 %token STRUCT BREAK CONTINUE ASSERT KWNULL ALLOC CHAR STRING DIML DIMR
 
 %type <exp> exp
@@ -72,7 +72,7 @@ void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
 %type <exp_seq> arg_list arg_list_follow dim_arg_list_opt
 %type <linkage> linkage
 
-%right ASSIGN PLUSEQ MINUSEQ TIMESEQ DIVEQ MODEQ
+%right ASSIGN PLUSEQ MINUSEQ TIMESEQ DIVEQ MODEQ SALEQ SAREQ OREQ ANDEQ XOREQ
 %left TO
 %right QUESTION COLON
 %left OR
@@ -123,8 +123,8 @@ exp:
   | exp MOD exp                       { $$ = new ASTBinopExp(ASTBinopExp::MOD, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp SHL exp                       { $$ = new ASTBinopExp(ASTBinopExp::SHL, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp SHR exp                       { $$ = new ASTBinopExp(ASTBinopExp::SHR, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
-  | exp AND exp                       { $$ = new ASTBinopExp(ASTBinopExp::AND, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
-  | exp OR exp                        { $$ = new ASTBinopExp(ASTBinopExp::OR, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp AND exp                       { $$ = new ASTTernopExp(std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3), std::shared_ptr<ASTExpNode>(new ASTBooleanExp(false))); }
+  | exp OR exp                        { $$ = new ASTTernopExp(std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>(new ASTBooleanExp(true)), std::shared_ptr<ASTExpNode>($3)); }
   | exp BAND exp                      { $$ = new ASTBinopExp(ASTBinopExp::BAND, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp BOR exp                       { $$ = new ASTBinopExp(ASTBinopExp::BOR, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp BXOR exp                      { $$ = new ASTBinopExp(ASTBinopExp::BXOR, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
@@ -169,6 +169,11 @@ simp:
   | exp TIMESEQ exp                   { $$ = new ASTAssignStmt(ASTBinopExp::MUL, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp DIVEQ exp                     { $$ = new ASTAssignStmt(ASTBinopExp::DIV, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp MODEQ exp                     { $$ = new ASTAssignStmt(ASTBinopExp::MOD, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp SALEQ exp                     { $$ = new ASTAssignStmt(ASTBinopExp::SHL, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp SAREQ exp                     { $$ = new ASTAssignStmt(ASTBinopExp::SHR, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp ANDEQ exp                     { $$ = new ASTAssignStmt(ASTBinopExp::BAND, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp OREQ exp                      { $$ = new ASTAssignStmt(ASTBinopExp::BOR, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
+  | exp XOREQ exp                     { $$ = new ASTAssignStmt(ASTBinopExp::BXOR, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp INCR                          { $$ = new ASTAssignStmt(ASTBinopExp::ADD, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>(new ASTIntegerExp(1))); }
   | exp DECR                          { $$ = new ASTAssignStmt(ASTBinopExp::SUB, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>(new ASTIntegerExp(1))); }
   | exp                               { $$ = new ASTExprStmt(std::shared_ptr<ASTExpNode>($1)); }

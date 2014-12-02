@@ -130,7 +130,8 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         Value *v = codegen_exp(ctx, unop_exp->getExp());
 
         switch(unop_exp->getOp()) {
-        case ASTUnopExp::NOT:  return ctx->getBuilder()->CreateBinOp(Instruction::Xor, v, v);
+        case ASTUnopExp::NOT:  return ctx->getBuilder()->CreateBinOp(Instruction::Xor, v,
+                                   ConstantInt::get(Type::getInt1Ty(ctx->getContext()), 1));
         case ASTUnopExp::BNOT: return ctx->getBuilder()->CreateNot(v);
         case ASTUnopExp::NEG:  return ctx->getBuilder()->CreateNeg(v); // TODO investigate x86
         }

@@ -126,6 +126,11 @@ int comment_depth = 0;
 "*="                    { return TIMESEQ; }
 "/="                    { return DIVEQ; }
 "%="                    { return MODEQ; }
+"<<="                   { return SALEQ; }
+">>="                   { return SAREQ; }
+"|="                    { return OREQ; }
+"&="                    { return ANDEQ; }
+"^="                    { return XOREQ; }
 "<<<"                   { return DIML; }
 ">>>"                   { return DIMR; }
 
