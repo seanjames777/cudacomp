@@ -4,7 +4,6 @@
 #include <ast/ast.h>
 #include <parser/parse.h>
 
-
 #define YYERROR_VERBOSE
 
 int line_num = 1;
