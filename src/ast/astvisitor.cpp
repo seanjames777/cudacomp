@@ -45,6 +45,7 @@ IMPL_CLASS(ExpNode) {
     SUB_CLASS(IdentifierExp);
     SUB_CLASS(IndexExp);
     SUB_CLASS(IntegerExp);
+    SUB_CLASS(NullExp);
     SUB_CLASS(RecordAccessExp);
     SUB_CLASS(TernopExp);
     SUB_CLASS(UnopExp);
@@ -140,6 +141,9 @@ IMPL_CLASS(IndexExp) {
 }
 
 IMPL_CLASS(IntegerExp) {
+}
+
+IMPL_CLASS(NullExp) {
 }
 
 IMPL_CLASS(RecordAccessExp) {

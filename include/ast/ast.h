@@ -27,6 +27,7 @@
 #include <ast/expr/astidentifierexp.h>
 #include <ast/expr/astindexexp.h>
 #include <ast/expr/astintegerexp.h>
+#include <ast/expr/astnullexp.h>
 #include <ast/expr/astrecordaccessexp.h>
 #include <ast/expr/astternopexp.h>
 #include <ast/expr/astunopexp.h>

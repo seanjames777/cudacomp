@@ -87,7 +87,7 @@ void yyerror(Parser::ParserArgs *args, const char *str) {
 %left SHL SHR
 %left PLUS MINUS
 %left STAR DIV MOD
-%right NOT BNOT UNARY
+%right NOT BNOT UNARY DECR INCR
 %nonassoc LPAREN RPAREN LBRACKET RBRACKET DOT ARROW
 
 %start program
@@ -106,7 +106,7 @@ top_list:
   ;
 
 program:
-    top_list                          { args->root = std::shared_ptr<ASTDeclSeqNode>($1); }
+    top_list                          { args->root = std::shared_ptr<ASTDeclSeqNode>($1); line_num = 1; }
   ;
 
 stmt_list:
@@ -119,6 +119,7 @@ exp:
   | FLOAT32                           { $$ = new ASTFloatExp($1); }
   | TRUE                              { $$ = new ASTBooleanExp(true); }
   | FALSE                             { $$ = new ASTBooleanExp(false); }
+  | KWNULL                            { $$ = new ASTNullExp(); }
   | exp PLUS exp                      { $$ = new ASTBinopExp(ASTBinopExp::ADD, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp MINUS exp                     { $$ = new ASTBinopExp(ASTBinopExp::SUB, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp DIV exp                       { $$ = new ASTBinopExp(ASTBinopExp::DIV, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
