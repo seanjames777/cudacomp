@@ -12,7 +12,6 @@ CMakeFiles/
 Doxyfile_Configured
 DriverConfig.pm
 Driverlib.pm
-Makefile
 README-driver
 README-runtime
 autotimer.pl
