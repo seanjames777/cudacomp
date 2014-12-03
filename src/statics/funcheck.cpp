@@ -36,6 +36,7 @@ void FunCheck::run(std::shared_ptr<ASTDeclSeqNode> ast) {
         std::shared_ptr<FunctionInfo> entry = module->getFunction(args->entrypoint);
 
         // Must be present
+        // TODO: This won't ever happen now that main is forward declared.
         if (!entry)
             throw InvalidEntrypointException();
 
