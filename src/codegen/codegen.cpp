@@ -284,7 +284,7 @@ bool codegen_stmts(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtSeqNo
 
 Value *genDeviceAlloc(std::shared_ptr<CodegenCtx> ctx, int size) {
     std::vector<Value *> args;
-    args.push_back(ConstantInt::get(convertType(ASTIntegerType::get()), size));
+    args.push_back(ConstantInt::get(Type::getInt32Ty(ctx->getContext()), size));
 
     return ctx->getBuilder()->CreateCall(ctx->getAllocDevice(), args);
 }
@@ -296,7 +296,7 @@ Value *genCopyHostToDevice(std::shared_ptr<CodegenCtx> ctx, Value *dst, Value *s
     args.push_back(ctx->getBuilder()->CreatePointerCast(
         src,
         PointerType::getUnqual(Type::getInt8Ty(ctx->getContext()))));
-    args.push_back(ConstantInt::get(convertType(ASTIntegerType::get()), size));
+    args.push_back(ConstantInt::get(Type::getInt32Ty(ctx->getContext()), size));
 
     return ctx->getBuilder()->CreateCall(ctx->getCopyHostToDevice(), args);
 }
@@ -314,7 +314,7 @@ void codegen_cudacall(
 
     Value *arg_buff = ctx->getBuilder()->CreateAlloca(
         PointerType::getUnqual(Type::getInt8Ty(ctx->getContext())),
-        ConstantInt::get(convertType(ASTIntegerType::get()), funType->getNumArgs()));
+        ConstantInt::get(Type::getInt32Ty(ctx->getContext()), funType->getNumArgs()));
 
     std::shared_ptr<ASTArgSeqNode> args_sig = funType->getArgs();
     std::shared_ptr<ASTExpSeqNode> args_val = call->getArgs();
@@ -330,13 +330,14 @@ void codegen_cudacall(
         // Generate code for the argument, allocate room for it, and copy it
         // The 'source' is a pointer to a stack location, so we don't need to
         // take its address to copy it.
+        unsigned long arg_size = ctx->getSize(arg_sig->getType());
         Value *arg_src = codegen_exp(ctx, arg_exp);
-        Value *arg_dst = genDeviceAlloc(ctx, arg_sig->getType()->getSize());
-        genCopyHostToDevice(ctx, arg_dst, arg_src, arg_sig->getType()->getSize());
+        Value *arg_dst = genDeviceAlloc(ctx, arg_size);
+        genCopyHostToDevice(ctx, arg_dst, arg_src, arg_size);
         //argPtrs.push_back(arg_dst);
 
         // Store pointer into argument buffer
-        Value *argIdxVal = ConstantInt::get(convertType(ASTIntegerType::get()), argIdx++);
+        Value *argIdxVal = ConstantInt::get(Type::getInt32Ty(ctx->getContext()), argIdx++);
         Value *argDstPtr = ctx->getBuilder()->CreateGEP(arg_buff, argIdxVal);
         ctx->getBuilder()->CreateStore(arg_dst, argDstPtr);
 

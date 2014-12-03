@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <signal.h>
 
 extern int _cc_main();

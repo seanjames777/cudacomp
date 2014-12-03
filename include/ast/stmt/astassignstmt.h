@@ -22,9 +22,9 @@ class ASTAssignStmt : public ASTStmtNode {
 public:
 private:
 
+    enum ASTBinopExp::op op;
     std::shared_ptr<ASTExpNode> lvalue;
     std::shared_ptr<ASTExpNode> exp;
-    enum ASTBinopExp::op op;
     std::shared_ptr<ASTTypeNode> type;
 
 public:

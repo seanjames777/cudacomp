@@ -373,6 +373,11 @@ void CodegenCtx::createRecord(std::shared_ptr<ASTRecordType> recordInfo){
     type->setBody(elems);
 }
 
+unsigned long CodegenCtx::getSize(std::shared_ptr<ASTTypeNode> t) {
+    Type * tau = convertType(t, this);
+    return layout->getTypeSizeInBits(tau) / 8;
+}
+
 unsigned long CodegenCtx::getAlignedSize(std::shared_ptr<ASTTypeNode> t) {
     Type * tau = convertType(t, this);
     return layout->getTypeAllocSize(tau);

@@ -234,6 +234,11 @@ public:
     Type *getRecordType(std::string name);
 
     /**
+     * @brief Gets the bits needed to hold a type, without padding.
+     */
+    unsigned long getSize(std::shared_ptr<ASTTypeNode> t);
+
+    /**
      * @brief Gets the bits needed to hold a type, with padding.
      */
     unsigned long getAlignedSize(std::shared_ptr<ASTTypeNode> t);

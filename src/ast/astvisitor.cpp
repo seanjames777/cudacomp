@@ -73,7 +73,6 @@ IMPL_CLASS(TypeNode) {
     SUB_CLASS(IdType);
     SUB_CLASS(IntegerType);
     SUB_CLASS(PtrType);
-    SUB_CLASS(RangeType);
     SUB_CLASS(RecordType);
     SUB_CLASS(VoidType);
 }

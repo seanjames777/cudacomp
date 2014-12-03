@@ -10,9 +10,9 @@
 #define __CONVERTTYPE_H
 
 #include <ast/ast.h>
+#include <codegen/codegenctx.h>
 
 // TODO
-#include <codegen/CodegenCtx.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Value.h>

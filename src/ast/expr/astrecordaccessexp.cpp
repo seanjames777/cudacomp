@@ -8,8 +8,8 @@
 
 ASTRecordAccessExp::ASTRecordAccessExp(std::shared_ptr<ASTExpNode> lvalue, std::string id)
     : lvalue(lvalue),
-      id(id),
-      type(nullptr)
+      type(nullptr),
+      id(id)
 {
 }
 
