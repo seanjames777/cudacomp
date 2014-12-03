@@ -1,3 +1,14 @@
+#
+# Makefile
+#
+# This is a pure Makefile for 411/Autolab compatability. For general builds,
+# CMake according the README.txt
+#
+# Author: Sean James <seanjames777@gmail.com>
+#
+
+%option noyywrap
+
 %{
 #include <iostream>
 #include <string>
@@ -57,7 +68,20 @@ int comment_depth = 0;
 "NULL"                  { return KWNULL; }
 "char"                  { return CHAR; }
 "string"                { return STRING; }
+"float"                 {
+                            struct CCArgs *args = getOptions();
 
+                            if (args->no_float) {
+                                yylval.string = strdup(yytext);
+
+                                if (typedefs.find(std::string(yytext)) != typedefs.end())
+                                    return IDTYPE;
+                                else
+                                    return IDENT;
+                            }
+                            else
+                                return FLOAT;
+                        }
 0|[1-9][0-9]*           {
                             unsigned long long int val = strtoull(yytext, NULL, 10);
                             if (val > (1UL << 31)) {
@@ -86,20 +110,6 @@ int comment_depth = 0;
                                 return IDTYPE;
                             else
                                 return IDENT;
-                        }
-"float"                 {
-                            struct CCArgs *args = getOptions();
-
-                            if (args->no_float) {
-                                yylval.string = strdup(yytext);
-
-                                if (typedefs.find(std::string(yytext)) != typedefs.end())
-                                    return IDTYPE;
-                                else
-                                    return IDENT;
-                            }
-                            else
-                                return FLOAT;
                         }
 "?"                     { return QUESTION; }
 ":"                     { return COLON; }

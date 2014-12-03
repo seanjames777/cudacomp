@@ -86,4 +86,7 @@ void parseArgs(int argc, char *argv[]) {
 
     if (args.out_dfile.empty())
         args.out_dfile = args.emit_text ? "device.ll" : "device.bc";
+
+    if (args.in_file.empty())
+        throw std::runtime_error("No input file");
 }

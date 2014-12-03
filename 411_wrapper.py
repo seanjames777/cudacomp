@@ -57,7 +57,7 @@ def run_shell(command):
 
 # If we are not the autograder we need to compile the runtime library ourself...
 autograder = getpass.getuser() == "autograder"
-link_runtime = not(autograder) or not(emit_llvm)
+link_runtime = not(emit_llvm)
 
 # Process each source file
 for source in sources:

@@ -31,8 +31,15 @@ std::shared_ptr<ASTDeclSeqNode> append(
 }
 
 int main(int argc, char *argv[]) {
-    // Parse arguments
-    parseArgs(argc, argv);
+    try {
+        // Parse arguments
+        parseArgs(argc, argv);
+    }
+    catch (std::runtime_error & except) {
+        std::cout << "\033[31;1m" << except.what() << "\033[0m" << std::endl;
+        return -1;
+    }
+
     struct CCArgs *args = getOptions();
 
     std::shared_ptr<ASTDeclSeqNode> ast = nullptr;

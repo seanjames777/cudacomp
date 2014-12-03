@@ -12,10 +12,6 @@ std::unordered_map<std::string, ASTTypeNode *> typedefs;
 
 int yylex(void);
 
-int yywrap() {
-    return 1;
-}
-
 void yyerror(Parser::ParserArgs *args, const char *str) {
     std::stringstream ss;
     ss << "Line " << line_num << ": " << str;

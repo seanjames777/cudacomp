@@ -195,5 +195,5 @@ add_custom_target(l4c
 
 add_custom_target(clean
     COMMAND rm -rf bin/ lexer.cpp parser.output cc driver.py
-        lib parser.cpp Doxyfile_Configured libhost_rt.a parser.hpp
+        lib parser.cpp Doxyfile_Configured libhost_rt.a parser.hpp l4lib.bc
 )
