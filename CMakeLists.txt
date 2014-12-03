@@ -57,14 +57,17 @@ add_executable(cc
     src/ast/astseqnode.cpp
     src/ast/astvisitor.cpp
     src/ast/expr/astallocarrayexp.cpp
+    src/ast/expr/astallocexp.cpp
     src/ast/expr/astbinopexp.cpp
     src/ast/expr/astbooleanexp.cpp
     src/ast/expr/astcallexp.cpp
+    src/ast/expr/astderefexp.cpp
     src/ast/expr/astexpnode.cpp
     src/ast/expr/astfloatexp.cpp
     src/ast/expr/astidentifierexp.cpp
     src/ast/expr/astindexexp.cpp
     src/ast/expr/astintegerexp.cpp
+    src/ast/expr/astrecordaccessexp.cpp
     src/ast/expr/astternopexp.cpp
     src/ast/expr/astunopexp.cpp
     src/ast/stmt/astassertstmt.cpp
@@ -79,6 +82,7 @@ add_executable(cc
     src/ast/stmt/astwhilestmt.cpp
     src/ast/decl/astfundecl.cpp
     src/ast/decl/astdeclnode.cpp
+    src/ast/decl/astrecorddecl.cpp
     src/ast/decl/asttypedecl.cpp
     src/ast/type/astargnode.cpp
     src/ast/type/astarrtype.cpp
@@ -88,6 +92,7 @@ add_executable(cc
     src/ast/type/astidtype.cpp
     src/ast/type/astintegertype.cpp
     src/ast/type/astptrtype.cpp
+    src/ast/type/astrecordtype.cpp
     src/ast/type/asttypenode.cpp
     src/ast/type/astvoidtype.cpp
     src/codegen/codegen.cpp

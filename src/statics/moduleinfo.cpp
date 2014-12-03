@@ -42,3 +42,14 @@ bool ModuleInfo::hasCudaFunctions() {
 SymbolTable<std::shared_ptr<FunctionInfo>> & ModuleInfo::getFunctions() {
     return functions;
 }
+
+void ModuleInfo::addRecordType(std::string name, std::shared_ptr<ASTRecordType> type) {
+    recordTypes.set(name,type);
+}
+
+std::shared_ptr<ASTRecordType> ModuleInfo::getRecordType(std::string id) {
+    if (!recordTypes.hasSymbol(id))
+        return nullptr;
+
+    return recordTypes.get(id);
+}

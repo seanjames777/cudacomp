@@ -16,6 +16,7 @@ CodegenCtx::CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo)
       emit_device(emit_device),
       modInfo(modInfo),
       alloc_array(nullptr),
+      alloc(nullptr),
       alloc_device(nullptr),
       cpy_h2d(nullptr),
       cpy_d2h(nullptr),
@@ -31,6 +32,7 @@ CodegenCtx::CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo)
       body_builder(nullptr)
 {
     module = std::make_shared<Module>("", context);
+    layout = std::make_shared<DataLayout>(module.get());
 }
 
 Function *CodegenCtx::getAllocArray() {
@@ -46,6 +48,20 @@ Function *CodegenCtx::getAllocArray() {
     }
 
     return alloc_array;
+}
+
+Function *CodegenCtx::getAlloc() {
+    // Only declare it if it's used, to make small programs simpler
+    if (!alloc) {
+        // Construct a declaration of the runtime's alloc function
+        std::vector<Type *> argTypes;
+        argTypes.push_back(Type::getInt32Ty(context));
+
+        FunctionType *ftype = FunctionType::get(PointerType::getUnqual(Type::getInt8Ty(context)), argTypes, false);
+        alloc = Function::Create(ftype, GlobalValue::ExternalLinkage, "_rt_alloc", module.get());
+
+    }
+    return alloc;
 }
 
 Function *CodegenCtx::getAllocDevice() {
@@ -217,7 +233,7 @@ Function *CodegenCtx::createFunction(std::shared_ptr<FunctionInfo> funcInfo) {
 
     std::shared_ptr<ASTFunType> sig = funcInfo->getSignature();
     std::shared_ptr<ASTArgSeqNode> args = sig->getArgs();
-    Type *returnType = convertType(sig->getReturnType());
+    Type *returnType = convertType(sig->getReturnType(), this);
 
     bool isVoid = sig->getReturnType()->equal(ASTVoidType::get());
 
@@ -229,7 +245,7 @@ Function *CodegenCtx::createFunction(std::shared_ptr<FunctionInfo> funcInfo) {
     // Add arguments to LLVM function type
     while (args != nullptr) {
         std::shared_ptr<ASTArgNode> arg = args->getHead();
-        argTypes.push_back(convertType(arg->getType()));
+        argTypes.push_back(convertType(arg->getType(), this));
         args = args->getTail();
     }
 
@@ -317,7 +333,7 @@ Value *CodegenCtx::getOrCreateSymbol(std::string id) {
     // TODO: can name some or all of the values
 
     if (!symbols.hasSymbol(id)) {
-        Value *instr = def_builder->CreateAlloca(convertType(funcInfo->getLocalType(id)));
+        Value *instr = def_builder->CreateAlloca(convertType(funcInfo->getLocalType(id), this));
         symbols.set(id, instr);
         return instr;
     }
@@ -327,6 +343,39 @@ Value *CodegenCtx::getOrCreateSymbol(std::string id) {
 
 Value *CodegenCtx::createTemp(Type *type) {
     return def_builder->CreateAlloca(type);
+}
+
+Type *CodegenCtx::getRecordType(std::string name) {
+    if (records.hasSymbol(name))
+        return records.get(name);
+
+    // The record has not been declared, so implicitly declare an opaque type
+    StructType *type = StructType::create(context, name);
+    records.set(name, type);
+    return type;
+
+}
+
+void CodegenCtx::createRecord(std::shared_ptr<ASTRecordType> recordInfo){
+    // TODO : evaluate possibility of undesirable name conflicts between "struct foo" and named type foo
+    std::string name = recordInfo->getId();
+    // Add opaque type for the recursive case
+    StructType *type = StructType::create(context, name);
+    records.set(name, type);
+
+    std::vector<Type *> elems;
+    std::shared_ptr<ASTArgSeqNode> fields = recordInfo->getFields();
+    while (fields != nullptr) {
+        std::shared_ptr<ASTTypeNode> field_type = fields->getHead()->getType();
+        elems.push_back(convertType(field_type, this));
+        fields = fields->getTail();
+    }
+    type->setBody(elems);
+}
+
+unsigned long CodegenCtx::getAlignedSize(std::shared_ptr<ASTTypeNode> t) {
+    Type * tau = convertType(t, this);
+    return layout->getTypeAllocSize(tau);
 }
 
 }

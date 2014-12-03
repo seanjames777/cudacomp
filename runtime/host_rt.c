@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
 
@@ -11,6 +10,10 @@ void *_rt_alloc_array(int elemSize, int length) {
     *((int *)&buff[4]) = elemSize;
 
     return (void *)&buff[8];
+}
+
+void *_rt_alloc(int size) {
+    return (void*)calloc(1, size);
 }
 
 void _rt_div_check(int n, int d) {
@@ -30,7 +33,6 @@ void _rt_assert(int c) {
 }
 
 // Used for our own testing
-
 void print_float(float x) {
     printf("%f\n", x);
 }

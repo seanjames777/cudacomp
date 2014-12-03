@@ -45,6 +45,17 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         else
             throw IllegalTypeException();
     }
+    // Pointer dereference
+    else if (std::shared_ptr<ASTDerefExp> ptr_exp = std::dynamic_pointer_cast<ASTDerefExp>(node)) {
+
+        std::shared_ptr<ASTTypeNode> subexp_type = typecheck_exp(mod, func, ptr_exp->getExp());
+
+        // The sub-exp type must be a pointer
+        if (std::shared_ptr<ASTPtrType> sub_ptr = std::dynamic_pointer_cast<ASTPtrType>(subexp_type))
+            return sub_ptr->getToType();
+        else
+            throw IllegalTypeException();
+    }
     // Unary operator
     else if (std::shared_ptr<ASTUnopExp> unop_exp = std::dynamic_pointer_cast<ASTUnopExp>(node)) {
         // Get operand types
@@ -234,6 +245,33 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         // Returns an array of elemTypes
         return std::make_shared<ASTArrType>(elemType);
     }
+    // Heap allocation
+    else if (std::shared_ptr<ASTAllocExp> alloc_exp = std::dynamic_pointer_cast<ASTAllocExp>(node)) {
+        std::shared_ptr<ASTTypeNode> elemType = alloc_exp->getElemType();
+
+        // We cannot allocate certain types
+        // TODO: better void check (e.g. structural search for void)
+        if (elemType->equal(ASTVoidType::get()))
+            throw IllegalTypeException();
+
+        // Returns a pointer to an elemType
+        return std::make_shared<ASTPtrType>(elemType);
+    }
+    // Record access
+    else if (std::shared_ptr<ASTRecordAccessExp> record_exp = std::dynamic_pointer_cast<ASTRecordAccessExp>(node)) {
+        std::shared_ptr<ASTTypeNode> lvalue_type = typecheck_exp(mod, func, record_exp->getLValue());
+
+        std::string field_name = record_exp->getId();
+
+        // This type needs to be a record
+        if (std::shared_ptr<ASTRecordType> record_type = std::dynamic_pointer_cast<ASTRecordType>(lvalue_type)) {
+            // Get field information about the type, find the type of field_name
+            record_exp->setType(record_type);
+            return record_type->getField(field_name)->getType();
+        }
+        else
+            throw IllegalTypeException();
+    }
 
     throw ASTMalformedException();
     return nullptr;
@@ -301,6 +339,24 @@ void typecheck_stmt(
                 throw IllegalTypeException();
 
             defn_stmt->setType(rhs_type);
+        }
+        // Pointer dereference
+        else if (std::shared_ptr<ASTDerefExp> ptr_exp = std::dynamic_pointer_cast<ASTDerefExp>(defn_stmt->getLValue())) {
+            std::shared_ptr<ASTTypeNode> lhs_type = typecheck_exp(mod, func, ptr_exp);
+            std::shared_ptr<ASTTypeNode> rhs_type = typecheck_exp(mod, func, defn_stmt->getExp());
+
+            // TODO: check to ensure no struct
+            if (!lhs_type->equal(rhs_type))
+                throw IllegalTypeException();
+        }
+        // Record access
+        else if (std::shared_ptr<ASTRecordAccessExp> rcd_exp = std::dynamic_pointer_cast<ASTRecordAccessExp>(defn_stmt->getLValue())) {
+            std::shared_ptr<ASTTypeNode> lhs_type = typecheck_exp(mod, func, rcd_exp);
+            std::shared_ptr<ASTTypeNode> rhs_type = typecheck_exp(mod, func, defn_stmt->getExp());
+
+            // TODO: check to ensure no struct
+            if (!lhs_type->equal(rhs_type))
+                throw IllegalTypeException();
         }
         else throw IllegalLValueException();
     }
@@ -449,8 +505,6 @@ void typecheck_top(
         if (typeDefn->getType()->equal(ASTVoidType::get()))
             throw IllegalTypeException();
     }
-    else
-        throw ASTMalformedException();
 }
 
 };

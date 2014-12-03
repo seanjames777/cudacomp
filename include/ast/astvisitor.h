@@ -63,14 +63,18 @@ public:
 
     DECLARE_CLASS(FunDecl);
     DECLARE_CLASS(TypeDecl);
+    DECLARE_CLASS(RecordDecl);
 
     DECLARE_CLASS(AllocArrayExp);
+    DECLARE_CLASS(AllocExp);
     DECLARE_CLASS(BinopExp);
     DECLARE_CLASS(BooleanExp);
     DECLARE_CLASS(CallExp);
+    DECLARE_CLASS(DerefExp);
     DECLARE_CLASS(IdentifierExp);
     DECLARE_CLASS(IndexExp);
     DECLARE_CLASS(IntegerExp);
+    DECLARE_CLASS(RecordAccessExp);
     DECLARE_CLASS(TernopExp);
     DECLARE_CLASS(UnopExp);
 
@@ -89,6 +93,7 @@ public:
     DECLARE_CLASS(FunType);
     DECLARE_CLASS(IdType);
     DECLARE_CLASS(IntegerType);
+    DECLARE_CLASS(RecordType);
     DECLARE_CLASS(PtrType);
     DECLARE_CLASS(VoidType);
 

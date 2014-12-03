@@ -49,12 +49,12 @@ int comment_depth = 0;
 "typedef"               { return TYPEDEF; }
 "extern"                { return EXTERN; }
 "alloc_array"           { return ALLOC_ARRAY; }
+"alloc"                 { return ALLOC; }
 "for"                   { return FOR; }
 "struct"                { return STRUCT; }
 "continue"              { return CONTINUE; }
 "break"                 { return BREAK; }
 "NULL"                  { return KWNULL; }
-"alloc"                 { return ALLOC; }
 "char"                  { return CHAR; }
 "string"                { return STRING; }
 
@@ -104,8 +104,10 @@ int comment_depth = 0;
 "?"                     { return QUESTION; }
 ":"                     { return COLON; }
 ","                     { return COMMA; }
+"."                     { return DOT; }
+"->"                    { return ARROW; }
 "+"                     { return PLUS; }
-"*"                     { return TIMES; }
+"*"                     { return STAR; }
 "-"                     { return MINUS; }
 "/"                     { return DIV; }
 "%"                     { return MOD; }

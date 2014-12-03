@@ -31,17 +31,21 @@ IMPL_CLASS(Node) {
 
 IMPL_CLASS(DeclNode) {
     SUB_CLASS(FunDecl);
+    SUB_CLASS(RecordDecl);
     SUB_CLASS(TypeDecl);
 }
 
 IMPL_CLASS(ExpNode) {
     SUB_CLASS(AllocArrayExp);
+    SUB_CLASS(AllocExp);
     SUB_CLASS(BinopExp);
     SUB_CLASS(BooleanExp);
     SUB_CLASS(CallExp);
+    SUB_CLASS(DerefExp);
     SUB_CLASS(IdentifierExp);
     SUB_CLASS(IndexExp);
     SUB_CLASS(IntegerExp);
+    SUB_CLASS(RecordAccessExp);
     SUB_CLASS(TernopExp);
     SUB_CLASS(UnopExp);
 }
@@ -69,6 +73,8 @@ IMPL_CLASS(TypeNode) {
     SUB_CLASS(IdType);
     SUB_CLASS(IntegerType);
     SUB_CLASS(PtrType);
+    SUB_CLASS(RangeType);
+    SUB_CLASS(RecordType);
     SUB_CLASS(VoidType);
 }
 
@@ -97,9 +103,17 @@ IMPL_CLASS(TypeDecl) {
     HAS_MEMBER(getType());
 }
 
+IMPL_CLASS(RecordDecl) {
+    HAS_MEMBER(getSignature());
+}
+
 IMPL_CLASS(AllocArrayExp) {
     HAS_MEMBER(getElemType());
     HAS_MEMBER(getLength());
+}
+
+IMPL_CLASS(AllocExp) {
+    HAS_MEMBER(getElemType());
 }
 
 IMPL_CLASS(BinopExp) {
@@ -114,6 +128,10 @@ IMPL_CLASS(CallExp) {
     HAS_MEMBER(getArgs());
 }
 
+IMPL_CLASS(DerefExp) {
+    HAS_MEMBER(getExp());
+}
+
 IMPL_CLASS(IdentifierExp) {
 }
 
@@ -123,6 +141,10 @@ IMPL_CLASS(IndexExp) {
 }
 
 IMPL_CLASS(IntegerExp) {
+}
+
+IMPL_CLASS(RecordAccessExp) {
+    HAS_MEMBER(getLValue());
 }
 
 IMPL_CLASS(TernopExp) {
@@ -195,6 +217,9 @@ IMPL_CLASS(IntegerType) {
 
 IMPL_CLASS(ArrType) {
     HAS_MEMBER(getElemType());
+}
+
+IMPL_CLASS(RecordType) {
 }
 
 IMPL_CLASS(PtrType) {

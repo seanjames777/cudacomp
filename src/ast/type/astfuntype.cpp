@@ -75,7 +75,3 @@ bool ASTFunType::equal(std::shared_ptr<ASTTypeNode> other_type) {
 
 void ASTFunType::print(std::ostream & ss) {
 }
-
-int ASTFunType::getSize() {
-    throw std::runtime_error("Funtion types do not have a size");
-}

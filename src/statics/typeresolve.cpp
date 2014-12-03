@@ -17,7 +17,7 @@ std::shared_ptr<ASTTypeNode> TypeResolve::resolveType(std::shared_ptr<ASTTypeNod
     // Type definitions can only introduce one level of indirection. So, a newly defined type is
     // either a basic type like int or bool, or a single indirection into the existing types.
 
-    // Resolve the 'to' type for pointers. TODO: test this when language support arrives.
+    // Resolve the 'to' type for pointers.
     if (std::shared_ptr<ASTPtrType> ptr_type = std::dynamic_pointer_cast<ASTPtrType>(type)) {
         ptr_type->setToType(resolveType(ptr_type->getToType()));
         return ptr_type;
@@ -37,9 +37,25 @@ std::shared_ptr<ASTTypeNode> TypeResolve::resolveType(std::shared_ptr<ASTTypeNod
 
         return resolved;
     }
+    // Record type. Look up the record information, which should already be resolved.
+    else if (std::shared_ptr<ASTRecordType> record_type = std::dynamic_pointer_cast<ASTRecordType>(type)) {
+        std::shared_ptr<ASTRecordType> resolved = module->getRecordType(record_type->getId());
+
+        // TODO: Don't want exception b/c undeclared structs are OK. But, not sure if nullptr is correct
+        if (!resolved)
+            return record_type;
+
+        return resolved;
+    }
     // Otherwise it's a basic type already
     else
         return type;
+}
+
+void TypeResolve::visitRecordType(std::shared_ptr<ASTRecordType> type) {
+    // We don't want to resolve any children ; we use cached thing
+    resolveType(type);
+    //ASTVisitor::visitTypeNode(type);
 }
 
 void TypeResolve::visitTypeNode(std::shared_ptr<ASTTypeNode> type) {
@@ -70,6 +86,11 @@ void TypeResolve::visitAllocArrayExp(std::shared_ptr<ASTAllocArrayExp> allocExp)
     ASTVisitor::visitAllocArrayExp(allocExp);
 }
 
+void TypeResolve::visitAllocExp(std::shared_ptr<ASTAllocExp> allocExp) {
+    allocExp->setElemType(resolveType(allocExp->getElemType()));
+    ASTVisitor::visitAllocExp(allocExp);
+}
+
 void TypeResolve::visitTypeDecl(std::shared_ptr<ASTTypeDecl> typeDecl) {
     // TypeDecl's define new type names, so we need to update the mapping in the module
 
@@ -84,6 +105,40 @@ void TypeResolve::visitTypeDecl(std::shared_ptr<ASTTypeDecl> typeDecl) {
     module->addType(typeDecl->getName(), resolveType(typeDecl->getType()));
 
     ASTVisitor::visitTypeDecl(typeDecl);
+}
+
+void TypeResolve::visitRecordDecl(std::shared_ptr<ASTRecordDecl> recordDecl) {
+
+    // Nothing to do on a declaration without a definition
+    if (!(recordDecl->isDefn()))
+        return;
+
+    // Records cannot be redefined
+    if (module->getRecordType(recordDecl->getName()) != nullptr)
+        throw RedeclaredTypeException(recordDecl->getName());
+
+    // TODO : FIX broken handling of recursive structs
+    // TODO : ensure no repeat field names, void fields
+
+    std::string name = recordDecl->getName();
+    module->addRecordType(name, recordDecl->getSignature());
+    std::shared_ptr<ASTArgSeqNode> fields = recordDecl->getSignature()->getFields();
+
+    ASTVisitor::visitArgSeqNode(fields);
+    ASTVisitor::visitRecordDecl(recordDecl);
+
+    // Recursive or undefined structs yield exception
+    while(fields) {
+        std::shared_ptr<ASTArgNode> field = fields->getHead();
+        if (std::shared_ptr<ASTRecordType> type = std::dynamic_pointer_cast<ASTRecordType>(field->getType())) {
+            if ((name.compare(type->getId())) == 0)
+                throw IllegalTypeException(); // TODO : better exception?
+            if(!module->getRecordType(type->getId()))
+                throw IllegalTypeException();
+        }
+        fields = fields->getTail();
+    }
+
 }
 
 void TypeResolve::run(std::shared_ptr<ASTDeclSeqNode> ast) {

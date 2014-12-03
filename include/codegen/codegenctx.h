@@ -15,6 +15,7 @@
 #include <statics/moduleinfo.h>
 #include <options.h>
 
+#include <llvm/IR/DataLayout.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Value.h>
@@ -42,10 +43,13 @@ private:
     // Whole module
     std::shared_ptr<Module>        module;        // LLVM module for all functions
     LLVMContext                   &context;       // LLVM context
+    std::shared_ptr<DataLayout>    layout;       // LLVM data layout
     bool                           emit_device;   // Should we emit GPU code
     SymbolTable<Function *>        functions;     // Mapping from function names to LLVM functions
+    SymbolTable<Type *>            records;      // Mapping from struct names to LLVM types
     std::shared_ptr<ModuleInfo>    modInfo;       // Information about module
     Function                      *alloc_array;   // Runtime alloc_array function
+    Function                      *alloc;        // Runtime alloc function
     Function                      *alloc_device;  // Allocate untyped device memory
     Function                      *cpy_h2d;       // Copy from host to device
     Function                      *cpy_d2h;       // Copy from device to host
@@ -82,6 +86,11 @@ public:
     Function *getAllocArray();
 
     /**
+     * @brief Get the 'alloc' runtime function
+     */
+    Function *getAlloc();
+
+    /**
      * @brief Get the 'alloc_array' runtime function
      */
     Function *getAllocDevice();
@@ -101,7 +110,7 @@ public:
      */
     Function *getInvokeKernel();
 
-    /**
+    /*
      * @brief Get the 'div_check' runtime function
      */
     Function *getDivCheck();
@@ -213,6 +222,21 @@ public:
      */
     std::shared_ptr<IRBuilder<>> getBuilder();
 
+    /**
+     * @brief Declare an LLVM record type. It may be retrieved later with the getRecordType function.
+     */
+    void createRecord(std::shared_ptr<ASTRecordType> recordInfo);
+
+
+    /**
+     * @brief Gets the LLVM type for the record with the given name
+     */
+    Type *getRecordType(std::string name);
+
+    /**
+     * @brief Gets the bits needed to hold a type, with padding.
+     */
+    unsigned long getAlignedSize(std::shared_ptr<ASTTypeNode> t);
 };
 
 }

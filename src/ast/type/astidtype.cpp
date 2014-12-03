@@ -23,6 +23,3 @@ void ASTIdType::print(std::ostream & ss) {
     ss << id;
 }
 
-int ASTIdType::getSize() {
-    throw std::runtime_error("ID types do not have a size");
-}

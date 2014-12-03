@@ -31,8 +31,3 @@ bool ASTArrType::equal(std::shared_ptr<ASTTypeNode> other) {
 
 void ASTArrType::print(std::ostream & ss) {
 }
-
-int ASTArrType::getSize() {
-    // Pointers as far as the compiler is concerned
-    return 8;
-}

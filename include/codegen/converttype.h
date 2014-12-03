@@ -12,6 +12,7 @@
 #include <ast/ast.h>
 
 // TODO
+#include <codegen/CodegenCtx.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Value.h>
@@ -31,7 +32,7 @@ using namespace llvm;
 
 namespace Codegen {
 
-Type *convertType(std::shared_ptr<ASTTypeNode> type);
+Type *convertType(std::shared_ptr<ASTTypeNode> type, CodegenCtx *ctx);
 
 }
 

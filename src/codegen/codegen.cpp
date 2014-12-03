@@ -45,8 +45,18 @@ Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNod
     else if (std::shared_ptr<ASTIndexExp> idx_exp = std::dynamic_pointer_cast<ASTIndexExp>(node)) {
         Value *lhs = codegen_exp(ctx, idx_exp->getLValue());
         Value *sub = codegen_exp(ctx, idx_exp->getSubscript());
-
         return ctx->getBuilder()->CreateGEP(lhs, sub);
+    }
+    // Record access
+    else if (std::shared_ptr<ASTRecordAccessExp> rcd_exp = std::dynamic_pointer_cast<ASTRecordAccessExp>(node)) {
+        Value *lhs = codegen_lvalue(ctx, rcd_exp->getLValue());
+        int field_idx = rcd_exp->getType()->getFieldIndex(rcd_exp->getId());
+        return ctx->getBuilder()->CreateConstGEP2_32(lhs, 0, field_idx);
+    }
+    // Pointer dereference
+    else if (std::shared_ptr<ASTDerefExp> ptr_exp = std::dynamic_pointer_cast<ASTDerefExp>(node)) {
+        Value *subexp = codegen_exp(ctx, ptr_exp->getExp());
+        return ctx->getBuilder()->CreateGEP(subexp, ConstantInt::get(convertType(ASTIntegerType::get(), ctx.get()), 0));
     }
     else
         throw new ASTMalformedException();
@@ -119,13 +129,13 @@ Value *codegen_binop(
 Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
     // Integer constant
     if (std::shared_ptr<ASTIntegerExp> int_exp = std::dynamic_pointer_cast<ASTIntegerExp>(node))
-        return ConstantInt::get(convertType(ASTIntegerType::get()), int_exp->getValue());
+        return ConstantInt::get(convertType(ASTIntegerType::get(), ctx.get()), int_exp->getValue());
     // Boolean constant
     else if (std::shared_ptr<ASTBooleanExp> bool_exp = std::dynamic_pointer_cast<ASTBooleanExp>(node))
-        return ConstantInt::get(convertType(ASTBooleanType::get()), (int)bool_exp->getValue());
+        return ConstantInt::get(convertType(ASTBooleanType::get(), ctx.get()), (int)bool_exp->getValue());
     // Float constant
     else if (std::shared_ptr<ASTFloatExp> float_exp = std::dynamic_pointer_cast<ASTFloatExp>(node))
-        return ConstantFP::get(convertType(ASTFloatType::get()), float_exp->getValue());
+        return ConstantFP::get(convertType(ASTFloatType::get(), ctx.get()), float_exp->getValue());
     // Unary operator
     else if (std::shared_ptr<ASTUnopExp> unop_exp = std::dynamic_pointer_cast<ASTUnopExp>(node)) {
         Value *v = codegen_exp(ctx, unop_exp->getExp());
@@ -153,7 +163,7 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
 
         std::shared_ptr<ASTTypeNode> expType = tern_exp->getType();
         assert(expType != nullptr);
-        Value *result = ctx->createTemp(convertType(expType));
+        Value *result = ctx->createTemp(convertType(expType, ctx.get()));
 
         BasicBlock *trueBlock = ctx->createBlock();
         BasicBlock *falseBlock = ctx->createBlock();
@@ -191,7 +201,7 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         // In device mode, add a pointer to a new temp to get the return value
         if (ctx->getEmitDevice() && (funcInfo->getUsage() & FunctionInfo::Global) && !isVoid) {
             // TODO use an address of instead maybe
-            ret_val = ctx->createTemp(convertType(sig->getReturnType()));
+            ret_val = ctx->createTemp(convertType(sig->getReturnType(), ctx.get()));
             args.push_back(ret_val);
         }
 
@@ -219,8 +229,8 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
     // Array allocation
     else if (std::shared_ptr<ASTAllocArrayExp> alloc_exp = std::dynamic_pointer_cast<ASTAllocArrayExp>(node)) {
         // Element size constant
-        Value *elemSize = ConstantInt::get(convertType(ASTIntegerType::get()),
-            alloc_exp->getElemType()->getSize());
+        Value *elemSize = ConstantInt::get(convertType(ASTIntegerType::get(), ctx.get()),
+            ctx->getAlignedSize((alloc_exp->getElemType())));
 
         // Array length
         Value *length = codegen_exp(ctx, alloc_exp->getLength());
@@ -234,7 +244,23 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
 
         // Cast the result to the right type
         return ctx->getBuilder()->CreatePointerCast(buff,
-            PointerType::getUnqual(convertType(alloc_exp->getElemType())));
+            PointerType::getUnqual(convertType(alloc_exp->getElemType(), ctx.get())));
+    }
+    // Heap allocation
+    else if (std::shared_ptr<ASTAllocExp> alloc_exp = std::dynamic_pointer_cast<ASTAllocExp>(node)) {
+        // Element size constant
+        Value *elemSize = ConstantInt::get(convertType(ASTIntegerType::get(), ctx.get()),
+            ctx->getAlignedSize((alloc_exp->getElemType())));
+
+        // Call into runtime allocator
+        std::vector<Value *> args;
+        args.push_back(elemSize);
+
+        Value *buff = ctx->getBuilder()->CreateCall(ctx->getAlloc(), args);
+
+        // Cast the result to the right type
+        return ctx->getBuilder()->CreatePointerCast(buff,
+            PointerType::getUnqual(convertType(alloc_exp->getElemType(), ctx.get())));
     }
     // Otherwise, it's an lvalue. Get the address and dereference it.
     else {
@@ -639,9 +665,10 @@ void codegen_top(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTDeclNode> n
 
         ctx->finishFunction();
     }
+    else if (std::shared_ptr<ASTRecordDecl> rcdDecl = std::dynamic_pointer_cast<ASTRecordDecl>(node)) {
+        if (rcdDecl->isDefn())
+            ctx->createRecord(rcdDecl->getSignature());
+    }
 }
 
 }
-
-// TODO: make the codegen context over the whole module and add code to push functions
-// TODO: do something similar for type checking and other analyses

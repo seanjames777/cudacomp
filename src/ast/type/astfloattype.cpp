@@ -24,7 +24,3 @@ bool ASTFloatType::equal(std::shared_ptr<ASTTypeNode> other) {
 
 void ASTFloatType::print(std::ostream & ss) {
 }
-
-int ASTFloatType::getSize() {
-    return 4;
-}
