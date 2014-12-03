@@ -45,7 +45,22 @@ std::shared_ptr<ASTDeclSeqNode> parse(std::string file, bool header) {
     if (!file.empty())
         fclose(fp);
 
-    return args.root;
+    struct CCArgs *opts = getOptions();
+
+    // Inject a declaration of main
+    std::shared_ptr<ASTFunType> main_sig = std::make_shared<ASTFunType>(
+        ASTIntegerType::get(),
+        nullptr,
+        nullptr);
+
+    std::shared_ptr<ASTFunDecl> main = std::make_shared<ASTFunDecl>(
+        opts->entrypoint,
+        main_sig,
+        false,
+        ASTDeclNode::Internal,
+        nullptr);
+
+    return std::make_shared<ASTDeclSeqNode>(main, args.root);
 }
 
 };

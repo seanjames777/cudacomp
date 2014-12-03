@@ -41,7 +41,6 @@ int comment_depth = 0;
 "while"                 { return WHILE; }
 "int"                   { return INT; }
 "bool"                  { return BOOL; }
-"float"                 { return FLOAT; }
 "if"                    { return IF; }
 "else"                  { return ELSE; }
 "true"                  { yylval.boolean = true; return TRUE; } // TODO: don't need the boolean
@@ -87,6 +86,20 @@ int comment_depth = 0;
                                 return IDTYPE;
                             else
                                 return IDENT;
+                        }
+"float"                 {
+                            struct CCArgs *args = getOptions();
+
+                            if (args->no_float) {
+                                yylval.string = strdup(yytext);
+
+                                if (typedefs.find(std::string(yytext)) != typedefs.end())
+                                    return IDTYPE;
+                                else
+                                    return IDENT;
+                            }
+                            else
+                                return FLOAT;
                         }
 "?"                     { return QUESTION; }
 ":"                     { return COLON; }

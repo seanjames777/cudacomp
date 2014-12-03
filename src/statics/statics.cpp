@@ -25,14 +25,14 @@ std::shared_ptr<ModuleInfo> run(std::shared_ptr<ASTDeclSeqNode> node) {
     FunCheck funChecker(module);
     funChecker.run(node);
 
-    SymbolMangle mangle(module);
-    mangle.run(node);
-
     if (args->verbose)
         std::cout << "Checking symbols..." << std::endl;
 
     SymbolCheck symbolChecker;
     symbolChecker.run(node);
+
+    SymbolMangle mangle(module);
+    mangle.run(node);
 
     if (args->verbose)
         std::cout << "Checking types..." << std::endl;

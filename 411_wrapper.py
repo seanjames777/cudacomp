@@ -61,7 +61,7 @@ link_runtime = not(autograder) or not(emit_llvm)
 
 # Process each source file
 for source in sources:
-    compiler_args = [ "./cc", "--symbol-prefix", "_c0_", "--require-entry", "main" ]
+    compiler_args = [ "./cc", "--symbol-prefix", "_c0_", "--require-entry", "main", "--no-float" ]
 
     if print_ast:
         compiler_args.append("--print-ast")
@@ -90,6 +90,7 @@ for source in sources:
     stat = run_shell(compiler_args)
 
     if stat != 0:
+        print "Compile error"
         exit(stat)
 
     if link_runtime:
@@ -97,6 +98,7 @@ for source in sources:
         stat = run_shell([ "llvm-link", "-S", "-o", outfile_ll, "l4lib.bc", outfile_bc ])
 
         if stat != 0:
+            print "llvm-link error"
             exit(stat)
 
     # We don't have an x86 backend, so if we're compiling to x86, use llc
@@ -106,6 +108,7 @@ for source in sources:
         stat = run_shell([ "llc", "-o", outfile, outfile_ll ])
 
         if stat != 0:
+            print "llc error"
             exit(stat)
 
     if link_runtime:

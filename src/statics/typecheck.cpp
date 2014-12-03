@@ -187,11 +187,6 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         // The function checker guarantees that this exists
         std::shared_ptr<FunctionInfo> call_func = mod->getFunction(call_exp->getId());
 
-        // Function must not have been shadowed by a variable. This leaves room for function
-        // pointers.
-        if (func->hasLocal(call_exp->getId()))
-            throw IllegalTypeException();
-
         std::shared_ptr<ASTFunType> sig = call_func->getSignature();
 
         // Check the expressions against the signature
@@ -412,13 +407,29 @@ void typecheck_top(
     std::shared_ptr<ModuleInfo> mod,
     std::shared_ptr<ASTDeclNode> node)
 {
-    // TODO: Names of functions and variables may not collide with defined type names.
-    // TODO: All function parameters must have distinct names
-
     if (std::shared_ptr<ASTFunDecl> funDefn = std::dynamic_pointer_cast<ASTFunDecl>(node)) {
         std::shared_ptr<ASTFunType> sig = funDefn->getSignature();
 
-        // TODO: void args
+        // Make sure:
+        //   - Arguments do not have the same name
+        //   - Arguments do not have void type
+        SymbolSet argNames;
+
+        std::shared_ptr<ASTArgSeqNode> args = sig->getArgs();
+
+        while (args != nullptr) {
+            std::shared_ptr<ASTArgNode> arg = args->getHead();
+
+            if (argNames.find(arg->getName()) != argNames.end())
+                throw IllegalTypeException(); // TODO better exception
+            else
+                argNames.insert(arg->getName());
+
+            if (arg->getType()->equal(ASTVoidType::get()))
+                throw IllegalTypeException();
+
+            args = args->getTail();
+        }
 
         // Skip empty declarations
         if (!funDefn->isDefn())

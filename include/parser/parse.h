@@ -10,7 +10,8 @@
 #define __PARSE_H
 
 #include <defs.h>
-#include <ast/decl/astdeclnode.h>
+#include <ast/ast.h>
+#include <options.h>
 
 namespace Parser {
 

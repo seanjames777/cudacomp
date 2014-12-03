@@ -27,6 +27,7 @@ namespace Statics {
  * - External functions may not be defined
  * - Functions must be declared before they can be called
  * - Any internal function that is called must be defined
+ * - Names of functions may not collide with defined type names
  */
 class FunCheck : public ASTVisitor {
 private:
@@ -35,7 +36,10 @@ private:
 
     std::shared_ptr<ModuleInfo> module;
     idset called;
-    idset defined;
+    idset defined_func;
+
+    idset declared_func;
+    idset declared_type;
 
 public:
 
@@ -46,6 +50,8 @@ public:
     void visitCallExp(std::shared_ptr<ASTCallExp> call_exp) override;
 
     void visitFunDecl(std::shared_ptr<ASTFunDecl> funDefn) override;
+
+    void visitTypeDecl(std::shared_ptr<ASTTypeDecl> typeDecl) override;
 
 };
 

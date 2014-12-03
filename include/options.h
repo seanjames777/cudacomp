@@ -27,6 +27,7 @@ struct CCArgs {
     bool                     emit_text;     //!< Whether to emit LLVM IR as text
     std::string              entrypoint;    //!< Required entrypoint name
     std::vector<std::string> headers;       //!< List of headers
+    bool                     no_float;      //!< Disable floating point
 };
 
 /**

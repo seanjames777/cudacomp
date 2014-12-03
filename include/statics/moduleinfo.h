@@ -44,6 +44,11 @@ public:
     std::shared_ptr<FunctionInfo> getFunction(std::string id);
 
     /**
+     * @brief Get underlying function table
+     */
+    SymbolTable<std::shared_ptr<FunctionInfo>> & getFunctions();
+
+    /**
      * @brief Add a type to the module
      *
      * @param[in] name Name of type

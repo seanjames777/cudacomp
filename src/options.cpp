@@ -30,7 +30,8 @@ void printHelp(char *argv[]) {
         "    --symbol-prefix <pfx>  String to prefix internal function names with\n"
         "    --mem-safe             Insert memory safety checks\n"
         "    --oper-safe            Insert operator safety checks (division by 0, etc.)\n"
-        "    --require-entry <name> Require an entrypoint called <name> \n"
+        "    --require-entry <name> Require an entrypoint called <name>\n"
+        "    --no-float             Disable floating point\n"
         , argv[0]);
 }
 
@@ -45,6 +46,7 @@ void parseArgs(int argc, char *argv[]) {
     args.mem_safe      = false;
     args.opr_safe      = false;
     args.entrypoint    = "_cc_main";
+    args.no_float      = false;
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
@@ -73,6 +75,8 @@ void parseArgs(int argc, char *argv[]) {
             args.entrypoint = std::string(argv[++i]);
         else if (strcmp(argv[i], "-ix") == 0)
             args.headers.push_back(std::string(argv[++i]));
+        else if (strcmp(argv[i], "--no-float") == 0)
+            args.no_float = true;
         else
             args.in_file = std::string(argv[i]);
     }

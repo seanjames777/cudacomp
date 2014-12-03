@@ -100,6 +100,13 @@ public:
         return table.end();
     }
 
+    /**
+     * @brief Erase an element from the table
+     */
+    void erase(iterator it) {
+        table.erase(it);
+    }
+
 };
 
 #endif

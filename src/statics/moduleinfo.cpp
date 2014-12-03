@@ -38,3 +38,7 @@ bool ModuleInfo::hasCudaFunctions() {
 
     return false;
 }
+
+SymbolTable<std::shared_ptr<FunctionInfo>> & ModuleInfo::getFunctions() {
+    return functions;
+}

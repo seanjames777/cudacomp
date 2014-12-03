@@ -15,14 +15,14 @@ FunCheck::FunCheck(std::shared_ptr<ModuleInfo> module)
 
 void FunCheck::run(std::shared_ptr<ASTDeclSeqNode> ast) {
     // Visit the AST
-    visitDeclSeqNode(ast);
+    visitNode(ast);
 
     // Find the functions which were called but never defined
     idset undef;
 
     std::set_difference(
         called.begin(), called.end(),
-        defined.begin(), defined.end(),
+        defined_func.begin(), defined_func.end(),
         std::inserter(undef, undef.end()));
 
     for (auto id : undef)
@@ -66,6 +66,12 @@ void FunCheck::visitCallExp(std::shared_ptr<ASTCallExp> call_exp) {
 }
 
 void FunCheck::visitFunDecl(std::shared_ptr<ASTFunDecl> funDefn) {
+    // Make sure there isn't a type with the same name
+    if (declared_type.find(funDefn->getName()) != declared_type.end())
+        throw IllegalTypeException(); // TODO better exception
+
+    declared_func.insert(funDefn->getName());
+
     // Check for an existing declaration
     std::shared_ptr<FunctionInfo> funInfo = module->getFunction(funDefn->getName());
 
@@ -85,7 +91,7 @@ void FunCheck::visitFunDecl(std::shared_ptr<ASTFunDecl> funDefn) {
             throw IncorrectLinkageException(funDefn->getName());
 
         // If there is a definition, the function may not be defined already
-        if (funDefn->isDefn() && defined.find(funDefn->getName()) != defined.end())
+        if (funDefn->isDefn() && defined_func.find(funDefn->getName()) != defined_func.end())
             throw RedefinedFunctionException(funDefn->getName());
     }
     else {
@@ -98,9 +104,19 @@ void FunCheck::visitFunDecl(std::shared_ptr<ASTFunDecl> funDefn) {
 
     // If there is a body, mark the function as defined
     if (funDefn->isDefn())
-        defined.insert(funDefn->getName());
+        defined_func.insert(funDefn->getName());
 
     ASTVisitor::visitFunDecl(funDefn);
+}
+
+void FunCheck::visitTypeDecl(std::shared_ptr<ASTTypeDecl> typeDecl) {
+    // Make sure there isn't a function with the same name
+    if (declared_func.find(typeDecl->getName()) != declared_func.end())
+        throw IllegalTypeException(); // TODO better exception
+
+    declared_type.insert(typeDecl->getName());
+
+    ASTVisitor::visitTypeDecl(typeDecl);
 }
 
 }

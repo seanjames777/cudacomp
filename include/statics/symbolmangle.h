@@ -21,7 +21,6 @@ class SymbolMangle : public ASTVisitor {
 private:
 
     std::shared_ptr<ModuleInfo> module;
-    SymbolSet internal; // TODO: idset
     struct CCArgs *args;
 
     std::string mangleSymbol(std::string name);
