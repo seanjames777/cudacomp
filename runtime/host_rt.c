@@ -24,6 +24,11 @@ void _rt_shift_check(int s) {
         raise(SIGFPE);
 }
 
+void _rt_assert(int c) {
+    if (!c)
+        raise(SIGABRT); // TODO: call abort()?
+}
+
 // Used for our own testing
 
 void print_float(float x) {

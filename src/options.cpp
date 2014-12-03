@@ -14,13 +14,14 @@ struct CCArgs *getOptions() {
 
 void printHelp(char *argv[]) {
     printf(
-        "Usage: %s [-S] [-o[d] <file>] [<file>]\n"
+        "Usage: %s [-S] [-i <file>] [-o[d] <file>] [<file>]\n"
         "\n"
         "Basic Options:\n"
         "    -h                     Print this help message and exit\n"
         "    -S                     Emit LLVM IR as text instead of bitcode\n"
         "    -o <file>              Output (host) assembly to a file\n"
         "    -od <file>             Output (device) assembly to a file\n"
+        "    -ix <file>             Include a header of external declarations\n"
         "    <file>                 File to parse, instead of standard in\n"
         "\n"
         "Additional Options:\n"
@@ -70,6 +71,8 @@ void parseArgs(int argc, char *argv[]) {
             args.emit_text = true;
         else if (strcmp(argv[i], "--require-entry") == 0)
             args.entrypoint = std::string(argv[++i]);
+        else if (strcmp(argv[i], "-ix") == 0)
+            args.headers.push_back(std::string(argv[++i]));
         else
             args.in_file = std::string(argv[i]);
     }

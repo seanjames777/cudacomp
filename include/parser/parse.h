@@ -22,7 +22,12 @@ public:
     virtual const char *what() const noexcept override { return msg.c_str(); }
 };
 
-std::shared_ptr<ASTDeclSeqNode> parse(std::string file);
+struct ParserArgs {
+    std::shared_ptr<ASTDeclSeqNode> root;
+    bool header;
+};
+
+std::shared_ptr<ASTDeclSeqNode> parse(std::string file, bool header);
 
 };
 

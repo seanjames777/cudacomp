@@ -47,6 +47,7 @@ IMPL_CLASS(ExpNode) {
 }
 
 IMPL_CLASS(StmtNode) {
+    SUB_CLASS(AssertStmt);
     SUB_CLASS(AssignStmt);
     SUB_CLASS(ExprStmt);
     SUB_CLASS(IfStmt);
@@ -167,6 +168,10 @@ IMPL_CLASS(ScopeStmt) {
 IMPL_CLASS(VarDeclStmt) {
     HAS_MEMBER(getType());
     HAS_MEMBER(getExp());
+}
+
+IMPL_CLASS(AssertStmt) {
+    HAS_MEMBER(getCond());
 }
 
 IMPL_CLASS(AssignStmt) {

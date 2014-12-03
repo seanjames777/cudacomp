@@ -5,6 +5,7 @@
 #include <parser/parse.h>
 
 #define YYERROR_VERBOSE
+#define YYMAXDEPTH 100000
 
 int line_num = 1;
 std::unordered_map<std::string, ASTTypeNode *> typedefs;
@@ -15,7 +16,7 @@ int yywrap() {
     return 1;
 }
 
-void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
+void yyerror(Parser::ParserArgs *args, const char *str) {
     std::stringstream ss;
     ss << "Line " << line_num << ": " << str;
     throw Parser::ParseException(ss.str());
@@ -25,7 +26,8 @@ void yyerror(std::shared_ptr<ASTDeclSeqNode> *root, const char *str) {
 
 // Note: We can't return anything, so we need to use a pointer to a shared
 // pointer. TODO: Could use a reference, but it's not much of an improvement.
-%parse-param { std::shared_ptr<ASTDeclSeqNode> *root }
+
+%parse-param {Parser::ParserArgs *args}
 
 // Note: We need to use regular pointers here, because otherwise we can't easily
 // put them in a union. This makes the actual parser code a bit dense/ugly, but
@@ -103,7 +105,7 @@ top_list:
   ;
 
 program:
-    top_list                          { *root = std::shared_ptr<ASTDeclSeqNode>($1); }
+    top_list                          { args->root = std::shared_ptr<ASTDeclSeqNode>($1); }
   ;
 
 stmt_list:
@@ -188,6 +190,7 @@ stmt:
   | WHILE LPAREN exp RPAREN stmt      { $$ = new ASTWhileStmt(std::shared_ptr<ASTExpNode>($3), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($5), nullptr)); }
   | FOR LPAREN simpopt SEMI exp SEMI simpopt RPAREN stmt
     { $$ = new ASTForStmt(std::shared_ptr<ASTStmtNode>($3), std::shared_ptr<ASTExpNode>($5), std::shared_ptr<ASTStmtNode>($7), std::make_shared<ASTStmtSeqNode>(std::shared_ptr<ASTStmtNode>($9), nullptr)); }
+  | ASSERT LPAREN exp RPAREN SEMI     { $$ = new ASTAssertStmt(std::shared_ptr<ASTExpNode>($3)); }
   ;
 
 elseopt:
@@ -226,9 +229,28 @@ linkage:
 
 fundecl:
     linkage type IDENT dim_param_list_opt LPAREN param_list RPAREN LBRACE stmt_list RBRACE
-    { $$ = new ASTFunDecl(std::string($3), std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($2), std::shared_ptr<ASTArgSeqNode>($4), std::shared_ptr<ASTArgSeqNode>($6)), true, $1, std::shared_ptr<ASTStmtSeqNode>($9)); free($3); }
+    {
+        $$ = new ASTFunDecl(std::string($3),
+                 std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($2),
+                 std::shared_ptr<ASTArgSeqNode>($4),
+                 std::shared_ptr<ASTArgSeqNode>($6)),
+                 true,
+                 args->header ? ASTDeclNode::External : $1,
+                 std::shared_ptr<ASTStmtSeqNode>($9));
+        free($3);
+    }
   | linkage type IDENT dim_param_list_opt LPAREN param_list RPAREN SEMI
-    { $$ = new ASTFunDecl(std::string($3), std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($2), std::shared_ptr<ASTArgSeqNode>($4), std::shared_ptr<ASTArgSeqNode>($6)), false, $1, nullptr); free($3); }
+    {
+        $$ = new ASTFunDecl(
+                 std::string($3),
+                 std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($2),
+                 std::shared_ptr<ASTArgSeqNode>($4),
+                 std::shared_ptr<ASTArgSeqNode>($6)),
+                 false,
+                 args->header ? ASTDeclNode::External : $1,
+                 nullptr);
+                 free($3);
+    }
   ;
 
 dim_param_list_opt:

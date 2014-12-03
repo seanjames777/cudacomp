@@ -36,6 +36,7 @@ int comment_depth = 0;
 <LINE_COMMENT>[^\n]*    /* ignore */
 <LINE_COMMENT>"\n"      { BEGIN(INITIAL); line_num++; }
 
+"assert"                { return ASSERT; }
 "return"                { return RETURN; }
 "while"                 { return WHILE; }
 "int"                   { return INT; }
@@ -53,7 +54,6 @@ int comment_depth = 0;
 "struct"                { return STRUCT; }
 "continue"              { return CONTINUE; }
 "break"                 { return BREAK; }
-"assert"                { return ASSERT; }
 "NULL"                  { return KWNULL; }
 "alloc"                 { return ALLOC; }
 "char"                  { return CHAR; }

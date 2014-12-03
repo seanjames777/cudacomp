@@ -15,17 +15,18 @@
  * @brief Compiler command line options
  */
 struct CCArgs {
-    bool        emit_device;   //!< Whether to emit PTX code
-    bool        print_ast;     //!< Whether to print the AST
-    std::string in_file;       //!< Input file, possibly null to indicate stdin
-    std::string out_hfile;     //!< Output host code file
-    std::string out_dfile;     //!< Output device code file
-    bool        verbose;       //!< Whether to print verbose output
-    std::string symbol_prefix; //!< String to prefix intern function names with
-    bool        mem_safe;      //!< Whether to insert memory safety checks
-    bool        opr_safe;      //!< Whether to insert operator safety checks
-    bool        emit_text;     //!< Whether to emit LLVM IR as text
-    std::string entrypoint;    //!< Required entrypoint name
+    bool                     emit_device;   //!< Whether to emit PTX code
+    bool                     print_ast;     //!< Whether to print the AST
+    std::string              in_file;       //!< Input file, possibly null to indicate stdin
+    std::string              out_hfile;     //!< Output host code file
+    std::string              out_dfile;     //!< Output device code file
+    bool                     verbose;       //!< Whether to print verbose output
+    std::string              symbol_prefix; //!< String to prefix intern function names with
+    bool                     mem_safe;      //!< Whether to insert memory safety checks
+    bool                     opr_safe;      //!< Whether to insert operator safety checks
+    bool                     emit_text;     //!< Whether to emit LLVM IR as text
+    std::string              entrypoint;    //!< Required entrypoint name
+    std::vector<std::string> headers;       //!< List of headers
 };
 
 /**

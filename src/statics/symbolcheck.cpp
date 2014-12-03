@@ -59,7 +59,7 @@ Symbol SymbolCheck::makeUniqueSymbol(Symbol original, bool defined) {
 
     // Create a unique name and add it to the 'rename' map
     std::stringstream ss;
-    ss << "sym" << symbolCounter++ << "_" << original;
+    ss << "_sym_" << symbolCounter++;
     std::string unique = ss.str();
 
     rename.set(original, unique);

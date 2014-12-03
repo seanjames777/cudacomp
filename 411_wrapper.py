@@ -69,6 +69,10 @@ for source in sources:
     outfile_bc = source.rsplit('.', 1)[0] + ".bc"
     outfile_ll = source.rsplit('.', 1)[0] + ".ll"
 
+    for header in headers:
+        compiler_args.append("-ix")
+        compiler_args.append(header)
+
     if not(link_runtime):
         compiler_args.append("-S")
         compiler_args.append("-o")

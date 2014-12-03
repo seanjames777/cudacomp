@@ -52,6 +52,7 @@ private:
     Function                      *invoke_kernel; // Invoke a kernel
     Function                      *div_check;     // Runtime division safety check
     Function                      *shift_check;   // Runtime shift safety check
+    Function                      *fassert;        // Runtime assertion
 
     // Current function
     BasicBlock                    *def_bblock;    // Locals definition block, assists with SSA
@@ -109,6 +110,11 @@ public:
      * @brief Get the 'shift_check' runtime function
      */
     Function *getShiftCheck();
+
+    /**
+     * @brief Get the 'assert' runtime function
+     */
+    Function *getAssert();
 
     /**
      * @brief Get module information

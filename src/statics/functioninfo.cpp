@@ -52,8 +52,6 @@ bool FunctionInfo::hasLocal(std::string id) {
 }
 
 void FunctionInfo::copyArgumentsToLocals() {
-    // TODO: need to check somewhere that arguments have different names
-
     std::shared_ptr<ASTArgSeqNode> args = signature->getDimArgs();
 
     while (args != nullptr) {

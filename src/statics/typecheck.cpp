@@ -174,6 +174,10 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         if (!leftType->equal(rightType))
             throw IllegalTypeException();
 
+        // May not have void type
+        if (leftType->equal(ASTVoidType::get()))
+            throw IllegalTypeException();
+
         tern_exp->setType(leftType);
 
         return leftType;
@@ -345,6 +349,14 @@ void typecheck_stmt(
         if (if_node->getFalseStmt())
             typecheck_stmts(mod, func, if_node->getFalseStmt());
     }
+    // Assert statement
+    else if (std::shared_ptr<ASTAssertStmt> assert_node = std::dynamic_pointer_cast<ASTAssertStmt>(head)) {
+        // Condition must be a boolean
+        std::shared_ptr<ASTTypeNode> cond_type = typecheck_exp(mod, func, assert_node->getCond());
+
+        if (!cond_type->equal(ASTBooleanType::get()))
+            throw IllegalTypeException();
+    }
     // While statement
     else if (std::shared_ptr<ASTWhileStmt> while_node = std::dynamic_pointer_cast<ASTWhileStmt>(head)) {
         // Condition must be a boolean
@@ -400,7 +412,14 @@ void typecheck_top(
     std::shared_ptr<ModuleInfo> mod,
     std::shared_ptr<ASTDeclNode> node)
 {
+    // TODO: Names of functions and variables may not collide with defined type names.
+    // TODO: All function parameters must have distinct names
+
     if (std::shared_ptr<ASTFunDecl> funDefn = std::dynamic_pointer_cast<ASTFunDecl>(node)) {
+        std::shared_ptr<ASTFunType> sig = funDefn->getSignature();
+
+        // TODO: void args
+
         // Skip empty declarations
         if (!funDefn->isDefn())
             return;
@@ -408,16 +427,17 @@ void typecheck_top(
         // The function checker has already allocated FunctionInfo's for us
         std::shared_ptr<FunctionInfo> funInfo = mod->getFunction(funDefn->getName());
 
-        // TODO: void args
-
         funInfo->copyArgumentsToLocals();
 
         // Check the function body, building the local symbol table in the process
         typecheck_stmts(mod, funInfo, funDefn->getBody());
     }
     // Skip
-    else if (std::shared_ptr<ASTTypeDecl> typeDefn = std::dynamic_pointer_cast<ASTTypeDecl>(node))
-        return;
+    else if (std::shared_ptr<ASTTypeDecl> typeDefn = std::dynamic_pointer_cast<ASTTypeDecl>(node)) {
+        // Cannot typedef void
+        if (typeDefn->getType()->equal(ASTVoidType::get()))
+            throw IllegalTypeException();
+    }
     else
         throw ASTMalformedException();
 }

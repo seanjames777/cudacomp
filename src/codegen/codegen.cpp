@@ -26,6 +26,7 @@
 #include <ast/decl/asttypedecl.h>
 
 // TODO: Alloca alignment
+// TODO: Set the data layout explicitly
 
 // Note: This file makes heavy use of ctx->getBuilder(). This is an easy way to ensure
 // that the IR builder used to create an instruction always refers to the correct
@@ -433,6 +434,15 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
         // If both branches return, the caller should stop, or we'll end up
         // creating a block with no predecessors
         return leftContinue || rightContinue;
+    }
+    // Assert statement
+    else if (std::shared_ptr<ASTAssertStmt> assert_node = std::dynamic_pointer_cast<ASTAssertStmt>(head)) {
+        Value *cond = codegen_exp(ctx, assert_node->getCond());
+
+        std::vector<Value *> args;
+        args.push_back(cond);
+
+        ctx->getBuilder()->CreateCall(ctx->getAssert(), args);
     }
     // While statement
     else if (std::shared_ptr<ASTWhileStmt> while_node = std::dynamic_pointer_cast<ASTWhileStmt>(head)) {

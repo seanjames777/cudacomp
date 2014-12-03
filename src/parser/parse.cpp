@@ -6,7 +6,7 @@
 
 #include <parser/parse.h>
 
-extern int yyparse(std::shared_ptr<ASTDeclSeqNode> *root);
+extern int yyparse(Parser::ParserArgs *args);
 extern FILE *yyin;
 
 namespace Parser {
@@ -16,8 +16,12 @@ ParseException::ParseException(std::string msg)
 {
 }
 
-std::shared_ptr<ASTDeclSeqNode> parse(std::string file) {
+std::shared_ptr<ASTDeclSeqNode> parse(std::string file, bool header) {
     FILE *fp = nullptr;
+
+    ParserArgs args;
+    args.header = header;
+    args.root = nullptr;
 
     if (!file.empty()) {
         fp = fopen(file.c_str(), "r");
@@ -31,9 +35,7 @@ std::shared_ptr<ASTDeclSeqNode> parse(std::string file) {
         yyin = fp;
     }
 
-    std::shared_ptr<ASTDeclSeqNode> root = nullptr;
-
-    if (yyparse(&root)) {
+    if (yyparse(&args)) {
         if (!file.empty())
             fclose(fp);
 
@@ -43,7 +45,7 @@ std::shared_ptr<ASTDeclSeqNode> parse(std::string file) {
     if (!file.empty())
         fclose(fp);
 
-    return root;
+    return args.root;
 }
 
 };

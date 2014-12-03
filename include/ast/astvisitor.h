@@ -74,6 +74,7 @@ public:
     DECLARE_CLASS(TernopExp);
     DECLARE_CLASS(UnopExp);
 
+    DECLARE_CLASS(AssertStmt);
     DECLARE_CLASS(AssignStmt);
     DECLARE_CLASS(ExprStmt);
     DECLARE_CLASS(ForStmt);

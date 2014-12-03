@@ -22,6 +22,7 @@ CodegenCtx::CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo)
       invoke_kernel(nullptr),
       div_check(nullptr),
       shift_check(nullptr),
+      fassert(nullptr),
       def_bblock(nullptr),
       first_bblock(nullptr),
       def_builder(nullptr),
@@ -135,6 +136,20 @@ Function *CodegenCtx::getShiftCheck() {
     }
 
     return shift_check;
+}
+
+Function *CodegenCtx::getAssert() {
+    // Only declare it if it's used, to make small programs simpler
+    if (!fassert) {
+        // Construct a declaration of the runtime's fassert function
+        std::vector<Type *> argTypes;
+        argTypes.push_back(Type::getInt1Ty(context));
+
+        FunctionType *ftype = FunctionType::get(Type::getVoidTy(context), argTypes, false);
+        fassert = Function::Create(ftype, GlobalValue::ExternalLinkage, "_rt_assert", module.get());
+    }
+
+    return fassert;
 }
 
 std::shared_ptr<ModuleInfo> CodegenCtx::getModuleInfo() {
