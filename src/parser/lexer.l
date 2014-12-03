@@ -1,12 +1,3 @@
-#
-# Makefile
-#
-# This is a pure Makefile for 411/Autolab compatability. For general builds,
-# CMake according the README.txt
-#
-# Author: Sean James <seanjames777@gmail.com>
-#
-
 %option noyywrap
 
 %{
