@@ -43,7 +43,9 @@ for arg in sys.argv:
 
 # Runs shell commands
 def run_shell(command):
-    proc = subprocess.Popen (command, stdout=subprocess.PIPE)
+    env = dict(os.environ)
+    env["LD_LIBRARY_PATH"] = "llvm/lib/"
+    proc = subprocess.Popen (command, stdout=subprocess.PIPE, env=env)
     stat = proc.wait()
 
     while True:
@@ -55,31 +57,24 @@ def run_shell(command):
 
     return stat
 
-# If we are not the autograder we need to compile the runtime library ourself...
-autograder = getpass.getuser() == "autograder"
 link_runtime = not(emit_llvm)
 
 # Process each source file
 for source in sources:
-    compiler_args = [ "./cc", "--symbol-prefix", "_c0_", "--require-entry", "main", "--no-float" ]
+    compiler_args = [ "bin/cc", "--symbol-prefix", "_c0_", "--require-entry", "main", "--no-float" ]
 
     if print_ast:
         compiler_args.append("--print-ast")
 
-    outfile_bc = source.rsplit('.', 1)[0] + ".bc"
     outfile_ll = source.rsplit('.', 1)[0] + ".ll"
 
     for header in headers:
         compiler_args.append("-ix")
         compiler_args.append(header)
 
-    if not(link_runtime):
-        compiler_args.append("-S")
-        compiler_args.append("-o")
-        compiler_args.append(outfile_ll)
-    else:
-        compiler_args.append("-o")
-        compiler_args.append(outfile_bc)
+    compiler_args.append("-S")
+    compiler_args.append("-o")
+    compiler_args.append(outfile_ll)
 
     if safe_mode:
         compiler_args.append("--mem-safe")
@@ -95,7 +90,7 @@ for source in sources:
 
     if link_runtime:
         # Link with the compiled C0
-        stat = run_shell([ "llvm-link", "-S", "-o", outfile_ll, "l4lib.bc", outfile_bc ])
+        stat = run_shell([ "llvm-link", "-S", "-o", outfile_ll, "l4lib.ll", outfile_ll ])
 
         if stat != 0:
             print "llvm-link error"
@@ -110,9 +105,6 @@ for source in sources:
         if stat != 0:
             print "llc error"
             exit(stat)
-
-    if link_runtime:
-        run_shell([ "rm", outfile_bc ])
 
     if not(emit_llvm):
         run_shell([ "rm", outfile_ll ])

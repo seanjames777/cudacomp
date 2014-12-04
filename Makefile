@@ -18,16 +18,36 @@ BISON := bison
 CPPFLAGS := \
 	-I./ \
 	-I./include/ \
+	-I./llvm/include/ \
 	-std=c++11 \
 	-Wno-deprecated-register \
-	$(shell llvm-config --cxxflags) \
-	-fexceptions
-
-LLVM_VERSION := $(shell llvm-config --version)
+	-DNDEBUG -D_GNU_SOURCE \
+	-D__STDC_CONSTANT_MACROS \
+	-D__STDC_FORMAT_MACROS \
+	-D__STDC_LIMIT_MACROS \
+	-O3 \
+	-pipe \
+	-Wall \
+	-Wp,-D_FORTIFY_SOURCE=2 \
+	-fstack-protector \
+	--param=ssp-buffer-size=4 \
+	-m64 \
+	-mtune=generic \
+	-fomit-frame-pointer \
+	-fvisibility-inlines-hidden \
+	-fPIC \
+	-Woverloaded-virtual \
+	-Wcast-qual
 
 LDFLAGS := \
-	$(shell llvm-config --ldflags) \
-	-lLLVM-$(LLVM_VERSION)
+	-L ./llvm/lib/ \
+	-lpthread \
+	-lffi \
+	-ltinfo \
+	-lrt \
+	-ldl \
+	-lm \
+	-lLLVM-3.4
 
 OBJ := obj
 BIN := bin
@@ -115,23 +135,23 @@ DIRECTORIES:
 	mkdir -p $(OBJ)/statics
 	mkdir -p $(BIN)
 
-$(OBJ)/%.o: src/%.cpp DIRECTORIES
+$(OBJ)/%.o: src/%.cpp
 	$(CPP) $(CPPFLAGS) -o $@ -c $<
 
-$(OBJ)/lexer.o: src/parser/lexer.l DIRECTORIES
+$(OBJ)/lexer.o: src/parser/lexer.l
 	$(FLEX) -o lexer.cpp src/parser/lexer.l
 	$(CPP) $(CPPFLAGS) -o $@ -c lexer.cpp
 
-$(OBJ)/parser.o: src/parser/parser.y DIRECTORIES
+$(OBJ)/parser.o: src/parser/parser.y
 	$(BISON) -v --defines=parser.hpp --output=parser.cpp src/parser/parser.y;
 	$(CPP) $(CPPFLAGS) -o $@ -c parser.cpp
 
-$(BIN)/cc: $(OBJS) DIRECTORIES
+$(BIN)/cc: $(OBJS)
 	$(CPP) $(LDFLAGS) -o $@ $(OBJS)
 
-l4c: $(BIN)/cc
-	cp runtime/host_rt.c l4lib.c
+l4c: DIRECTORIES $(BIN)/cc
+	clang -S -emit-llvm -o l4lib.ll -c l4lib.c
 	cp 411_wrapper.py $(BIN)/l4c
 
 clean:
-	rm -rf bin obj parser.cpp parser.hpp lexer.cpp parser.output l4lib.c
+	rm -rf bin obj parser.cpp parser.hpp lexer.cpp parser.output l4lib.ll
