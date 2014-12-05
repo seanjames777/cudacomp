@@ -8,9 +8,19 @@ void *_rt_alloc_array(int elemSize, int length) {
     char *buff = (char *)calloc(1, elemSize * length + 8);
 
     *((int *)&buff[0]) = length;
-    *((int *)&buff[4]) = elemSize;
 
     return (void *)&buff[8];
+}
+
+void _rt_array_bounds_check(char *array, int idx) {
+    if (!array)
+        raise(SIGSEGV);
+
+    int len = *((int *)&array[-8]);
+
+    // Handles negative as well
+    if ((unsigned int)idx > len)
+        raise(SIGSEGV);
 }
 
 void *_rt_alloc(int size) {

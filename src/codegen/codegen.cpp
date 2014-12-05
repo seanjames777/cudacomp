@@ -36,6 +36,8 @@
 namespace Codegen {
 
 Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
+    CCArgs *args = getOptions();
+
     // Identifier reference
     if (std::shared_ptr<ASTIdentifierExp> id_exp = std::dynamic_pointer_cast<ASTIdentifierExp>(node)) {
         Value *id_ptr = ctx->getOrCreateSymbol(id_exp->getId());
@@ -45,6 +47,17 @@ Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNod
     else if (std::shared_ptr<ASTIndexExp> idx_exp = std::dynamic_pointer_cast<ASTIndexExp>(node)) {
         Value *lhs = codegen_exp(ctx, idx_exp->getLValue());
         Value *sub = codegen_exp(ctx, idx_exp->getSubscript());
+
+        // Bounds check
+        if (args->mem_safe) {
+            std::vector<Value *> args;
+            args.push_back(ctx->getBuilder()->CreatePointerCast(
+                lhs, PointerType::getUnqual(Type::getInt8Ty(ctx->getContext()))));
+            args.push_back(sub);
+
+            ctx->getBuilder()->CreateCall(ctx->getArrBoundsCheck(), args);
+        }
+
         return ctx->getBuilder()->CreateGEP(lhs, sub);
     }
     // Record access
