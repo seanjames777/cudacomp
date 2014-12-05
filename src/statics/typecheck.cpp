@@ -359,7 +359,7 @@ void typecheck_stmt(
             // TODO: check to ensure no struct
             if (!lhs_type->equal(rhs_type))
                 throw IllegalTypeException();
-            
+
             defn_stmt->setType(rhs_type);
         }
         else throw IllegalLValueException();
