@@ -68,8 +68,18 @@ Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNod
     }
     // Pointer dereference
     else if (std::shared_ptr<ASTDerefExp> ptr_exp = std::dynamic_pointer_cast<ASTDerefExp>(node)) {
-        Value *subexp = codegen_exp(ctx, ptr_exp->getExp());
-        return ctx->getBuilder()->CreateGEP(subexp, ConstantInt::get(convertType(ASTIntegerType::get(), ctx.get()), 0));
+        Value *ptr_val = codegen_exp(ctx, ptr_exp->getExp());
+
+        // Pointer check
+        if (args->mem_safe) {
+            std::vector<Value *> args;
+            args.push_back(ctx->getBuilder()->CreatePointerCast(
+                ptr_val, PointerType::getUnqual(Type::getInt8Ty(ctx->getContext()))));
+
+            ctx->getBuilder()->CreateCall(ctx->getDerefCheck(), args);
+        }
+
+        return ctx->getBuilder()->CreateGEP(ptr_val, ConstantInt::get(convertType(ASTIntegerType::get(), ctx.get()), 0));
     }
     else
         throw new ASTMalformedException();

@@ -23,6 +23,11 @@ void _rt_array_bounds_check(char *array, int idx) {
         raise(SIGSEGV);
 }
 
+void _rt_deref_check(char *ptr) {
+    if (!ptr)
+        raise(SIGSEGV);
+}
+
 void *_rt_alloc(int size) {
     return (void*)calloc(1, size);
 }

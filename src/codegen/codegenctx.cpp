@@ -24,6 +24,7 @@ CodegenCtx::CodegenCtx(bool emit_device, std::shared_ptr<ModuleInfo> modInfo)
       div_check(nullptr),
       shift_check(nullptr),
       arr_check(nullptr),
+      deref_check(nullptr),
       fassert(nullptr),
       def_bblock(nullptr),
       first_bblock(nullptr),
@@ -168,6 +169,20 @@ Function *CodegenCtx::getArrBoundsCheck() {
     }
 
     return arr_check;
+}
+
+Function *CodegenCtx::getDerefCheck() {
+    // Only declare it if it's used, to make small programs simpler
+    if (!deref_check) {
+        // Construct a declaration of the runtime's deref_check function
+        std::vector<Type *> argTypes;
+        argTypes.push_back(PointerType::getUnqual(Type::getInt8Ty(context)));
+
+        FunctionType *ftype = FunctionType::get(Type::getVoidTy(context), argTypes, false);
+        deref_check = Function::Create(ftype, GlobalValue::ExternalLinkage, "_rt_deref_check", module.get());
+    }
+
+    return deref_check;
 }
 
 Function *CodegenCtx::getAssert() {

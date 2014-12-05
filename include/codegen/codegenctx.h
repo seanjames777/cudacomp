@@ -57,6 +57,7 @@ private:
     Function                      *div_check;     // Runtime division safety check
     Function                      *shift_check;   // Runtime shift safety check
     Function                      *arr_check;     // Array bounds check
+    Function                      *deref_check;   // Array bounds check
     Function                      *fassert;       // Runtime assertion
 
     // Current function
@@ -125,6 +126,11 @@ public:
      * @brief Get the 'arr_bounds_check' runtime function
      */
     Function *getArrBoundsCheck();
+
+    /**
+     * @brief Get the 'deref_check' runtime function
+     */
+    Function *getDerefCheck();
 
     /**
      * @brief Get the 'assert' runtime function
