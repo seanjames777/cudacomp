@@ -18,36 +18,17 @@ BISON := bison
 CPPFLAGS := \
 	-I./ \
 	-I./include/ \
-	-I./llvm/include/ \
-	-std=c++11 \
-	-Wno-deprecated-register \
-	-DNDEBUG -D_GNU_SOURCE \
-	-D__STDC_CONSTANT_MACROS \
-	-D__STDC_FORMAT_MACROS \
-	-D__STDC_LIMIT_MACROS \
-	-O3 \
-	-pipe \
-	-Wall \
-	-Wp,-D_FORTIFY_SOURCE=2 \
-	-fstack-protector \
-	--param=ssp-buffer-size=4 \
-	-m64 \
-	-mtune=generic \
-	-fomit-frame-pointer \
-	-fvisibility-inlines-hidden \
-	-fPIC \
-	-Woverloaded-virtual \
-	-Wcast-qual
+	$(shell llvm-config --cxxflags) \
+	-fexceptions \
+	-frtti \
+	-Wno-deprecated-register
 
 LDFLAGS := \
-	-L ./llvm/lib/ \
-	-lpthread \
-	-lffi \
-	-ltinfo \
-	-lrt \
-	-ldl \
-	-lm \
-	-lLLVM-3.4
+	$(shell llvm-config --ldflags)
+
+LIBS := \
+	$(shell llvm-config --libs) \
+	$(shell llvm-config --system-libs)
 
 OBJ := obj
 BIN := bin
@@ -147,7 +128,7 @@ $(OBJ)/parser.o: src/parser/parser.y
 	$(CPP) $(CPPFLAGS) -o $@ -c parser.cpp
 
 $(BIN)/cc: $(OBJS)
-	$(CPP) $(LDFLAGS) -o $@ $(OBJS)
+	$(CPP) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 l4c: DIRECTORIES $(BIN)/cc
 	clang -S -emit-llvm -o l4lib.ll -c l4lib.c
