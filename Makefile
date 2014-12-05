@@ -102,6 +102,10 @@ OBJS := \
 	$(OBJ)/parser.o \
 	$(OBJ)/lexer.o
 
+DEPS := $(SOURCES:src/%.cpp=$(OBJ)/%.d)
+
+-include $(DEPS)
+
 .PHONY: DIRECTORIES
 DIRECTORIES:
 	mkdir -p $(OBJ)
@@ -116,7 +120,16 @@ DIRECTORIES:
 	mkdir -p $(OBJ)/statics
 	mkdir -p $(BIN)
 
-$(OBJ)/%.o: src/%.cpp
+$(DEPS): | DIRECTORIES
+$(OBJS): | DIRECTORIES
+$(OBJS)/lexer.o: | DIRECTORIES
+$(OBJS)/parser.o: | DIRECTORIES
+$(BIN)/cc: | DIRECTORIES
+
+$(OBJ)/%.d: src/%.cpp
+	$(CPP) $(CPPFLAGS) -MM -MT $(<:src/%.cpp=obj/%.o) -MF $@ $<
+
+$(OBJ)/%.o: src/%.cpp $(OBJ)/%.d
 	$(CPP) $(CPPFLAGS) -o $@ -c $<
 
 $(OBJ)/lexer.o: src/parser/lexer.l
@@ -130,7 +143,7 @@ $(OBJ)/parser.o: src/parser/parser.y
 $(BIN)/cc: $(OBJS)
 	$(CPP) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
-l4c: DIRECTORIES $(BIN)/cc
+l4c: $(BIN)/cc
 	clang -S -emit-llvm -o l4lib.ll -c l4lib.c
 	cp 411_wrapper.py $(BIN)/l4c
 
