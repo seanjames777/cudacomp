@@ -125,6 +125,8 @@ tests = [
     (SOURCE_DIR + "tests/testPointers7.cc", 10, "both"),
     (SOURCE_DIR + "tests/testPointers8.cc", 20, "both"),
     (SOURCE_DIR + "tests/testPointers9.cc", 0, "both"),
+    (SOURCE_DIR + "tests/testPointers10.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testPointers11.cc", 1, "both"),
     (SOURCE_DIR + "tests/testStructs1.cc", 0, "both"),
     (SOURCE_DIR + "tests/testStructs2.cc", 5, "both"),
     (SOURCE_DIR + "tests/testStructs3.cc", 1, "both"),

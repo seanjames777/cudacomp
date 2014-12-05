@@ -7,7 +7,8 @@
 #include <ast/expr/astderefexp.h>
 
 ASTDerefExp::ASTDerefExp(std::shared_ptr<ASTExpNode> exp)
-    : exp(exp)
+    : exp(exp),
+      isParenthesized(false)
 {
 }
 
@@ -16,6 +17,14 @@ ASTDerefExp::~ASTDerefExp() {
 
 std::shared_ptr<ASTExpNode> ASTDerefExp::getExp() {
     return exp;
+}
+
+bool ASTDerefExp::getParenthesization() {
+    return isParenthesized;
+}
+
+void ASTDerefExp::setParenthesization(bool parenthesization) {
+    isParenthesized = parenthesization;
 }
 
 void ASTDerefExp::print(std::ostream & ss) {

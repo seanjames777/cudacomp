@@ -18,6 +18,17 @@ void yyerror(Parser::ParserArgs *args, const char *str) {
     throw Parser::ParseException(ss.str());
 }
 
+void checkParenthesization(ASTExpNode *exp) {
+    if (ASTDerefExp *dExp = dynamic_cast<ASTDerefExp*>(exp))
+        if (!dExp->getParenthesization())
+            throw Parser::ParseException("*a++ or *a-- error");
+}
+
+void setParenthesized(ASTExpNode *exp) {
+    if (ASTDerefExp *dExp = dynamic_cast<ASTDerefExp*>(exp)) 
+      dExp->setParenthesization(true);
+}
+
 %}
 
 // Note: We can't return anything, so we need to use a pointer to a shared
@@ -139,9 +150,9 @@ exp:
   | STAR exp %prec UNARY              { $$ = new ASTDerefExp(std::shared_ptr<ASTExpNode>($2)); }
   | MINUS exp %prec UNARY             { $$ = new ASTUnopExp(ASTUnopExp::NEG, std::shared_ptr<ASTExpNode>($2)); }
   | IDENT dim_arg_list_opt LPAREN arg_list RPAREN
-    { $$ = new ASTCallExp(std::string($1), std::shared_ptr<ASTExpSeqNode>($2), std::shared_ptr<ASTExpSeqNode>($4)); free($1); }
+  { $$ = new ASTCallExp(std::string($1), std::shared_ptr<ASTExpSeqNode>($2), std::shared_ptr<ASTExpSeqNode>($4)); free($1); }
   | IDENT                             { $$ = new ASTIdentifierExp(std::string($1)); free($1); }
-  | LPAREN exp RPAREN                 { $$ = $2; }
+  | LPAREN exp RPAREN                 { setParenthesized($2); $$ = $2; }
   | exp LBRACKET exp RBRACKET         { $$ = new ASTIndexExp(std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | ALLOC_ARRAY LPAREN type COMMA exp RPAREN
     { $$ = new ASTAllocArrayExp(std::shared_ptr<ASTTypeNode>($3), std::shared_ptr<ASTExpNode>($5)); }
@@ -187,8 +198,8 @@ simp:
   | exp ANDEQ exp                     { $$ = new ASTAssignStmt(ASTBinopExp::BAND, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp OREQ exp                      { $$ = new ASTAssignStmt(ASTBinopExp::BOR, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
   | exp XOREQ exp                     { $$ = new ASTAssignStmt(ASTBinopExp::BXOR, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>($3)); }
-  | exp INCR                          { $$ = new ASTAssignStmt(ASTBinopExp::ADD, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>(new ASTIntegerExp(1))); }
-  | exp DECR                          { $$ = new ASTAssignStmt(ASTBinopExp::SUB, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>(new ASTIntegerExp(1))); }
+  | exp INCR                          { checkParenthesization($1); $$ = new ASTAssignStmt(ASTBinopExp::ADD, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>(new ASTIntegerExp(1))); }
+  | exp DECR                          { checkParenthesization($1); $$ = new ASTAssignStmt(ASTBinopExp::SUB, std::shared_ptr<ASTExpNode>($1), std::shared_ptr<ASTExpNode>(new ASTIntegerExp(1))); }
   | exp                               { $$ = new ASTExprStmt(std::shared_ptr<ASTExpNode>($1)); }
   ;
 

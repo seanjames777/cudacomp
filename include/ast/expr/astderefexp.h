@@ -19,6 +19,7 @@ class ASTDerefExp : public ASTExpNode {
 private:
 
     std::shared_ptr<ASTExpNode> exp;
+    bool isParenthesized;
 
 public:
 
@@ -38,6 +39,16 @@ public:
      * @brief Get right-hand expression
      */
     std::shared_ptr<ASTExpNode> getExp();
+
+    /**
+     * @brief Gets if this dereference was bound by parens in parsing
+     */
+    bool getParenthesization();
+
+    /**
+     * @brief Sets if this dereference was bound by parens in parsing.
+     */
+    void setParenthesization(bool isParenthesized);
 
     /**
      * @copydoc ASTNode::print
