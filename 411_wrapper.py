@@ -43,9 +43,7 @@ for arg in sys.argv:
 
 # Runs shell commands
 def run_shell(command):
-    env = dict(os.environ)
-    env["LD_LIBRARY_PATH"] = "llvm/lib/"
-    proc = subprocess.Popen (command, stdout=subprocess.PIPE, env=env)
+    proc = subprocess.Popen (command, stdout=subprocess.PIPE)
     stat = proc.wait()
 
     while True:

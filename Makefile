@@ -18,36 +18,17 @@ BISON := bison
 CPPFLAGS := \
 	-I./ \
 	-I./include/ \
-	-I./llvm/include/ \
 	-std=c++11 \
-	-Wno-deprecated-register \
-	-DNDEBUG -D_GNU_SOURCE \
-	-D__STDC_CONSTANT_MACROS \
-	-D__STDC_FORMAT_MACROS \
-	-D__STDC_LIMIT_MACROS \
+	$(shell llvm-config --cxxflags) \
+	-frtti \
+	-fexceptions \
 	-O3 \
-	-pipe \
-	-Wall \
-	-Wp,-D_FORTIFY_SOURCE=2 \
-	-fstack-protector \
-	--param=ssp-buffer-size=4 \
-	-m64 \
-	-mtune=generic \
-	-fomit-frame-pointer \
-	-fvisibility-inlines-hidden \
-	-fPIC \
-	-Woverloaded-virtual \
-	-Wcast-qual
+	-Wno-deprecated-register
 
 LDFLAGS := \
-	-L ./llvm/lib/ \
-	-lpthread \
-	-lffi \
-	-ltinfo \
-	-lrt \
-	-ldl \
-	-lm \
-	-lLLVM-3.4
+	$(shell llvm-config --ldflags) \
+	$(shell llvm-config --libs) \
+	$(shell llvm-config --system-libs)
 
 OBJ := obj
 BIN := bin
@@ -150,6 +131,7 @@ $(BIN)/cc: $(OBJS)
 	$(CPP) $(LDFLAGS) -o $@ $(OBJS)
 
 l4c: DIRECTORIES $(BIN)/cc
+	llvm-config --version
 	clang -S -emit-llvm -o l4lib.ll -c l4lib.c
 	cp 411_wrapper.py $(BIN)/l4c
 
