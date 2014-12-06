@@ -21,11 +21,11 @@ void yyerror(Parser::ParserArgs *args, const char *str) {
 void checkParenthesization(ASTExpNode *exp) {
     if (ASTDerefExp *dExp = dynamic_cast<ASTDerefExp*>(exp))
         if (!dExp->getParenthesization())
-            throw Parser::ParseException("*a++ or *a-- error");
+            throw Parser::ParseException("Attempted to increment or decrement an lvalue dereference");
 }
 
 void setParenthesized(ASTExpNode *exp) {
-    if (ASTDerefExp *dExp = dynamic_cast<ASTDerefExp*>(exp)) 
+    if (ASTDerefExp *dExp = dynamic_cast<ASTDerefExp*>(exp))
       dExp->setParenthesization(true);
 }
 
