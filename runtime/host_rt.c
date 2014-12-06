@@ -5,6 +5,9 @@
 extern int _cc_main();
 
 void *_rt_alloc_array(int elemSize, int length) {
+    if (length < 0)
+        raise(SIGSEGV);
+
     char *buff = (char *)calloc(1, elemSize * length + 8);
 
     *((int *)&buff[0]) = length;
@@ -19,7 +22,7 @@ void _rt_array_bounds_check(char *array, int idx) {
     int len = *((int *)&array[-8]);
 
     // Handles negative as well
-    if ((unsigned int)idx > len)
+    if ((unsigned int)idx >= len)
         raise(SIGSEGV);
 }
 
@@ -39,7 +42,7 @@ void _rt_div_check(int n, int d) {
 
 void _rt_shift_check(int s) {
     // Handles negative as well
-    if ((unsigned int)s > 31)
+    if ((unsigned int)s >= 32)
         raise(SIGFPE);
 }
 
