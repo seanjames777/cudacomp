@@ -46,6 +46,8 @@ void ASTPrint::enter(std::shared_ptr<ASTNode> node) {
 
     color(6);
     out << nodeName << " ";
+    color(0);
+    out << "<" << node << "> ";
     color(1);
     out << "(";
     color(7);

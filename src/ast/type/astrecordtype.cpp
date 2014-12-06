@@ -29,7 +29,8 @@ std::shared_ptr<ASTArgNode> ASTRecordType::getField(std::string id) {
 
         my_fields = my_fields->getTail();
     }
-    throw std::runtime_error("Field does not exist");
+
+    throw std::runtime_error("Field '" + id + "' does not exist");
 }
 
 void ASTRecordType::setFields(std::shared_ptr<ASTArgSeqNode> f) {
@@ -48,7 +49,7 @@ int ASTRecordType::getFieldIndex(std::string field_id) {
         f = f->getTail();
         idx++;
     }
-    throw std::runtime_error("Field does not exist");
+    throw std::runtime_error("Field '" + field_id + "'' does not exist");
 }
 
 bool ASTRecordType::equal(std::shared_ptr<ASTTypeNode> other_type) {
@@ -67,5 +68,18 @@ bool ASTRecordType::equal(std::shared_ptr<ASTTypeNode> other_type) {
 }
 
 void ASTRecordType::print(std::ostream & ss) {
-    ss << id;
+    ss << "struct " << id << " {";
+
+    std::shared_ptr<ASTArgSeqNode> fl = fields;
+
+    while (fl != nullptr) {
+        std::cout << fl->getHead()->getName();
+
+        if (fl->getTail() != nullptr)
+            std::cout << ", ";
+
+        fl = fl->getTail();
+    }
+
+    std::cout << "}";
 }

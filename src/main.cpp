@@ -52,27 +52,22 @@ int main(int argc, char *argv[]) {
             std::shared_ptr<ASTDeclSeqNode> parsed = Parser::parse(header, true);
             ast = append(ast, parsed);
         }
-        catch (Parser::ParseException & except) {
+        catch (std::runtime_error & except) {
             std::cout << "\033[31;1m" << except.what() << "\033[0m" << std::endl;
             return -1;
         }
     }
 
     if (args->verbose)
-            std::cout << "Parse '" << args->in_file << "'" << std::endl;
+        std::cout << "Parse '" << args->in_file << "'" << std::endl;
 
     try {
         std::shared_ptr<ASTDeclSeqNode> parsed = Parser::parse(args->in_file, false);
         ast = append(ast, parsed);
     }
-    catch (Parser::ParseException & except) {
+    catch (std::runtime_error & except) {
         std::cout << "\033[31;1m" << except.what() << "\033[0m" << std::endl;
         return -1;
-    }
-
-    if (args->print_ast) {
-        ASTPrint print(std::cout, true);
-        print.run(ast);
     }
 
     std::shared_ptr<ModuleInfo> moduleInfo;
@@ -80,9 +75,21 @@ int main(int argc, char *argv[]) {
     try {
         moduleInfo = Statics::run(ast);
     }
-    catch (Statics::StaticsException & except) {
+    catch (std::runtime_error & except) {
         std::cout << "\033[31;1m" << except.what() << "\033[0m" << std::endl;
+
+        if (args->print_ast) {
+            std::cout << "\033[31;1m" << "Partial AST:" << "\033[0m" << std::endl;
+            ASTPrint print(std::cout, true);
+            print.run(ast);
+        }
+
         return -1;
+    }
+
+    if (args->print_ast) {
+        ASTPrint print(std::cout, true);
+        print.run(ast);
     }
 
     if (!args->emit_device) {

@@ -60,7 +60,7 @@ void setParenthesized(ASTExpNode *exp) {
 %token <float32> FLOAT32
 %token <string> IDENT IDTYPE
 %token <boolean> TRUE FALSE
-%token PLUS MINUS DIV TIMES MOD SHL SHR AND OR BAND BOR BXOR NOT BNOT UNARY
+%token PLUS MINUS DIV MOD SHL SHR AND OR BAND BOR BXOR NOT BNOT UNARY
 %token ASSIGN SEMI COMMA LBRACKET RBRACKET INCR DECR DOT ARROW
 %token INT BOOL VOID FLOAT
 %token RETURN IF ELSE TYPEDEF WHILE EXTERN ALLOC_ARRAY COLON FOR ALLOC QUESTION
@@ -79,10 +79,8 @@ void setParenthesized(ASTExpNode *exp) {
 %type <top_seq> top_list
 %type <top> fundecl typedecl structdecl
 %type <exp_seq> arg_list arg_list_follow dim_arg_list_opt
-%type <linkage> linkage
 
 %right ASSIGN PLUSEQ MINUSEQ TIMESEQ DIVEQ MODEQ SALEQ SAREQ OREQ ANDEQ XOREQ
-%left TO
 %right QUESTION COLON
 %left OR
 %left AND
@@ -179,6 +177,7 @@ type:
 simpopt:
     /* empty */                       { $$ = nullptr; }
   | simp                              { $$ = $1; }
+  ;
 
 simp:
     type IDENT                        { $$ = new ASTVarDeclStmt(std::shared_ptr<ASTTypeNode>($1), std::string($2), nullptr); free($2); }
@@ -240,34 +239,29 @@ typedecl:
     }
   ;
 
-linkage:
-    /* empty */                       { $$ = ASTDeclNode::Internal; }
-  | EXTERN                            { $$ = ASTDeclNode::External; }
-  ;
-
 fundecl:
-    linkage type IDENT dim_param_list_opt LPAREN param_list RPAREN LBRACE stmt_list RBRACE
+    type IDENT dim_param_list_opt LPAREN param_list RPAREN LBRACE stmt_list RBRACE
     {
-        $$ = new ASTFunDecl(std::string($3),
-                 std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($2),
-                 std::shared_ptr<ASTArgSeqNode>($4),
-                 std::shared_ptr<ASTArgSeqNode>($6)),
+        $$ = new ASTFunDecl(std::string($2),
+                 std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($1),
+                 std::shared_ptr<ASTArgSeqNode>($3),
+                 std::shared_ptr<ASTArgSeqNode>($5)),
                  true,
-                 args->header ? ASTDeclNode::External : $1,
-                 std::shared_ptr<ASTStmtSeqNode>($9));
-        free($3);
+                 ASTDeclNode::Internal,
+                 std::shared_ptr<ASTStmtSeqNode>($8));
+        free($2);
     }
-  | linkage type IDENT dim_param_list_opt LPAREN param_list RPAREN SEMI
+  | type IDENT dim_param_list_opt LPAREN param_list RPAREN SEMI
     {
         $$ = new ASTFunDecl(
-                 std::string($3),
-                 std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($2),
-                 std::shared_ptr<ASTArgSeqNode>($4),
-                 std::shared_ptr<ASTArgSeqNode>($6)),
+                 std::string($2),
+                 std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($1),
+                 std::shared_ptr<ASTArgSeqNode>($3),
+                 std::shared_ptr<ASTArgSeqNode>($5)),
                  false,
-                 args->header ? ASTDeclNode::External : $1,
+                 ASTDeclNode::Internal,
                  nullptr);
-                 free($3);
+                 free($2);
     }
   ;
 

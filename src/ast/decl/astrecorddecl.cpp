@@ -30,21 +30,5 @@ bool ASTRecordDecl::isDefn() {
 
 void ASTRecordDecl::print(std::ostream & ss) {
     ss << "struct ";
-
     ss << name;
-
-    ss << "{";
-
-    std::shared_ptr<ASTArgSeqNode> field = sig->getFields();
-
-    while (field != nullptr) {
-        field->print(ss);
-
-        field = field->getTail();
-
-        if (field != nullptr)
-            ss << ", ";
-    }
-
-    ss << "}";
 }

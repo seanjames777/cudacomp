@@ -33,4 +33,7 @@ void ASTIdentifierExp::setIsLValue(bool lvalue) {
 
 void ASTIdentifierExp::print(std::ostream & ss) {
     ss << value;
+
+    if (lvalue)
+        ss << ", lvalue";
 }

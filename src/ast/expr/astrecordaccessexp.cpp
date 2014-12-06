@@ -22,4 +22,5 @@ std::string ASTRecordAccessExp::getId() {
 }
 
 void ASTRecordAccessExp::print(std::ostream & ss) {
+    ss << id;
 }

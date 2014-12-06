@@ -23,7 +23,7 @@ int comment_depth = 0;
 %%
 
 "/*"                    { BEGIN(COMMENT); comment_depth++; }
-<COMMENT>[^\n*/]*         /* ignore */
+<COMMENT>[^\n*/]*       /* ignore */
 <COMMENT>"\n"           { line_num++; }
 <COMMENT>"/*"           { comment_depth++; }
 <COMMENT>"*/"           { if (--comment_depth == 0) { BEGIN(INITIAL); } }

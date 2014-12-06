@@ -78,16 +78,6 @@ public:
      * @copydoc ASTNode::print
      */
     virtual void print(std::ostream & ss) override {
-        ss << "seq(";
-        getHead()->print(ss);
-        ss << "," << std::endl;
-
-        if (getTail())
-            getTail()->print(ss);
-        else
-            ss << "null";
-
-        ss << ")";
     }
 
 };
