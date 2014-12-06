@@ -482,7 +482,7 @@ void typecheck_stmt(
                 // Nothing to do
             }
             // Must return the correct type
-            if (!exp_type->equal(expected))
+            else if (!exp_type->equal(expected))
                 throw IllegalTypeException();
         }
     }
