@@ -5,6 +5,9 @@
 extern int _cc_main();
 
 void *_rt_alloc_array(int elemSize, int length) {
+    if (length < 0)
+        raise(SIGSEGV);
+
     char *buff = (char *)calloc(1, elemSize * length + 8);
 
     *((int *)&buff[0]) = length;
