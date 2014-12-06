@@ -1,41 +1,20 @@
-   ../tests1/apatosaurus-struct-def-late.l4
-   ../tests1/arsenic-struct_link.l4
-   ../tests1/arwen-color-graph.l4
    ../tests1/beorn-heh-trees.l4
-   ../tests1/brachiosaurus-struct-little-test.l4
    ../tests1/cobalt-return02.l4
    ../tests1/cobalt-return13.l4
-   ../tests1/colorado-return03.l4
    ../tests1/diplodocus-ll.l4
    ../tests1/galimimus-bst.l4
-   ../tests1/illinois-elaboration-is-da-winnamon.l4
-   ../tests1/illinois-in-struct-ion-selection.l4
-   ../tests1/intmap.l4
    ../tests1/kestrel-ski1.l4
    ../tests1/lead-21-benoit.l4
-   ../tests1/magnesium-types.l4
    ../tests1/maine-sudoku.l4
    ../tests1/merlin-return-binary-tree-inorder.l4
    ../tests1/merlin-return-hashtable.l4
-   ../tests1/minnesota-convoluted-edge-cases.l4
-   ../tests1/minnesota-nested-structs.l4
-   ../tests1/monoclonius-val5.l4
-   ../tests1/monoclonius-val6.l4
    ../tests1/newyork-testBinTreeSort.l4
-   ../tests1/oklahoma-return01.l4
    ../tests1/osmium-parsley.l4
    ../tests1/radium-lcss.l4
-   ../tests1/radium-ret02.l4
    ../tests1/strontium-09-typechecking-is-overrated.l4
-   ../tests1/struct-forward.l4
-   ../tests1/styracosaurus-namespace.l4
    ../tests1/theoden-climbed-a-tree.l4
    ../tests1/thorin-heapsort.l4
-   ../tests1/thorin-structofstruct2.l4
    ../tests1/titanium-hull.l4
-   ../tests1/tungsten-return03.l4
-   ../tests1/utah-lvalduction.l4
-   ../tests1/utah-nesting-nests.l4
    ../tests1/velociraptor-heap-heap-hooray.l4
    ../tests1/velociraptor-ordered-vector.l4
    ../tests1/velociraptor-persis-tree.l4
@@ -45,14 +24,10 @@
    ../tests1/wisconsin-test-pointer.l4
    ../tests1/wyoming-return08.l4
    ../tests1/zirconium-return-brainfuck.l4
-   ../tests2/brachiosaurus-struct-little-test2.l4
-   ../tests2/galimimus-left-right-eval1.l4
-   ../tests2/illinois-dealloc-default.l4
-   ../tests2/indiana-orbHammer.l4
-   ../tests2/michigan-error03.l4
-   ../tests2/northcarolina-dots.l4
-   ../tests2/utah-exception3.l4
-   ../tests2/utah-null-check.l4
-   ../tests2/wyoming-exception02.l4
    ../tests2/copper-error03.l4
    ../tests2/idaho-error-struct3.l4
+   ../tests2/galimimus-left-right-eval1.l4
+   ../tests2/illinois-dealloc-default.l4
+   ../tests2/michigan-error03.l4
+   ../tests2/utah-exception3.l4
+   ../tests2/wyoming-exception02.l4
