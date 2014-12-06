@@ -22,7 +22,7 @@ std::shared_ptr<ASTTypeNode> TypeResolve::resolveType(std::shared_ptr<ASTTypeNod
         ptr_type->setToType(resolveType(ptr_type->getToType()));
         return ptr_type;
     }
-    // Resolve the element type for arrays. TODO: test this
+    // Resolve the element type for arrays.
     else if (std::shared_ptr<ASTArrType> arr_type = std::dynamic_pointer_cast<ASTArrType>(type)) {
         arr_type->setElemType(resolveType(arr_type->getElemType()));
         return arr_type;
@@ -56,7 +56,7 @@ void TypeResolve::visitRecordType(std::shared_ptr<ASTRecordType> type) {
     // We don't want to resolve any children ; we use cached thing
     // TODO: cached thing?
     resolveType(type);
-    //ASTVisitor::visitTypeNode(type);
+    ASTVisitor::visitRecordType(type);
 }
 
 void TypeResolve::visitTypeNode(std::shared_ptr<ASTTypeNode> type) {
