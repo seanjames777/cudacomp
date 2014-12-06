@@ -386,6 +386,10 @@ void typecheck_stmt(
             std::shared_ptr<ASTTypeNode> lhs_type = typecheck_exp(mod, func, ptr_exp);
             std::shared_ptr<ASTTypeNode> rhs_type = typecheck_exp(mod, func, defn_stmt->getExp());
 
+            // We can't assign a type to *null, *(true ? null : null), etc.
+            if (rhs_type->equal(ASTPtrType::getNullPtr()))
+                throw IllegalTypeException();
+
             // TODO: check to ensure no struct
             if (!lhs_type->equal(rhs_type))
                 throw IllegalTypeException();
