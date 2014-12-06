@@ -71,7 +71,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
     // Array subscript
     else if (std::shared_ptr<ASTIndexExp> idx_exp = std::dynamic_pointer_cast<ASTIndexExp>(node)) {
         std::shared_ptr<ASTTypeNode> lhs_type = typecheck_exp(mod, func, lval, idx_exp->getLValue());
-        std::shared_ptr<ASTTypeNode> sub_type = typecheck_exp(mod, func, lval, idx_exp->getSubscript());
+        std::shared_ptr<ASTTypeNode> sub_type = typecheck_exp(mod, func, false, idx_exp->getSubscript());
 
         // Right hand side must be an integer
         if (!sub_type->equal(ASTIntegerType::get()))
@@ -126,7 +126,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
     // Unary operator
     else if (std::shared_ptr<ASTUnopExp> unop_exp = std::dynamic_pointer_cast<ASTUnopExp>(node)) {
         // Get operand types
-        std::shared_ptr<ASTTypeNode> exp_type = typecheck_exp(mod, func, lval, unop_exp->getExp());
+        std::shared_ptr<ASTTypeNode> exp_type = typecheck_exp(mod, func, false, unop_exp->getExp());
 
         // Types must be appropriate for operation
         switch(unop_exp->getOp()) {
@@ -148,8 +148,8 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
     // Binary operator
     else if (std::shared_ptr<ASTBinopExp> binop_exp = std::dynamic_pointer_cast<ASTBinopExp>(node)) {
         // Get operand types
-        std::shared_ptr<ASTTypeNode> t1 = typecheck_exp(mod, func, lval, binop_exp->getE1());
-        std::shared_ptr<ASTTypeNode> t2 = typecheck_exp(mod, func, lval, binop_exp->getE2());
+        std::shared_ptr<ASTTypeNode> t1 = typecheck_exp(mod, func, false, binop_exp->getE1());
+        std::shared_ptr<ASTTypeNode> t2 = typecheck_exp(mod, func, false, binop_exp->getE2());
 
         // Types must be appropriate for operation
         switch(binop_exp->getOp()) {
@@ -274,14 +274,14 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
     // Ternary operator
     else if (std::shared_ptr<ASTTernopExp> tern_exp = std::dynamic_pointer_cast<ASTTernopExp>(node)) {
         // Condition must be a boolean
-        std::shared_ptr<ASTTypeNode> condType = typecheck_exp(mod, func, lval, tern_exp->getCond());
+        std::shared_ptr<ASTTypeNode> condType = typecheck_exp(mod, func, false, tern_exp->getCond());
 
         if (!condType->equal(ASTBooleanType::get()))
             throw IllegalTypeException();
 
         // Each side must have the same type
-        std::shared_ptr<ASTTypeNode> leftType = typecheck_exp(mod, func, lval, tern_exp->getTrueExp());
-        std::shared_ptr<ASTTypeNode> rightType = typecheck_exp(mod, func, lval, tern_exp->getFalseExp());
+        std::shared_ptr<ASTTypeNode> leftType = typecheck_exp(mod, func, false, tern_exp->getTrueExp());
+        std::shared_ptr<ASTTypeNode> rightType = typecheck_exp(mod, func, false, tern_exp->getFalseExp());
 
         // Treat pointer types carefully
         if (std::shared_ptr<ASTPtrType> ptrType1 = std::dynamic_pointer_cast<ASTPtrType>(leftType)) {
@@ -351,7 +351,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             else if (args == nullptr && exprs == nullptr)
                 break;
 
-            std::shared_ptr<ASTTypeNode> exp_type = typecheck_exp(mod, func, lval, exprs->getHead());
+            std::shared_ptr<ASTTypeNode> exp_type = typecheck_exp(mod, func, false, exprs->getHead());
             std::shared_ptr<ASTTypeNode> arg_type = args->getHead()->getType();
 
             // The expression might be null, which is OK if the argument is a pointer type
@@ -375,7 +375,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             throw IllegalTypeException();
 
         // Size must be an integer
-        std::shared_ptr<ASTTypeNode> sizeType = typecheck_exp(mod, func, lval, alloc_exp->getLength());
+        std::shared_ptr<ASTTypeNode> sizeType = typecheck_exp(mod, func, false, alloc_exp->getLength());
 
         if (!sizeType->equal(ASTIntegerType::get()))
             throw IllegalTypeException();
