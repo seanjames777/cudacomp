@@ -15,25 +15,22 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
 {
     // Integer constant
     if (std::shared_ptr<ASTIntegerExp> int_exp = std::dynamic_pointer_cast<ASTIntegerExp>(node))
-        return ASTIntegerType::get();
+        node->setType(ASTIntegerType::get());
     // Boolean constant
     else if (std::shared_ptr<ASTBooleanExp> bool_exp = std::dynamic_pointer_cast<ASTBooleanExp>(node))
-        return ASTBooleanType::get();
+        node->setType(ASTBooleanType::get());
+    // Float constant
     else if (std::shared_ptr<ASTFloatExp> float_exp = std::dynamic_pointer_cast<ASTFloatExp>(node))
-        return ASTFloatType::get();
+        node->setType(ASTFloatType::get());
+    else if (std::shared_ptr<ASTNullExp> null_exp = std::dynamic_pointer_cast<ASTNullExp>(node))
+        node->setType(std::make_shared<ASTPtrType>(nullptr));
     // Variable reference
-    else if (std::shared_ptr<ASTIdentifierExp> id_exp = std::dynamic_pointer_cast<ASTIdentifierExp>(node)) {
-        std::shared_ptr<ASTTypeNode> type = func->getLocalType(id_exp->getId());
-        assert(type);
-
-        return type;
-    }
+    else if (std::shared_ptr<ASTIdentifierExp> id_exp = std::dynamic_pointer_cast<ASTIdentifierExp>(node))
+        node->setType(func->getLocalType(id_exp->getId()));
     // Array subscript
     else if (std::shared_ptr<ASTIndexExp> idx_exp = std::dynamic_pointer_cast<ASTIndexExp>(node)) {
         std::shared_ptr<ASTTypeNode> lhs_type = typecheck_exp(mod, func, idx_exp->getLValue());
         std::shared_ptr<ASTTypeNode> sub_type = typecheck_exp(mod, func, idx_exp->getSubscript());
-
-        // TODO test the following cases:
 
         // Right hand side must be an integer
         if (!sub_type->equal(ASTIntegerType::get()))
@@ -41,38 +38,39 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
 
         // Left hand side must be an array
         if (std::shared_ptr<ASTArrType> lhs_arr = std::dynamic_pointer_cast<ASTArrType>(lhs_type))
-            return lhs_arr->getElemType();
+            node->setType(lhs_arr->getElemType());
         else
             throw IllegalTypeException();
     }
     // Pointer dereference
     else if (std::shared_ptr<ASTDerefExp> ptr_exp = std::dynamic_pointer_cast<ASTDerefExp>(node)) {
-
         std::shared_ptr<ASTTypeNode> subexp_type = typecheck_exp(mod, func, ptr_exp->getExp());
 
         // The sub-exp type must be a pointer
         if (std::shared_ptr<ASTPtrType> sub_ptr = std::dynamic_pointer_cast<ASTPtrType>(subexp_type))
-            return sub_ptr->getToType();
+            node->setType(sub_ptr->getToType());
         else
             throw IllegalTypeException();
     }
     // Unary operator
     else if (std::shared_ptr<ASTUnopExp> unop_exp = std::dynamic_pointer_cast<ASTUnopExp>(node)) {
         // Get operand types
-        std::shared_ptr<ASTTypeNode> t = typecheck_exp(mod, func, unop_exp->getExp());
+        std::shared_ptr<ASTTypeNode> exp_type = typecheck_exp(mod, func, unop_exp->getExp());
 
         // Types must be appropriate for operation
         switch(unop_exp->getOp()) {
         case ASTUnopExp::NOT:
-            if (!t->equal(ASTBooleanType::get()))
+            if (!exp_type->equal(ASTBooleanType::get()))
                 throw IllegalTypeException();
-            return t;
+            else
+                node->setType(exp_type);
             break;
         case ASTUnopExp::BNOT:
         case ASTUnopExp::NEG:
-            if (!t->equal(ASTIntegerType::get()))
+            if (!exp_type->equal(ASTIntegerType::get()))
                 throw IllegalTypeException();
-            return t;
+            else
+                node->setType(exp_type);
             break;
         }
     }
@@ -91,18 +89,13 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         case ASTBinopExp::MOD:
             if (!t1->equal(t2))
                 throw IllegalTypeException();
-
-            if (t1->equal(ASTIntegerType::get())) {
-                binop_exp->setType(ASTIntegerType::get());
-                return ASTIntegerType::get();
-            }
-
-            if (t1->equal(ASTFloatType::get())) {
-                binop_exp->setType(ASTFloatType::get());
-                return ASTFloatType::get();
-            }
-
-            throw IllegalTypeException();
+            else if (t1->equal(ASTIntegerType::get()))
+                node->setType(ASTIntegerType::get());
+            else if (t1->equal(ASTFloatType::get()))
+                node->setType(ASTFloatType::get());
+            else
+                throw IllegalTypeException();
+            break;
         case ASTBinopExp::SHL:
         case ASTBinopExp::SHR:
         case ASTBinopExp::BAND:
@@ -110,64 +103,53 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         case ASTBinopExp::BXOR:
             if (!t1->equal(t2))
                 throw IllegalTypeException();
-
-            if (t1->equal(ASTIntegerType::get())) {
-                binop_exp->setType(ASTIntegerType::get());
-                return ASTIntegerType::get();
-            }
-
-            throw IllegalTypeException();
+            else if (t1->equal(ASTIntegerType::get()))
+                node->setType(ASTIntegerType::get());
+            else
+                throw IllegalTypeException();
+            break;
         case ASTBinopExp::OR:
         case ASTBinopExp::AND:
-            if (!t1->equal(ASTBooleanType::get()) || !t2->equal(ASTBooleanType::get()))
+            if (!t1->equal(t2))
                 throw IllegalTypeException();
-
-            binop_exp->setType(ASTBooleanType::get());
-            return ASTBooleanType::get();
+            else if (t1->equal(ASTBooleanType::get()))
+                node->setType(ASTBooleanType::get());
+            else
+                throw IllegalTypeException();
+            break;
         case ASTBinopExp::LEQ:
         case ASTBinopExp::GEQ:
         case ASTBinopExp::LT:
         case ASTBinopExp::GT:
             if (!t1->equal(t2))
                 throw IllegalTypeException();
-
-            if (t1->equal(ASTIntegerType::get())) {
-                binop_exp->setType(ASTIntegerType::get());
-                return ASTBooleanType::get();
-            }
-
-            if (t1->equal(ASTFloatType::get())) {
-                binop_exp->setType(ASTFloatType::get());
-                return ASTBooleanType::get();
-            }
-
-            throw IllegalTypeException();
-        case ASTBinopExp::NONE: throw ASTMalformedException(); return nullptr;
+            else if (t1->equal(ASTIntegerType::get()))
+                node->setType(ASTBooleanType::get());
+            else if (t1->equal(ASTFloatType::get()))
+                node->setType(ASTBooleanType::get());
+            else
+                throw IllegalTypeException();
+            break;
+        case ASTBinopExp::NONE:
+            throw ASTMalformedException();
+            break;
         case ASTBinopExp::EQ:
         case ASTBinopExp::NEQ:
-            // Must have the same type
             if (!t1->equal(t2))
                 throw IllegalTypeException();
-
-            // Must be an 'equality type'
-            std::shared_ptr<ASTArrType> arrType = std::dynamic_pointer_cast<ASTArrType>(t1);
-
-            if (t1->equal(ASTIntegerType::get()) ||
-                t1->equal(ASTBooleanType::get()) ||
-                arrType)
-            {
-                // TODO could split out boolean type, etc.
-                binop_exp->setType(ASTIntegerType::get());
-                return ASTBooleanType::get();
-            }
-
-            if (t1->equal(ASTFloatType::get())) {
-                binop_exp->setType(ASTFloatType::get());
-                return ASTBooleanType::get();
-            }
-
-            throw IllegalTypeException();
-            return nullptr;
+            else if (t1->equal(ASTIntegerType::get()))
+                node->setType(ASTBooleanType::get());
+            else if (t1->equal(ASTFloatType::get()))
+                node->setType(ASTBooleanType::get());
+            else if (t1->equal(ASTBooleanType::get()))
+                node->setType(ASTBooleanType::get());
+            else if (std::shared_ptr<ASTArrType> arrType = std::dynamic_pointer_cast<ASTArrType>(t1))
+                node->setType(ASTBooleanType::get());
+            else if (std::shared_ptr<ASTPtrType> ptrType = std::dynamic_pointer_cast<ASTPtrType>(t1))
+                node->setType(ASTBooleanType::get());
+            else
+                throw IllegalTypeException();
+            break;
         }
     }
     // Ternary operator
@@ -189,9 +171,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         if (leftType->equal(ASTVoidType::get()))
             throw IllegalTypeException();
 
-        tern_exp->setType(leftType);
-
-        return leftType;
+        node->setType(leftType);
     }
     // Function call
     else if (std::shared_ptr<ASTCallExp> call_exp = std::dynamic_pointer_cast<ASTCallExp>(node)) {
@@ -214,9 +194,6 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             std::shared_ptr<ASTTypeNode> exp_type = typecheck_exp(mod, func, exprs->getHead());
             std::shared_ptr<ASTTypeNode> arg_type = args->getHead()->getType();
 
-            // TODO: test for void argument
-            // TODO: test for void alloc_array
-
             if (!exp_type->equal(arg_type))
                 throw IllegalTypeException();
 
@@ -224,10 +201,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             exprs = exprs->getTail();
         }
 
-        // TODO: test argument length mismatch, type mismatch, return type mismatch
-        // TODO: actually check that stuff here
-
-        return sig->getReturnType();
+        node->setType(sig->getReturnType());
     }
     // Array allocation
     else if (std::shared_ptr<ASTAllocArrayExp> alloc_exp = std::dynamic_pointer_cast<ASTAllocArrayExp>(node)) {
@@ -243,7 +217,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             throw IllegalTypeException();
 
         // Returns an array of elemTypes
-        return std::make_shared<ASTArrType>(elemType);
+        node->setType(std::make_shared<ASTArrType>(elemType));
     }
     // Heap allocation
     else if (std::shared_ptr<ASTAllocExp> alloc_exp = std::dynamic_pointer_cast<ASTAllocExp>(node)) {
@@ -255,7 +229,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             throw IllegalTypeException();
 
         // Returns a pointer to an elemType
-        return std::make_shared<ASTPtrType>(elemType);
+        node->setType(std::make_shared<ASTPtrType>(elemType));
     }
     // Record access
     else if (std::shared_ptr<ASTRecordAccessExp> record_exp = std::dynamic_pointer_cast<ASTRecordAccessExp>(node)) {
@@ -264,17 +238,16 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         std::string field_name = record_exp->getId();
 
         // This type needs to be a record
-        if (std::shared_ptr<ASTRecordType> record_type = std::dynamic_pointer_cast<ASTRecordType>(lvalue_type)) {
-            // Get field information about the type, find the type of field_name
-            record_exp->setType(record_type);
-            return record_type->getField(field_name)->getType();
-        }
+        if (std::shared_ptr<ASTRecordType> record_type = std::dynamic_pointer_cast<ASTRecordType>(lvalue_type))
+            node->setType(record_type->getField(field_name)->getType());
         else
             throw IllegalTypeException();
     }
+    else
+        throw ASTMalformedException();
 
-    throw ASTMalformedException();
-    return nullptr;
+    assert(node->getType() && "Did not synthesize a type for an expression");
+    return node->getType();
 }
 
 void typecheck_stmts(
@@ -326,8 +299,6 @@ void typecheck_stmt(
             // Must assign the same type
             if (!exp_type->equal(decl_type))
                 throw IllegalTypeException();
-
-            defn_stmt->setType(exp_type);
         }
         // Array subscript
         else if (std::shared_ptr<ASTIndexExp> idx_exp = std::dynamic_pointer_cast<ASTIndexExp>(defn_stmt->getLValue())) {
@@ -337,8 +308,6 @@ void typecheck_stmt(
             // Must assign the same type
             if (!lhs_type->equal(rhs_type))
                 throw IllegalTypeException();
-
-            defn_stmt->setType(rhs_type);
         }
         // Pointer dereference
         else if (std::shared_ptr<ASTDerefExp> ptr_exp = std::dynamic_pointer_cast<ASTDerefExp>(defn_stmt->getLValue())) {
@@ -348,8 +317,6 @@ void typecheck_stmt(
             // TODO: check to ensure no struct
             if (!lhs_type->equal(rhs_type))
                 throw IllegalTypeException();
-
-            defn_stmt->setType(rhs_type);
         }
         // Record access
         else if (std::shared_ptr<ASTRecordAccessExp> rcd_exp = std::dynamic_pointer_cast<ASTRecordAccessExp>(defn_stmt->getLValue())) {
@@ -359,8 +326,6 @@ void typecheck_stmt(
             // TODO: check to ensure no struct
             if (!lhs_type->equal(rhs_type))
                 throw IllegalTypeException();
-
-            defn_stmt->setType(rhs_type);
         }
         else throw IllegalLValueException();
     }

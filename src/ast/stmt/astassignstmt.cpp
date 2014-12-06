@@ -32,14 +32,6 @@ std::shared_ptr<ASTExpNode> ASTAssignStmt::getExp() {
     return exp;
 }
 
-std::shared_ptr<ASTTypeNode> ASTAssignStmt::getType() {
-    return type;
-}
-
-void ASTAssignStmt::setType(std::shared_ptr<ASTTypeNode> type) {
-    this->type = type;
-}
-
 void ASTAssignStmt::print(std::ostream & ss) {
     ASTBinopExp::printBinop(op, ss);
 }

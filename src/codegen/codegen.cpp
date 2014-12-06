@@ -63,7 +63,9 @@ Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNod
     // Record access
     else if (std::shared_ptr<ASTRecordAccessExp> rcd_exp = std::dynamic_pointer_cast<ASTRecordAccessExp>(node)) {
         Value *lhs = codegen_lvalue(ctx, rcd_exp->getLValue());
-        int field_idx = rcd_exp->getType()->getFieldIndex(rcd_exp->getId());
+        std::shared_ptr<ASTRecordType> recSig = std::static_pointer_cast<ASTRecordType>(
+            rcd_exp->getLValue()->getType());
+        int field_idx = recSig->getFieldIndex(rcd_exp->getId());
         return ctx->getBuilder()->CreateConstGEP2_32(lhs, 0, field_idx);
     }
     // Pointer dereference
@@ -177,10 +179,7 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         Value *v1 = codegen_exp(ctx, binop_exp->getE1());
         Value *v2 = codegen_exp(ctx, binop_exp->getE2());
 
-        std::shared_ptr<ASTTypeNode> type = binop_exp->getType();
-        assert(type);
-
-        return codegen_binop(ctx, binop_exp->getOp(), type, v1, v2);
+        return codegen_binop(ctx, binop_exp->getOp(), binop_exp->getE1()->getType(), v1, v2);
     }
     // Ternary operator
     else if (std::shared_ptr<ASTTernopExp> tern_exp = std::dynamic_pointer_cast<ASTTernopExp>(node)) {
@@ -432,10 +431,8 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
             Value *loadLVal = ctx->getBuilder()->CreateLoad(lval);
             Value *rhs = codegen_exp(ctx, decl_stmt->getExp());
 
-            std::shared_ptr<ASTTypeNode> type = decl_stmt->getType();
-            assert(type != nullptr);
-
-            Value *newVal = codegen_binop(ctx, decl_stmt->getOp(), type, loadLVal, rhs);
+            Value *newVal = codegen_binop(ctx, decl_stmt->getOp(),
+                decl_stmt->getExp()->getType(), loadLVal, rhs);
             ctx->getBuilder()->CreateStore(newVal, lval);
         }
     }

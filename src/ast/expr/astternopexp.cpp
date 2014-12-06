@@ -32,13 +32,5 @@ std::shared_ptr<ASTExpNode> ASTTernopExp::getFalseExp() {
     return eFalse;
 }
 
-std::shared_ptr<ASTTypeNode> ASTTernopExp::getType() {
-    return type;
-}
-
-void ASTTernopExp::setType(std::shared_ptr<ASTTypeNode> type) {
-    this->type = type;
-}
-
 void ASTTernopExp::print(std::ostream & ss) {
 }

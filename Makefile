@@ -11,17 +11,27 @@
 
 all: l4c
 
-CPP := g++
-FLEX := flex
-BISON := bison
+CXX ?= g++
+FLEX ?= flex
+BISON ?= bison
+OBJ ?= obj
+BIN ?= bin
+DEBUG ?= 0
 
 CPPFLAGS := \
 	-I./ \
 	-I./include/ \
+	-std=c++11 \
 	$(shell llvm-config --cxxflags) \
 	-fexceptions \
 	-frtti \
 	-Wno-deprecated-register
+
+ifeq ($(DEBUG), 1)
+	CPPFLAGS += -O0 -g
+else
+	CPPFLAGS += -O3
+endif
 
 LDFLAGS := \
 	$(shell llvm-config --ldflags)
@@ -29,9 +39,6 @@ LDFLAGS := \
 LIBS := \
 	$(shell llvm-config --libs) \
 	$(shell llvm-config --system-libs)
-
-OBJ := obj
-BIN := bin
 
 SOURCES := \
 	src/ast/astnode.cpp \
@@ -127,21 +134,21 @@ $(OBJS)/parser.o: | DIRECTORIES
 $(BIN)/cc: | DIRECTORIES
 
 $(OBJ)/%.d: src/%.cpp
-	$(CPP) $(CPPFLAGS) -MM -MT $(<:src/%.cpp=obj/%.o) -MF $@ $<
+	$(CXX) $(CPPFLAGS) -MM -MT $(<:src/%.cpp=obj/%.o) -MF $@ $<
 
 $(OBJ)/%.o: src/%.cpp $(OBJ)/%.d
-	$(CPP) $(CPPFLAGS) -o $@ -c $<
+	$(CXX) $(CPPFLAGS) -o $@ -c $<
 
 $(OBJ)/lexer.o: src/parser/lexer.l
 	$(FLEX) -o lexer.cpp src/parser/lexer.l
-	$(CPP) $(CPPFLAGS) -o $@ -c lexer.cpp
+	$(CXX) $(CPPFLAGS) -o $@ -c lexer.cpp
 
 $(OBJ)/parser.o: src/parser/parser.y
 	$(BISON) -v --defines=parser.hpp --output=parser.cpp src/parser/parser.y;
-	$(CPP) $(CPPFLAGS) -o $@ -c parser.cpp
+	$(CXX) $(CPPFLAGS) -o $@ -c parser.cpp
 
 $(BIN)/cc: $(OBJS)
-	$(CPP) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 l4c: $(BIN)/cc
 	clang -S -emit-llvm -o l4lib.ll -c l4lib.c

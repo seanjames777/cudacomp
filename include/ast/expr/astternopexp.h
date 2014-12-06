@@ -59,16 +59,6 @@ public:
     std::shared_ptr<ASTExpNode> getFalseExp();
 
     /**
-     * @brief Type of expression. Only valid after typechecking.
-     */
-    std::shared_ptr<ASTTypeNode> getType();
-
-    /**
-     * @brief Set expression type.
-     */
-    void setType(std::shared_ptr<ASTTypeNode> type);
-
-    /**
      * @copydoc ASTNode::print()
      */
     void print(std::ostream & ss) override;

@@ -21,13 +21,5 @@ std::string ASTRecordAccessExp::getId() {
     return id;
 }
 
-std::shared_ptr<ASTRecordType> ASTRecordAccessExp::getType() {
-    return type;
-}
-
-void ASTRecordAccessExp::setType(std::shared_ptr<ASTRecordType> t) {
-    type = t;
-}
-
 void ASTRecordAccessExp::print(std::ostream & ss) {
 }
