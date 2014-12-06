@@ -11,7 +11,7 @@ namespace Statics {
 // Sets the type of an expression, propogating through sub-expressions such as
 // the ternary operator. This is used to recursively set unknown types on
 // expressions such as NULL, for which a type cannot be immediately synthesized.
-void prop_type(std::shared_ptr<ASTExpNode> exp, std::shared_ptr<ASTTypeNode> type) {
+static void prop_type(std::shared_ptr<ASTExpNode> exp, std::shared_ptr<ASTTypeNode> type) {
     if (std::shared_ptr<ASTTernopExp> tern_exp = std::dynamic_pointer_cast<ASTTernopExp>(exp)) {
         tern_exp->setType(type);
         prop_type(tern_exp->getTrueExp(), type);
@@ -19,6 +19,31 @@ void prop_type(std::shared_ptr<ASTExpNode> exp, std::shared_ptr<ASTTypeNode> typ
     }
     else
         exp->setType(type);
+}
+
+// Typecheck an expression against an expected type, where the expression may
+// possible be a null pointer. If the expression is null, and the expected
+// type is a pointer type, the expression's type is set and propogated to the
+// expected type. Then returns true. Otherwise, returns false.
+static bool check_null(
+    std::shared_ptr<ASTExpNode> exp,
+    std::shared_ptr<ASTTypeNode> actual_type,
+    std::shared_ptr<ASTTypeNode> expected_type)
+{
+    // If the right handle side is NULL, then it's OK if we're assigning
+    // to a pointer.
+    if (actual_type->equal(ASTPtrType::getNullPtr())) {
+        std::shared_ptr<ASTPtrType> ptr_type = std::dynamic_pointer_cast<ASTPtrType>(expected_type);
+
+        if (!ptr_type)
+            throw IllegalTypeException();
+
+        prop_type(exp, expected_type);
+
+        return true;
+    }
+
+    return false;
 }
 
 std::shared_ptr<ASTTypeNode> typecheck_exp(
@@ -59,8 +84,11 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
     else if (std::shared_ptr<ASTDerefExp> ptr_exp = std::dynamic_pointer_cast<ASTDerefExp>(node)) {
         std::shared_ptr<ASTTypeNode> subexp_type = typecheck_exp(mod, func, ptr_exp->getExp());
 
+        // We can't assign a type to *null, *(true ? null : null), etc.
+        if (subexp_type->equal(ASTPtrType::getNullPtr()))
+            throw IllegalTypeException();
         // The sub-exp type must be a pointer
-        if (std::shared_ptr<ASTPtrType> sub_ptr = std::dynamic_pointer_cast<ASTPtrType>(subexp_type))
+        else if (std::shared_ptr<ASTPtrType> sub_ptr = std::dynamic_pointer_cast<ASTPtrType>(subexp_type))
             node->setType(sub_ptr->getToType());
         else
             throw IllegalTypeException();
@@ -255,7 +283,11 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             std::shared_ptr<ASTTypeNode> exp_type = typecheck_exp(mod, func, exprs->getHead());
             std::shared_ptr<ASTTypeNode> arg_type = args->getHead()->getType();
 
-            if (!exp_type->equal(arg_type))
+            // The expression might be null, which is OK if the argument is a pointer type
+            if (check_null(exprs->getHead(), exp_type, arg_type)) {
+                // Nothing to do
+            }
+            else if (!exp_type->equal(arg_type))
                 throw IllegalTypeException();
 
             args = args->getTail();
@@ -345,13 +377,8 @@ void typecheck_stmt(
 
             // If the right handle side is NULL, then it's OK if we're assigning
             // to a pointer.
-            if (exp_type->equal(ASTPtrType::getNullPtr())) {
-                std::shared_ptr<ASTPtrType> ptr_exp_type = std::dynamic_pointer_cast<ASTPtrType>(exp_type);
-
-                if (!ptr_exp_type)
-                    throw IllegalTypeException();
-
-                prop_type(decl_exp, decl_type);
+            if (check_null(decl_exp, exp_type, decl_type)) {
+                // Nothing to do
             }
             // Otherwise, the types must match
             else if (!exp_type->equal(decl_type))
@@ -363,47 +390,32 @@ void typecheck_stmt(
     }
     // Assignment. Mark as defined and check the rest of the code
     else if (std::shared_ptr<ASTAssignStmt> defn_stmt = std::dynamic_pointer_cast<ASTAssignStmt>(head)) {
+        std::shared_ptr<ASTTypeNode> lhs_type = nullptr;
+        std::shared_ptr<ASTTypeNode> rhs_type = typecheck_exp(mod, func, defn_stmt->getExp());
+
         // Simple variable
-        if (std::shared_ptr<ASTIdentifierExp> id_exp = std::dynamic_pointer_cast<ASTIdentifierExp>(defn_stmt->getLValue())) {
-            std::shared_ptr<ASTTypeNode> decl_type = func->getLocalType(id_exp->getId());
-            std::shared_ptr<ASTTypeNode> exp_type = typecheck_exp(mod, func, defn_stmt->getExp());
-
-            // Must assign the same type
-            if (!exp_type->equal(decl_type))
-                throw IllegalTypeException();
-        }
+        if (std::shared_ptr<ASTIdentifierExp> id_exp = std::dynamic_pointer_cast<ASTIdentifierExp>(defn_stmt->getLValue()))
+            lhs_type = func->getLocalType(id_exp->getId());
         // Array subscript
-        else if (std::shared_ptr<ASTIndexExp> idx_exp = std::dynamic_pointer_cast<ASTIndexExp>(defn_stmt->getLValue())) {
-            std::shared_ptr<ASTTypeNode> lhs_type = typecheck_exp(mod, func, idx_exp);
-            std::shared_ptr<ASTTypeNode> rhs_type = typecheck_exp(mod, func, defn_stmt->getExp());
-
-            // Must assign the same type
-            if (!lhs_type->equal(rhs_type))
-                throw IllegalTypeException();
-        }
+        else if (std::shared_ptr<ASTIndexExp> idx_exp = std::dynamic_pointer_cast<ASTIndexExp>(defn_stmt->getLValue()))
+            lhs_type = typecheck_exp(mod, func, idx_exp);
         // Pointer dereference
-        else if (std::shared_ptr<ASTDerefExp> ptr_exp = std::dynamic_pointer_cast<ASTDerefExp>(defn_stmt->getLValue())) {
-            std::shared_ptr<ASTTypeNode> lhs_type = typecheck_exp(mod, func, ptr_exp);
-            std::shared_ptr<ASTTypeNode> rhs_type = typecheck_exp(mod, func, defn_stmt->getExp());
-
-            // We can't assign a type to *null, *(true ? null : null), etc.
-            if (rhs_type->equal(ASTPtrType::getNullPtr()))
-                throw IllegalTypeException();
-
-            // TODO: check to ensure no struct
-            if (!lhs_type->equal(rhs_type))
-                throw IllegalTypeException();
-        }
+        else if (std::shared_ptr<ASTDerefExp> ptr_exp = std::dynamic_pointer_cast<ASTDerefExp>(defn_stmt->getLValue()))
+            lhs_type = typecheck_exp(mod, func, ptr_exp);
         // Record access
-        else if (std::shared_ptr<ASTRecordAccessExp> rcd_exp = std::dynamic_pointer_cast<ASTRecordAccessExp>(defn_stmt->getLValue())) {
-            std::shared_ptr<ASTTypeNode> lhs_type = typecheck_exp(mod, func, rcd_exp);
-            std::shared_ptr<ASTTypeNode> rhs_type = typecheck_exp(mod, func, defn_stmt->getExp());
+        else if (std::shared_ptr<ASTRecordAccessExp> rcd_exp = std::dynamic_pointer_cast<ASTRecordAccessExp>(defn_stmt->getLValue()))
+            lhs_type = typecheck_exp(mod, func, rcd_exp);
+        else
+            throw IllegalLValueException();
 
-            // TODO: check to ensure no struct
-            if (!lhs_type->equal(rhs_type))
-                throw IllegalTypeException();
+        // If the right handle side is NULL, then it's OK if we're assigning
+        // to a pointer.
+        if (check_null(defn_stmt->getExp(), rhs_type, lhs_type)) {
+            // Nothing to do
         }
-        else throw IllegalLValueException();
+        // Must assign the same type
+        else if (!rhs_type->equal(lhs_type))
+            throw IllegalTypeException();
     }
     // Return statement
     else if (std::shared_ptr<ASTReturnStmt> ret_node = std::dynamic_pointer_cast<ASTReturnStmt>(head)) {
@@ -423,6 +435,12 @@ void typecheck_stmt(
         if (ret_node->getExp()) {
             std::shared_ptr<ASTTypeNode> exp_type = typecheck_exp(mod, func, ret_node->getExp());
 
+            // If the right handle side is NULL, then it's OK if we're returning
+            // a pointer
+            if (check_null(ret_node->getExp(), exp_type, expected)) {
+                // Nothing to do
+            }
+            // Must return the correct type
             if (!exp_type->equal(expected))
                 throw IllegalTypeException();
         }

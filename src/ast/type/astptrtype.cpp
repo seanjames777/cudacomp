@@ -28,6 +28,8 @@ bool ASTPtrType::equal(std::shared_ptr<ASTTypeNode> other) {
     if (std::shared_ptr<ASTPtrType> other_ptr = std::dynamic_pointer_cast<ASTPtrType>(other)) {
         if (toType == nullptr && other_ptr->getToType() == nullptr)
             return true;
+        else if (toType == nullptr || other_ptr->getToType() == nullptr)
+            return false;
         else
             return toType->equal(other_ptr->getToType());
     }
