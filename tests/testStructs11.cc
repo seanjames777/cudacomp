@@ -3,9 +3,11 @@ struct foo {
 };
 
 int bar(struct foo *f) {
-    return 0;
+    return f->baz;
 }
 
 int _cc_main() {
-    return 1;
+    struct foo * f = alloc(struct foo);
+    f->baz = 1;
+    return bar(f);
 }

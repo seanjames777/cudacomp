@@ -8,6 +8,19 @@
 
 namespace Statics {
 
+// May be better named as isNonLargeType; returns true for void types
+bool isSmallType(std::shared_ptr<ASTTypeNode> node) {
+    if (std::shared_ptr<ASTRecordType> type = std::dynamic_pointer_cast<ASTRecordType>(node))
+        return false;
+    return true;
+}
+
+bool isSmallNonvoidType(std::shared_ptr<ASTTypeNode> node) {
+    if (std::shared_ptr<ASTVoidType> type = std::dynamic_pointer_cast<ASTVoidType>(node))
+        return false;
+    return isSmallType(node);
+}
+
 // Sets the type of an expression, propogating through sub-expressions such as
 // the ternary operator. This is used to recursively set unknown types on
 // expressions such as NULL, for which a type cannot be immediately synthesized.
@@ -407,7 +420,7 @@ void typecheck_stmt(
     if (std::shared_ptr<ASTVarDeclStmt> decl_stmt = std::dynamic_pointer_cast<ASTVarDeclStmt>(head)) {
         std::shared_ptr<ASTTypeNode> decl_type = decl_stmt->getType();
 
-        if (decl_type->equal(ASTVoidType::get()))
+        if (!isSmallNonvoidType(decl_type))
             throw IllegalTypeException();
 
         std::shared_ptr<ASTExpNode> decl_exp = decl_stmt->getExp();
@@ -547,8 +560,12 @@ void typecheck_stmt(
         typecheck_stmts(mod, func, for_node->getBody());
     }
     // Expression statement
-    else if (std::shared_ptr<ASTExprStmt> exp_stmt = std::dynamic_pointer_cast<ASTExprStmt>(head))
-        typecheck_exp(mod, func, exp_stmt->getExp());
+    else if (std::shared_ptr<ASTExprStmt> exp_stmt = std::dynamic_pointer_cast<ASTExprStmt>(head)) {
+        // The expression cannot be a large type
+        std::shared_ptr<ASTTypeNode> type = typecheck_exp(mod, func, exp_stmt->getExp());
+        if (!isSmallType(type))
+            throw IllegalTypeException();
+    }
     else
         throw ASTMalformedException();
 }
@@ -570,9 +587,14 @@ void typecheck_top(
     if (std::shared_ptr<ASTFunDecl> funDefn = std::dynamic_pointer_cast<ASTFunDecl>(node)) {
         std::shared_ptr<ASTFunType> sig = funDefn->getSignature();
 
+        // Function cannot have a large type return value
+        if (!isSmallType(sig->getReturnType()))
+                throw IllegalTypeException();
+
         // Make sure:
         //   - Arguments do not have the same name
         //   - Arguments do not have void type
+        //   - Arguments do not have large type
         SymbolSet argNames;
 
         std::shared_ptr<ASTArgSeqNode> args = sig->getArgs();
@@ -585,7 +607,7 @@ void typecheck_top(
             else
                 argNames.insert(arg->getName());
 
-            if (arg->getType()->equal(ASTVoidType::get()))
+            if (!isSmallNonvoidType(arg->getType()))
                 throw IllegalTypeException();
 
             args = args->getTail();

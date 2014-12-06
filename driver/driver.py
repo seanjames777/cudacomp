@@ -105,6 +105,8 @@ tests = [
     (SOURCE_DIR + "tests/testFunDecl11.cc", 5, "both"),
     (SOURCE_DIR + "tests/testFunDecl12.cc", "error", "both"),
     (SOURCE_DIR + "tests/testFunDecl13.cc", 518, "both"),
+    (SOURCE_DIR + "tests/testFunDecl14.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testFunDecl15.cc", "error", "both"),
     (SOURCE_DIR + "tests/testArr1.cc", 5, "both"),
     (SOURCE_DIR + "tests/testArr2.cc", 0, "both"),
     (SOURCE_DIR + "tests/testArr3.cc", 5, "both"),
@@ -140,6 +142,13 @@ tests = [
     (SOURCE_DIR + "tests/testStructs11.cc", 1, "both"),
     (SOURCE_DIR + "tests/testStructs12.cc", 1, "both"),
     (SOURCE_DIR + "tests/testStructs13.cc", 1, "both"),
+    (SOURCE_DIR + "tests/testStructs14.cc", 10, "both"),
+    (SOURCE_DIR + "tests/testStructs15.cc", 10, "both"),
+    (SOURCE_DIR + "tests/testStructs16.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testStructs17.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testStructs18.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testStructs19.cc", "error", "both"),
+    (SOURCE_DIR + "tests/testStructs20.cc", "error", "both"),
 ]
 
 # TODO: actually test type checking...

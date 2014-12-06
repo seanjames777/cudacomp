@@ -109,7 +109,6 @@ void TypeResolve::visitTypeDecl(std::shared_ptr<ASTTypeDecl> typeDecl) {
 }
 
 void TypeResolve::visitRecordDecl(std::shared_ptr<ASTRecordDecl> recordDecl) {
-
     // Nothing to do on a declaration without a definition
     if (!(recordDecl->isDefn()))
         return;
@@ -118,9 +117,6 @@ void TypeResolve::visitRecordDecl(std::shared_ptr<ASTRecordDecl> recordDecl) {
     if (module->getRecordType(recordDecl->getName()) != nullptr)
         throw RedeclaredTypeException(recordDecl->getName());
 
-    // TODO : FIX broken handling of recursive structs
-    // TODO : ensure no repeat field names, void fields
-
     std::string name = recordDecl->getName();
     module->addRecordType(name, recordDecl->getSignature());
     std::shared_ptr<ASTArgSeqNode> fields = recordDecl->getSignature()->getFields();
@@ -128,7 +124,9 @@ void TypeResolve::visitRecordDecl(std::shared_ptr<ASTRecordDecl> recordDecl) {
     ASTVisitor::visitArgSeqNode(fields);
     ASTVisitor::visitRecordDecl(recordDecl);
 
-    // Recursive or undefined structs yield exception
+    std::set<std::string> fieldNames;
+
+    // Check for self reference, undefined structs, repeat field names, and void fields
     while(fields) {
         std::shared_ptr<ASTArgNode> field = fields->getHead();
         if (std::shared_ptr<ASTRecordType> type = std::dynamic_pointer_cast<ASTRecordType>(field->getType())) {
@@ -137,6 +135,12 @@ void TypeResolve::visitRecordDecl(std::shared_ptr<ASTRecordDecl> recordDecl) {
             if(!module->getRecordType(type->getId()))
                 throw IllegalTypeException();
         }
+        if (std::shared_ptr<ASTVoidType> type = std::dynamic_pointer_cast<ASTVoidType>(field->getType()))
+            throw IllegalTypeException();
+        std::string name = field->getName();
+        if (fieldNames.find(name) != fieldNames.end())
+            throw RedeclaredIdentifierException(name);
+        fieldNames.insert(name);
         fields = fields->getTail();
     }
 
