@@ -46,7 +46,7 @@ private:
     std::shared_ptr<DataLayout>    layout;        // LLVM data layout
     bool                           emit_device;   // Should we emit GPU code
     SymbolTable<Function *>        functions;     // Mapping from function names to LLVM functions
-    SymbolTable<Type *>            records;       // Mapping from struct names to LLVM types
+    SymbolTable<StructType *>      records;       // Mapping from struct names to LLVM types
     std::shared_ptr<ModuleInfo>    modInfo;       // Information about module
     Function                      *alloc_array;   // Runtime alloc_array function
     Function                      *alloc;         // Runtime alloc function

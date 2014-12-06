@@ -391,7 +391,7 @@ void CodegenCtx::createRecord(std::shared_ptr<ASTRecordType> recordInfo){
     // TODO : evaluate possibility of undesirable name conflicts between "struct foo" and named type foo
     std::string name = recordInfo->getId();
     // Add opaque type for the recursive case
-    StructType *type = StructType::create(context, name);
+    StructType *type = records.hasSymbol(name) ? records.get(name) : StructType::create(context, name);
     records.set(name, type);
 
     std::vector<Type *> elems;
