@@ -253,14 +253,55 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         std::shared_ptr<ASTTypeNode> leftType = typecheck_exp(mod, func, tern_exp->getTrueExp());
         std::shared_ptr<ASTTypeNode> rightType = typecheck_exp(mod, func, tern_exp->getFalseExp());
 
-        if (!leftType->equal(rightType))
-            throw IllegalTypeException();
+        // Treat pointer types carefully
+        if (std::shared_ptr<ASTPtrType> ptrType1 = std::dynamic_pointer_cast<ASTPtrType>(leftType)) {
+            std::shared_ptr<ASTPtrType> ptrType2 = std::dynamic_pointer_cast<ASTPtrType>(rightType);
 
+            // Both sides must be pointer types
+            if (!ptrType2)
+                throw IllegalTypeException();
+
+            // If both sides have definite 'to' types, OK. If both sides do
+            // not, then both are null: also OK.
+            if (ptrType1->equal(ptrType2)) {
+                // If both are null, the whole thing is null
+                if (ptrType1->getToType() == nullptr)
+                    node->setType(ASTPtrType::getNullPtr());
+                // Otherwise, WLOG use the left type
+                else
+                    node->setType(ptrType1);
+            }
+            // If the types are not the same, and they are not both indefinite,
+            // then there's a pointer type mismatch
+            else if (ptrType1->getToType() != nullptr && ptrType2->getToType() != nullptr)
+                throw IllegalTypeException();
+            // Otherwise, one pointer is indefinite, so we now know its type
+            else {
+                // Find the definite type
+                std::shared_ptr<ASTTypeNode> definiteType =
+                    ptrType1->getToType() != nullptr ? ptrType1->getToType()
+                                                     : ptrType2->getToType();
+
+                // Make sure both sides have indefinite types
+                ptrType1->setToType(definiteType);
+                ptrType2->setToType(definiteType);
+
+                // Propogate the types back down
+                prop_type(tern_exp->getTrueExp(), ptrType1);
+                prop_type(tern_exp->getFalseExp(), ptrType2);
+
+                // WLOG use the left type
+                node->setType(ptrType1);
+            }
+        }
+        // Otherwise, the types must be the same
+        else if (!leftType->equal(rightType))
+            throw IllegalTypeException();
         // May not have void type
-        if (leftType->equal(ASTVoidType::get()))
+        else if (leftType->equal(ASTVoidType::get()))
             throw IllegalTypeException();
-
-        node->setType(leftType);
+        else
+            node->setType(leftType);
     }
     // Function call
     else if (std::shared_ptr<ASTCallExp> call_exp = std::dynamic_pointer_cast<ASTCallExp>(node)) {
