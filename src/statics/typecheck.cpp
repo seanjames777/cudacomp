@@ -450,6 +450,9 @@ void typecheck_stmt(
         std::shared_ptr<ASTTypeNode> lhs_type = typecheck_exp(mod, func, true, defn_stmt->getLValue());
         std::shared_ptr<ASTTypeNode> rhs_type = typecheck_exp(mod, func, false, defn_stmt->getExp());
 
+        if (!isSmallNonvoidType(lhs_type))
+            throw IllegalTypeException();
+
         // If the right handle side is NULL, then it's OK if we're assigning
         // to a pointer.
         if (check_null(defn_stmt->getExp(), rhs_type, lhs_type)) {
