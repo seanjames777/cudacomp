@@ -6,6 +6,8 @@
 
 #include <ast/type/astptrtype.h>
 
+static std::shared_ptr<ASTPtrType> null_ptr_type = nullptr;
+
 ASTPtrType::ASTPtrType(std::shared_ptr<ASTTypeNode> toType)
     : toType(toType)
 {
@@ -23,11 +25,22 @@ bool ASTPtrType::equal(std::shared_ptr<ASTTypeNode> other) {
     if (!other)
         return false;
 
-    if (std::shared_ptr<ASTPtrType> other_ptr = std::dynamic_pointer_cast<ASTPtrType>(other))
-        return toType->equal(other_ptr->getToType());
+    if (std::shared_ptr<ASTPtrType> other_ptr = std::dynamic_pointer_cast<ASTPtrType>(other)) {
+        if (toType == nullptr && other_ptr->getToType() == nullptr)
+            return true;
+        else
+            return toType->equal(other_ptr->getToType());
+    }
 
     return false;
 }
 
 void ASTPtrType::print(std::ostream & ss) {
+}
+
+const std::shared_ptr<ASTPtrType> ASTPtrType::getNullPtr() {
+    if (!null_ptr_type)
+        null_ptr_type = std::make_shared<ASTPtrType>(nullptr);
+
+    return null_ptr_type;
 }

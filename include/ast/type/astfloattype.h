@@ -31,7 +31,7 @@ public:
     /**
      * @brief Get the singleton instance of this class
      */
-    static std::shared_ptr<ASTFloatType> get();
+    static const std::shared_ptr<ASTFloatType> get();
 
     /**
      * @copydoc ASTTypeNode::equal()

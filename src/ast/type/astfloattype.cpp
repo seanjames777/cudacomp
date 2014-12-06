@@ -11,7 +11,7 @@ std::shared_ptr<ASTFloatType> ASTFloatType::instance = nullptr;
 ASTFloatType::ASTFloatType() {
 }
 
-std::shared_ptr<ASTFloatType> ASTFloatType::get() {
+const std::shared_ptr<ASTFloatType> ASTFloatType::get() {
     if (!instance)
         instance = std::make_shared<ASTFloatType>();
 

@@ -161,8 +161,10 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
     // Float constant
     else if (std::shared_ptr<ASTFloatExp> float_exp = std::dynamic_pointer_cast<ASTFloatExp>(node))
         return ConstantFP::get(convertType(ASTFloatType::get(), ctx.get()), float_exp->getValue());
-    else if (std::shared_ptr<ASTNullExp> null_exp = std::dynamic_pointer_cast<ASTNullExp>(node))
-        return ConstantPointerNull::get(PointerType::getUnqual(Type::getInt8Ty(ctx->getContext())));
+    else if (std::shared_ptr<ASTNullExp> null_exp = std::dynamic_pointer_cast<ASTNullExp>(node)) {
+        Type *cvt_type = convertType(null_exp->getType(), ctx.get());
+        return ConstantPointerNull::get(static_cast<PointerType *>(cvt_type));
+    }
     // Unary operator
     else if (std::shared_ptr<ASTUnopExp> unop_exp = std::dynamic_pointer_cast<ASTUnopExp>(node)) {
         Value *v = codegen_exp(ctx, unop_exp->getExp());

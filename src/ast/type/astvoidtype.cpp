@@ -11,7 +11,7 @@ std::shared_ptr<ASTVoidType> ASTVoidType::instance = nullptr;
 ASTVoidType::ASTVoidType() {
 }
 
-std::shared_ptr<ASTVoidType> ASTVoidType::get() {
+const std::shared_ptr<ASTVoidType> ASTVoidType::get() {
     if (!instance)
         instance = std::make_shared<ASTVoidType>();
 

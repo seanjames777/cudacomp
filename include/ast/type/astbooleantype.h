@@ -30,7 +30,7 @@ public:
     /**
      * @brief Get the singleton instance of this class
      */
-    static std::shared_ptr<ASTBooleanType> get();
+    static const std::shared_ptr<ASTBooleanType> get();
 
     /**
      * @copydoc ASTTypeNode::equal()

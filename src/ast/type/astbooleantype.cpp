@@ -11,7 +11,7 @@ std::shared_ptr<ASTBooleanType> ASTBooleanType::instance = nullptr;
 ASTBooleanType::ASTBooleanType() {
 }
 
-std::shared_ptr<ASTBooleanType> ASTBooleanType::get() {
+const std::shared_ptr<ASTBooleanType> ASTBooleanType::get() {
     if (!instance)
         instance = std::make_shared<ASTBooleanType>();
 

@@ -11,7 +11,7 @@ std::shared_ptr<ASTIntegerType> ASTIntegerType::instance = nullptr;
 ASTIntegerType::ASTIntegerType() {
 }
 
-std::shared_ptr<ASTIntegerType> ASTIntegerType::get() {
+const std::shared_ptr<ASTIntegerType> ASTIntegerType::get() {
     if (!instance)
         instance = std::make_shared<ASTIntegerType>();
 
