@@ -41,9 +41,11 @@ std::shared_ptr<ASTTypeNode> TypeResolve::resolveType(std::shared_ptr<ASTTypeNod
     else if (std::shared_ptr<ASTRecordType> record_type = std::dynamic_pointer_cast<ASTRecordType>(type)) {
         std::shared_ptr<ASTRecordType> resolved = module->getRecordType(record_type->getId());
 
-        // TODO: Don't want exception b/c undeclared structs are OK. But, not sure if nullptr is correct
-        if (!resolved)
+        // If it is not resolved, we insert an implicit declaration into the module
+        if (!resolved) {
+            module->addRecordType(record_type->getId(), record_type);
             return record_type;
+        }
 
         return resolved;
     }
@@ -113,13 +115,21 @@ void TypeResolve::visitRecordDecl(std::shared_ptr<ASTRecordDecl> recordDecl) {
     if (!(recordDecl->isDefn()))
         return;
 
+    std::string name = recordDecl->getName();
+
     // Records cannot be redefined
-    if (module->getRecordType(recordDecl->getName()) != nullptr)
+    if (module->getRecordType(name) != nullptr &&
+        module->getRecordType(name)->getFields() != nullptr)
         throw RedeclaredTypeException(recordDecl->getName());
 
-    std::string name = recordDecl->getName();
-    module->addRecordType(name, recordDecl->getSignature());
-    std::shared_ptr<ASTArgSeqNode> fields = recordDecl->getSignature()->getFields();
+    std::shared_ptr<ASTRecordType> sig = module->getRecordType(name);
+    if (sig) 
+        sig->setFields(recordDecl->getSignature()->getFields());
+    else {
+        sig = recordDecl->getSignature();
+        module->addRecordType(name, sig);
+    }
+    std::shared_ptr<ASTArgSeqNode> fields = sig->getFields();
 
     ASTVisitor::visitArgSeqNode(fields);
     ASTVisitor::visitRecordDecl(recordDecl);
