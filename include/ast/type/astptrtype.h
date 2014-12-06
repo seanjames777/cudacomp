@@ -47,6 +47,12 @@ public:
      * @copydoc ASTNode::print()
      */
     virtual void print(std::ostream & ss) override;
+
+    /**
+     * @brief Get a type representing a pointer to any type
+     */
+    static const std::shared_ptr<ASTPtrType> getNullPtr();
+
 };
 
 #endif

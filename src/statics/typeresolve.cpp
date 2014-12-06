@@ -54,6 +54,7 @@ std::shared_ptr<ASTTypeNode> TypeResolve::resolveType(std::shared_ptr<ASTTypeNod
 
 void TypeResolve::visitRecordType(std::shared_ptr<ASTRecordType> type) {
     // We don't want to resolve any children ; we use cached thing
+    // TODO: cached thing?
     resolveType(type);
     //ASTVisitor::visitTypeNode(type);
 }

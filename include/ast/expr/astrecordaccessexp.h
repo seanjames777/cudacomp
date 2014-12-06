@@ -43,17 +43,6 @@ public:
     std::string getId();
 
     /**
-     * @brief Get the type of the record we are accessing.
-     *        This is set during typechecking.
-     */
-    std::shared_ptr<ASTRecordType> getType();
-
-    /**
-     * @brief Set the type of the record we are accessing.
-     */
-    void setType(std::shared_ptr<ASTRecordType> t);
-
-    /**
      * @copydoc ASTNode::print()
      */
     virtual void print(std::ostream & ss) override;

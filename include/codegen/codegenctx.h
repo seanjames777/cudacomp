@@ -43,20 +43,22 @@ private:
     // Whole module
     std::shared_ptr<Module>        module;        // LLVM module for all functions
     LLVMContext                   &context;       // LLVM context
-    std::shared_ptr<DataLayout>    layout;       // LLVM data layout
+    std::shared_ptr<DataLayout>    layout;        // LLVM data layout
     bool                           emit_device;   // Should we emit GPU code
     SymbolTable<Function *>        functions;     // Mapping from function names to LLVM functions
-    SymbolTable<Type *>            records;      // Mapping from struct names to LLVM types
+    SymbolTable<Type *>            records;       // Mapping from struct names to LLVM types
     std::shared_ptr<ModuleInfo>    modInfo;       // Information about module
     Function                      *alloc_array;   // Runtime alloc_array function
-    Function                      *alloc;        // Runtime alloc function
+    Function                      *alloc;         // Runtime alloc function
     Function                      *alloc_device;  // Allocate untyped device memory
     Function                      *cpy_h2d;       // Copy from host to device
     Function                      *cpy_d2h;       // Copy from device to host
     Function                      *invoke_kernel; // Invoke a kernel
     Function                      *div_check;     // Runtime division safety check
     Function                      *shift_check;   // Runtime shift safety check
-    Function                      *fassert;        // Runtime assertion
+    Function                      *arr_check;     // Array bounds check
+    Function                      *deref_check;   // Array bounds check
+    Function                      *fassert;       // Runtime assertion
 
     // Current function
     BasicBlock                    *def_bblock;    // Locals definition block, assists with SSA
@@ -91,12 +93,12 @@ public:
     Function *getAlloc();
 
     /**
-     * @brief Get the 'alloc_array' runtime function
+     * @brief Get the 'alloc_device' runtime function
      */
     Function *getAllocDevice();
 
     /**
-     * @brief Get the 'alloc_array' runtime function
+     * @brief Get the 'alloc_array' runtime function // TODO
      */
     Function *getCopyHostToDevice();
 
@@ -119,6 +121,16 @@ public:
      * @brief Get the 'shift_check' runtime function
      */
     Function *getShiftCheck();
+
+    /**
+     * @brief Get the 'arr_bounds_check' runtime function
+     */
+    Function *getArrBoundsCheck();
+
+    /**
+     * @brief Get the 'deref_check' runtime function
+     */
+    Function *getDerefCheck();
 
     /**
      * @brief Get the 'assert' runtime function

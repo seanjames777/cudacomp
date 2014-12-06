@@ -30,14 +30,6 @@ std::shared_ptr<ASTExpNode> ASTBinopExp::getE2() {
     return e2;
 }
 
-std::shared_ptr<ASTTypeNode> ASTBinopExp::getType() {
-    return type;
-}
-
-void ASTBinopExp::setType(std::shared_ptr<ASTTypeNode> type) {
-    this->type = type;
-}
-
 void ASTBinopExp::printBinop(enum ASTBinopExp::op op, std::ostream & ss) {
     switch(op) {
     case ADD:

@@ -83,16 +83,6 @@ public:
     std::shared_ptr<ASTExpNode> getE2();
 
     /**
-     * @brief Get the operation type. Not valid until after typechecking.
-     */
-    std::shared_ptr<ASTTypeNode> getType();
-
-    /**
-     * @brief Set the operation type.
-     */
-    void setType(std::shared_ptr<ASTTypeNode> type);
-
-    /**
      * @brief Utility for printing operators to a stream
      *
      * @param[in] op Operator to print

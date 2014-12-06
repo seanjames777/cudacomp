@@ -62,16 +62,6 @@ public:
     std::shared_ptr<ASTExpNode> getExp();
 
     /**
-     * @brief Get type. Only valid after typechecking.
-     */
-    std::shared_ptr<ASTTypeNode> getType();
-
-    /**
-     * @brief Set type
-     */
-    void setType(std::shared_ptr<ASTTypeNode> type);
-
-    /**
      * @coypdoc ASTNode::print()
      */
     void print(std::ostream & ss) override;

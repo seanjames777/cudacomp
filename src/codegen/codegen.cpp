@@ -36,6 +36,8 @@
 namespace Codegen {
 
 Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
+    CCArgs *args = getOptions();
+
     // Identifier reference
     if (std::shared_ptr<ASTIdentifierExp> id_exp = std::dynamic_pointer_cast<ASTIdentifierExp>(node)) {
         Value *id_ptr = ctx->getOrCreateSymbol(id_exp->getId());
@@ -45,18 +47,41 @@ Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNod
     else if (std::shared_ptr<ASTIndexExp> idx_exp = std::dynamic_pointer_cast<ASTIndexExp>(node)) {
         Value *lhs = codegen_exp(ctx, idx_exp->getLValue());
         Value *sub = codegen_exp(ctx, idx_exp->getSubscript());
+
+        // Bounds check
+        if (args->mem_safe) {
+            std::vector<Value *> args;
+            args.push_back(ctx->getBuilder()->CreatePointerCast(
+                lhs, PointerType::getUnqual(Type::getInt8Ty(ctx->getContext()))));
+            args.push_back(sub);
+
+            ctx->getBuilder()->CreateCall(ctx->getArrBoundsCheck(), args);
+        }
+
         return ctx->getBuilder()->CreateGEP(lhs, sub);
     }
     // Record access
     else if (std::shared_ptr<ASTRecordAccessExp> rcd_exp = std::dynamic_pointer_cast<ASTRecordAccessExp>(node)) {
         Value *lhs = codegen_lvalue(ctx, rcd_exp->getLValue());
-        int field_idx = rcd_exp->getType()->getFieldIndex(rcd_exp->getId());
+        std::shared_ptr<ASTRecordType> recSig = std::static_pointer_cast<ASTRecordType>(
+            rcd_exp->getLValue()->getType());
+        int field_idx = recSig->getFieldIndex(rcd_exp->getId());
         return ctx->getBuilder()->CreateConstGEP2_32(lhs, 0, field_idx);
     }
     // Pointer dereference
     else if (std::shared_ptr<ASTDerefExp> ptr_exp = std::dynamic_pointer_cast<ASTDerefExp>(node)) {
-        Value *subexp = codegen_exp(ctx, ptr_exp->getExp());
-        return ctx->getBuilder()->CreateGEP(subexp, ConstantInt::get(convertType(ASTIntegerType::get(), ctx.get()), 0));
+        Value *ptr_val = codegen_exp(ctx, ptr_exp->getExp());
+
+        // Pointer check
+        if (args->mem_safe) {
+            std::vector<Value *> args;
+            args.push_back(ctx->getBuilder()->CreatePointerCast(
+                ptr_val, PointerType::getUnqual(Type::getInt8Ty(ctx->getContext()))));
+
+            ctx->getBuilder()->CreateCall(ctx->getDerefCheck(), args);
+        }
+
+        return ctx->getBuilder()->CreateGEP(ptr_val, ConstantInt::get(convertType(ASTIntegerType::get(), ctx.get()), 0));
     }
     else
         throw new ASTMalformedException();
@@ -136,6 +161,10 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
     // Float constant
     else if (std::shared_ptr<ASTFloatExp> float_exp = std::dynamic_pointer_cast<ASTFloatExp>(node))
         return ConstantFP::get(convertType(ASTFloatType::get(), ctx.get()), float_exp->getValue());
+    else if (std::shared_ptr<ASTNullExp> null_exp = std::dynamic_pointer_cast<ASTNullExp>(node)) {
+        Type *cvt_type = convertType(null_exp->getType(), ctx.get());
+        return ConstantPointerNull::get(static_cast<PointerType *>(cvt_type));
+    }
     // Unary operator
     else if (std::shared_ptr<ASTUnopExp> unop_exp = std::dynamic_pointer_cast<ASTUnopExp>(node)) {
         Value *v = codegen_exp(ctx, unop_exp->getExp());
@@ -152,10 +181,7 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
         Value *v1 = codegen_exp(ctx, binop_exp->getE1());
         Value *v2 = codegen_exp(ctx, binop_exp->getE2());
 
-        std::shared_ptr<ASTTypeNode> type = binop_exp->getType();
-        assert(type);
-
-        return codegen_binop(ctx, binop_exp->getOp(), type, v1, v2);
+        return codegen_binop(ctx, binop_exp->getOp(), binop_exp->getE1()->getType(), v1, v2);
     }
     // Ternary operator
     else if (std::shared_ptr<ASTTernopExp> tern_exp = std::dynamic_pointer_cast<ASTTernopExp>(node)) {
@@ -404,13 +430,11 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
         }
         // Compound assignment like +=, etc.
         else {
-            Value *loadLVal = ctx->getBuilder()->CreateLoad(lval);
             Value *rhs = codegen_exp(ctx, decl_stmt->getExp());
+            Value *loadLVal = ctx->getBuilder()->CreateLoad(lval);
 
-            std::shared_ptr<ASTTypeNode> type = decl_stmt->getType();
-            assert(type != nullptr);
-
-            Value *newVal = codegen_binop(ctx, decl_stmt->getOp(), type, loadLVal, rhs);
+            Value *newVal = codegen_binop(ctx, decl_stmt->getOp(),
+                decl_stmt->getExp()->getType(), loadLVal, rhs);
             ctx->getBuilder()->CreateStore(newVal, lval);
         }
     }

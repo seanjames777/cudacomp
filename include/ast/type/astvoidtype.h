@@ -30,7 +30,7 @@ public:
     /**
      * @brief Get the singleton instance of this class
      */
-    static std::shared_ptr<ASTVoidType> get();
+    static const std::shared_ptr<ASTVoidType> get();
 
     /**
      * @copydoc ASTTypeNode::equal()
