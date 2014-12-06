@@ -247,7 +247,7 @@ fundecl:
                  std::shared_ptr<ASTArgSeqNode>($3),
                  std::shared_ptr<ASTArgSeqNode>($5)),
                  true,
-                 ASTDeclNode::Internal,
+                 args->header ? ASTDeclNode::External : ASTDeclNode::Internal,
                  std::shared_ptr<ASTStmtSeqNode>($8));
         free($2);
     }
@@ -259,7 +259,7 @@ fundecl:
                  std::shared_ptr<ASTArgSeqNode>($3),
                  std::shared_ptr<ASTArgSeqNode>($5)),
                  false,
-                 ASTDeclNode::Internal,
+                 args->header ? ASTDeclNode::External : ASTDeclNode::Internal,
                  nullptr);
                  free($2);
     }
