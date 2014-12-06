@@ -430,8 +430,8 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
         }
         // Compound assignment like +=, etc.
         else {
-            Value *loadLVal = ctx->getBuilder()->CreateLoad(lval);
             Value *rhs = codegen_exp(ctx, decl_stmt->getExp());
+            Value *loadLVal = ctx->getBuilder()->CreateLoad(lval);
 
             Value *newVal = codegen_binop(ctx, decl_stmt->getOp(),
                 decl_stmt->getExp()->getType(), loadLVal, rhs);
