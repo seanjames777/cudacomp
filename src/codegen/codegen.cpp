@@ -35,12 +35,50 @@
 
 namespace Codegen {
 
-Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> node) {
+// Generates code that checks if a pointer is null, if memory safety checks
+// are enabled
+void create_null_check(std::shared_ptr<CodegenCtx> ctx, Value *ptr) {
     CCArgs *args = getOptions();
+
+    if (args->mem_safe) {
+        std::vector<Value *> args;
+        args.push_back(ctx->getBuilder()->CreatePointerCast(
+            ptr, PointerType::getUnqual(Type::getInt8Ty(ctx->getContext()))));
+
+        ctx->getBuilder()->CreateCall(ctx->getDerefCheck(), args);
+    }
+}
+
+// Generates code that checks if a pointer to an array if null, and if an index
+// into that array is >= 0 and < length of the array, if memory safety checks
+// are enabled
+void create_bounds_check(std::shared_ptr<CodegenCtx> ctx, Value *arr, Value *sub) {
+    CCArgs *args = getOptions();
+
+    if (args->mem_safe) {
+        std::vector<Value *> args;
+        args.push_back(ctx->getBuilder()->CreatePointerCast(
+            arr, PointerType::getUnqual(Type::getInt8Ty(ctx->getContext()))));
+        args.push_back(sub);
+
+        ctx->getBuilder()->CreateCall(ctx->getArrBoundsCheck(), args);
+    }
+}
+
+Value *codegen_lvalue(
+    std::shared_ptr<CodegenCtx> ctx,
+    std::shared_ptr<ASTExpNode> node,
+    bool *require_null_check)
+{
+    *require_null_check = false;
 
     // Identifier reference
     if (std::shared_ptr<ASTIdentifierExp> id_exp = std::dynamic_pointer_cast<ASTIdentifierExp>(node)) {
         Value *id_ptr = ctx->getOrCreateSymbol(id_exp->getId());
+
+        // Identifiers are stack allocated until mem2reg. We know that their
+        // addresses are safe. No need for a null check.
+
         return id_ptr;
     }
     // Array subscript
@@ -48,39 +86,38 @@ Value *codegen_lvalue(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNod
         Value *lhs = codegen_exp(ctx, idx_exp->getLValue());
         Value *sub = codegen_exp(ctx, idx_exp->getSubscript());
 
-        // Bounds check
-        if (args->mem_safe) {
-            std::vector<Value *> args;
-            args.push_back(ctx->getBuilder()->CreatePointerCast(
-                lhs, PointerType::getUnqual(Type::getInt8Ty(ctx->getContext()))));
-            args.push_back(sub);
+        create_bounds_check(ctx, lhs, sub);
 
-            ctx->getBuilder()->CreateCall(ctx->getArrBoundsCheck(), args);
-        }
+        // We know that if the array is not null, and the index is in bounds,
+        // we won't be returning a null pointer.
 
         return ctx->getBuilder()->CreateGEP(lhs, sub);
     }
     // Record access
     else if (std::shared_ptr<ASTRecordAccessExp> rcd_exp = std::dynamic_pointer_cast<ASTRecordAccessExp>(node)) {
-        Value *lhs = codegen_lvalue(ctx, rcd_exp->getLValue());
+        bool check;
+        Value *lhs = codegen_lvalue(ctx, rcd_exp->getLValue(), &check);
+
+        if (check)
+            create_null_check(ctx, lhs);
+
         std::shared_ptr<ASTRecordType> recSig = std::static_pointer_cast<ASTRecordType>(
             rcd_exp->getLValue()->getType());
         int field_idx = recSig->getFieldIndex(rcd_exp->getId());
+
+        // We know that if the struct is not null, a member of that struct will
+        // not be at a null address.
+
         return ctx->getBuilder()->CreateConstGEP2_32(lhs, 0, field_idx);
     }
     // Pointer dereference
     else if (std::shared_ptr<ASTDerefExp> ptr_exp = std::dynamic_pointer_cast<ASTDerefExp>(node)) {
         Value *ptr_val = codegen_exp(ctx, ptr_exp->getExp());
 
-        // Pointer check
-        if (args->mem_safe) {
-            std::vector<Value *> args;
-            args.push_back(ctx->getBuilder()->CreatePointerCast(
-                ptr_val, PointerType::getUnqual(Type::getInt8Ty(ctx->getContext()))));
+        // We're essentially returning the pointer directly, so it might be null
+        *require_null_check = true;
 
-            ctx->getBuilder()->CreateCall(ctx->getDerefCheck(), args);
-        }
-
+        // TODO: Don't really need this?
         return ctx->getBuilder()->CreateGEP(ptr_val, ConstantInt::get(convertType(ASTIntegerType::get(), ctx.get()), 0));
     }
     else
@@ -290,7 +327,12 @@ Value *codegen_exp(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTExpNode> 
     }
     // Otherwise, it's an lvalue. Get the address and dereference it.
     else {
-        Value *lval_ptr = codegen_lvalue(ctx, node);
+        bool check;
+        Value *lval_ptr = codegen_lvalue(ctx, node, &check);
+
+        if (check)
+            create_null_check(ctx, lval_ptr);
+
         return ctx->getBuilder()->CreateLoad(lval_ptr);
     }
 
@@ -422,15 +464,24 @@ bool codegen_stmt(std::shared_ptr<CodegenCtx> ctx, std::shared_ptr<ASTStmtNode> 
     // Assignment to an lvalue. Get the address and write to it. Note that this works for
     // local variables as well because they are stack allocated until conversion to SSA.
     else if (std::shared_ptr<ASTAssignStmt> decl_stmt = std::dynamic_pointer_cast<ASTAssignStmt>(head)) {
-        Value *lval = codegen_lvalue(ctx, decl_stmt->getLValue());
+        bool check;
+        Value *lval = codegen_lvalue(ctx, decl_stmt->getLValue(), &check);
 
         if (decl_stmt->getOp() == ASTBinopExp::NONE) {
-            Value *exp_val = codegen_exp(ctx, decl_stmt->getExp());
-            ctx->getBuilder()->CreateStore(exp_val, lval);
+            Value *rhs = codegen_exp(ctx, decl_stmt->getExp());
+
+            if (check)
+                create_null_check(ctx, lval);
+
+            ctx->getBuilder()->CreateStore(rhs, lval);
         }
         // Compound assignment like +=, etc.
         else {
             Value *rhs = codegen_exp(ctx, decl_stmt->getExp());
+
+            if (check)
+                create_null_check(ctx, lval);
+
             Value *loadLVal = ctx->getBuilder()->CreateLoad(lval);
 
             Value *newVal = codegen_binop(ctx, decl_stmt->getOp(),

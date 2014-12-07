@@ -1,10 +1,25 @@
-   ../tests2/galimimus-left-right-eval1.l4
-   ../tests2/illinois-dealloc-default.l4
-   ../tests2/michigan-error03.l4
-   ../tests2/utah-exception3.l4
-   ../tests2/wyoming-exception02.l4
-   ../tests1/osmium-parsley.l4
+   ../tests2/lammergeier-mightyena.l4
+   ../tests2/struct-avail.l4
+   ../tests2/minnesota-error-5.l4
+   ../tests2/styracosaurus-error06.l4
+   ../tests2/michigan-error02.l4
+   ../tests2/utah-infinite_size.l4
+   ../tests2/deagol-AAAAAAAAAAAAAAAA-read-my-embedded-story-AAAAAAAAAAAAAAAA.l4
+   ../tests2/utah-error03.l4
+   ../tests2/tc27.l4
+   ../tests2/theoden-is-still-recursive.l4
+   ../tests2/potassium-er02.l4
+   ../tests2/brachiosaurus-struct-pointer-fail.l4
+   ../tests2/theoden-is-also-recursive.l4
+   ../tests2/alabama-g-2.l4
+   ../tests2/radium-error03.l4
+   ../tests2/arwen-bad-nested-struct.l4
+   ../tests2/washington-one-step-at-a-time.l4
+   ../tests2/monoclonius-error1.l4
+   ../tests2/kite-circ.l4
+   ../tests2/hawaii-structsaretheuniverse.l4
+   ../tests1/westvirginia-goes-for-a-walk.l4
    ../tests1/strontium-09-typechecking-is-overrated.l4
    ../tests1/titanium-hull.l4
-   ../tests1/westvirginia-goes-for-a-walk.l4
    ../tests1/wisconsin-test-pointer.l4
+   ../tests1/osmium-parsley.l4
