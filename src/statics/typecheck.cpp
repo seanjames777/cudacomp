@@ -556,8 +556,17 @@ void typecheck_stmt(
     }
     // Expression statement
     else if (std::shared_ptr<ASTExprStmt> exp_stmt = std::dynamic_pointer_cast<ASTExprStmt>(head)) {
-        // The expression cannot be a large type
         std::shared_ptr<ASTTypeNode> type = typecheck_exp(mod, func, false, exp_stmt->getExp());
+
+        // If the expression has an indefinite pointer type, assign an arbitrary
+        // type
+        if (auto ptr_type = std::dynamic_pointer_cast<ASTPtrType>(type))
+            if (!ptr_type->getToType()) {
+                ptr_type->setToType(ASTIntegerType::get());
+                prop_type(exp_stmt->getExp(), ptr_type);
+            }
+
+        // The expression cannot be a large type
         if (!isSmallType(type))
             throw IllegalTypeException();
     }
