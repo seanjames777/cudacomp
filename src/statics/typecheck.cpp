@@ -635,6 +635,10 @@ void typecheck_top(
         if (typeDefn->getType()->equal(ASTVoidType::get()))
             throw IllegalTypeException();
     }
+    else if (std::shared_ptr<ASTRecordDecl> recordDecl = std::dynamic_pointer_cast<ASTRecordDecl>(node)) {
+        if (recordDecl->isDefn())
+            mod->defineRecord(recordDecl->getName());
+    }
 }
 
 };

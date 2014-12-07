@@ -55,8 +55,9 @@ std::shared_ptr<ASTRecordType> ModuleInfo::getRecordType(std::string id) {
 }
 
 bool ModuleInfo::isRecordDefined(std::string name) {
-    if (getRecordType(name) != nullptr &&
-        getRecordType(name)->getFields() != nullptr)
-        return true;
-    return false;
+    return (definedRecords.end() != definedRecords.find(name));
+}
+
+void ModuleInfo::defineRecord(std::string name) {
+    definedRecords.insert(name);
 }
