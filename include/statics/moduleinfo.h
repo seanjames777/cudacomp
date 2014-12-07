@@ -85,6 +85,13 @@ public:
      */
     std::shared_ptr<ASTRecordType> getRecordType(std::string id);
 
+    /**
+     * @brief Returns if the record is fully defined in the module
+     *
+     * @param[in] name Name of the record
+     */
+    bool isRecordDefined(std::string name);
+
 };
 
 #endif

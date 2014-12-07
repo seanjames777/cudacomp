@@ -125,7 +125,7 @@ void TypeResolve::visitRecordDecl(std::shared_ptr<ASTRecordDecl> recordDecl) {
     std::string name = recordDecl->getName();
 
     // Records cannot be redefined
-    if (isDefined(name, module))
+    if (module->isRecordDefined(name))
         throw RedeclaredTypeException(recordDecl->getName());
 
     std::shared_ptr<ASTRecordType> sig = module->getRecordType(name);
@@ -151,7 +151,7 @@ void TypeResolve::visitRecordDecl(std::shared_ptr<ASTRecordDecl> recordDecl) {
             if ((name.compare(type->getId())) == 0)
                 throw IllegalTypeException();
             // Can only embed defined structs
-            if(!isDefined(type->getId(), module))
+            if(!module->isRecordDefined(type->getId()))
                 throw IllegalTypeException();
         }
         if (std::shared_ptr<ASTVoidType> type = std::dynamic_pointer_cast<ASTVoidType>(field->getType()))

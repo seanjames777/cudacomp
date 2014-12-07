@@ -103,8 +103,12 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         std::string field_name = record_exp->getId();
 
         // This type needs to be a record
-        if (std::shared_ptr<ASTRecordType> record_type = std::dynamic_pointer_cast<ASTRecordType>(lvalue_type))
+        if (std::shared_ptr<ASTRecordType> record_type = std::dynamic_pointer_cast<ASTRecordType>(lvalue_type)) {
+            // The record type needs to be defined
+            if (!mod->isRecordDefined(record_type->getId()))
+                throw IllegalTypeException();
             node->setType(record_type->getField(field_name)->getType());
+        }
         else
             throw IllegalTypeException();
     }
