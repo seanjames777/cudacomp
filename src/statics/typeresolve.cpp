@@ -110,23 +110,12 @@ void TypeResolve::visitTypeDecl(std::shared_ptr<ASTTypeDecl> typeDecl) {
     ASTVisitor::visitTypeDecl(typeDecl);
 }
 
-bool isDefined(std::string name, std::shared_ptr<ModuleInfo> module) {
-    if (module->getRecordType(name) != nullptr &&
-        module->getRecordType(name)->getFields() != nullptr)
-        return true;
-    return false;
-}
-
 void TypeResolve::visitRecordDecl(std::shared_ptr<ASTRecordDecl> recordDecl) {
     // Nothing to do on a declaration without a definition
     if (!(recordDecl->isDefn()))
         return;
 
     std::string name = recordDecl->getName();
-
-    // Records cannot be redefined
-    if (isDefined(name, module))
-        throw RedeclaredTypeException(recordDecl->getName());
 
     std::shared_ptr<ASTRecordType> sig = module->getRecordType(name);
     if (sig) 
@@ -142,16 +131,13 @@ void TypeResolve::visitRecordDecl(std::shared_ptr<ASTRecordDecl> recordDecl) {
 
     std::set<std::string> fieldNames;
 
-    // Check for self reference, undefined structs, repeat field names, and void fields
+    // Check for self reference, repeat field names, and void fields
     while(fields) {
         std::shared_ptr<ASTArgNode> field = fields->getHead();
         // Embedded struct
         if (std::shared_ptr<ASTRecordType> type = std::dynamic_pointer_cast<ASTRecordType>(field->getType())) {
             // Self embedded structs disallowed
             if ((name.compare(type->getId())) == 0)
-                throw IllegalTypeException();
-            // Can only embed defined structs
-            if(!isDefined(type->getId(), module))
                 throw IllegalTypeException();
         }
         if (std::shared_ptr<ASTVoidType> type = std::dynamic_pointer_cast<ASTVoidType>(field->getType()))

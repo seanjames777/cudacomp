@@ -104,7 +104,6 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
 
         // This type needs to be a record
         if (std::shared_ptr<ASTRecordType> record_type = std::dynamic_pointer_cast<ASTRecordType>(lvalue_type)) {
-            // The record type needs to be defined
             if (!mod->isRecordDefined(record_type->getId()))
                 throw IllegalTypeException();
             node->setType(record_type->getField(field_name)->getType());
@@ -636,8 +635,30 @@ void typecheck_top(
             throw IllegalTypeException();
     }
     else if (std::shared_ptr<ASTRecordDecl> recordDecl = std::dynamic_pointer_cast<ASTRecordDecl>(node)) {
-        if (recordDecl->isDefn())
-            mod->defineRecord(recordDecl->getName());
+        // Check statics for record definition
+
+        // Nothing to do if this is not a definition
+        if (recordDecl->isDefn()) {
+            std::string name = recordDecl->getName();   
+
+            // Records cannot be redefined
+            if (mod->isRecordDefined(name))
+                throw RedeclaredTypeException(recordDecl->getName());   
+
+            mod->defineRecord(name);    
+
+            std::shared_ptr<ASTArgSeqNode> fields = recordDecl->getSignature()->getFields();
+            while(fields) {
+                std::shared_ptr<ASTArgNode> field = fields->getHead();
+                if (std::shared_ptr<ASTRecordType> type = std::dynamic_pointer_cast<ASTRecordType>(field->getType())) {
+                    // Can only embed defined structs
+                    if(!mod->isRecordDefined(type->getId()))
+                        throw IllegalTypeException();
+                }
+                fields = fields->getTail();
+            }
+        }
+
     }
 }
 
