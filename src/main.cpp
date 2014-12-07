@@ -39,10 +39,6 @@ int main(int argc, char *argv[]) {
         std::cout << "\033[31;1m" << except.what() << "\033[0m" << std::endl;
         return -1;
     }
-    catch (Parser::ParseException & except) {
-        std::cout << "\033[31;1m" << except.what() << "\033[0m" << std::endl;
-        return -1;
-    }
 
     struct CCArgs *args = getOptions();
 
@@ -60,7 +56,7 @@ int main(int argc, char *argv[]) {
             std::cout << "\033[31;1m" << except.what() << "\033[0m" << std::endl;
             return -1;
         }
-        catch (Statics::StaticsException & except) {
+        catch (Parser::ParseException & except) {
             std::cout << "\033[31;1m" << except.what() << "\033[0m" << std::endl;
             return -1;
         }
@@ -77,13 +73,17 @@ int main(int argc, char *argv[]) {
         std::cout << "\033[31;1m" << except.what() << "\033[0m" << std::endl;
         return -1;
     }
+    catch (Parser::ParseException & except) {
+        std::cout << "\033[31;1m" << except.what() << "\033[0m" << std::endl;
+        return -1;
+    }
 
     std::shared_ptr<ModuleInfo> moduleInfo;
 
     try {
         moduleInfo = Statics::run(ast);
     }
-    catch (std::runtime_error & except) {
+    catch (Statics::StaticsException & except) {
         std::cout << "\033[31;1m" << except.what() << "\033[0m" << std::endl;
 
         if (args->print_ast) {
