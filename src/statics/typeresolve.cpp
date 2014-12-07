@@ -131,7 +131,7 @@ void TypeResolve::visitRecordDecl(std::shared_ptr<ASTRecordDecl> recordDecl) {
 
     std::set<std::string> fieldNames;
 
-    // Check for self reference, repeat field names, and void fields
+    // Check for self reference, repeat field names
     while(fields) {
         std::shared_ptr<ASTArgNode> field = fields->getHead();
         // Embedded struct
@@ -140,8 +140,6 @@ void TypeResolve::visitRecordDecl(std::shared_ptr<ASTRecordDecl> recordDecl) {
             if ((name.compare(type->getId())) == 0)
                 throw IllegalTypeException();
         }
-        if (std::shared_ptr<ASTVoidType> type = std::dynamic_pointer_cast<ASTVoidType>(field->getType()))
-            throw IllegalTypeException();
         std::string name = field->getName();
         if (fieldNames.find(name) != fieldNames.end())
             throw RedeclaredIdentifierException(name);

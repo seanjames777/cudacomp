@@ -8,17 +8,53 @@
 
 namespace Statics {
 
-// May be better named as isNonLargeType; returns true for void types
-bool isSmallType(std::shared_ptr<ASTTypeNode> node) {
-    if (std::shared_ptr<ASTRecordType> type = std::dynamic_pointer_cast<ASTRecordType>(node))
+// A type is has legal values if it does not structurally contain void or functions
+bool isLegalType(std::shared_ptr<ASTTypeNode> node, std::shared_ptr<ModuleInfo> mod) {
+    if (std::shared_ptr<ASTVoidType> void_type = std::dynamic_pointer_cast<ASTVoidType>(node))
+        return false;
+    else if (std::shared_ptr<ASTFunType> fun_type = std::dynamic_pointer_cast<ASTFunType>(node))
+        return false;
+    else if (std::shared_ptr<ASTPtrType> ptr_type = std::dynamic_pointer_cast<ASTPtrType>(node))
+        return isLegalType(ptr_type->getToType(), mod);
+    else if (std::shared_ptr<ASTArrType> arr_type = std::dynamic_pointer_cast<ASTArrType>(node))
+        return isLegalType(arr_type->getElemType(), mod);
+    else return true;
+}
+
+// Only small, legal types can be declared
+bool canBeDeclared(std::shared_ptr<ASTTypeNode> node, std::shared_ptr<ModuleInfo> mod) {
+    if (!isLegalType(node,mod))
+        return false;
+    else if (std::shared_ptr<ASTRecordType> record_type = std::dynamic_pointer_cast<ASTRecordType>(node))
         return false;
     return true;
 }
 
-bool isSmallNonvoidType(std::shared_ptr<ASTTypeNode> node) {
-    if (std::shared_ptr<ASTVoidType> type = std::dynamic_pointer_cast<ASTVoidType>(node))
+// A type can be allocated if it is legal and has defined size (e.g. ptr to something, defined struct)
+bool canBeAllocated(std::shared_ptr<ASTTypeNode> node, std::shared_ptr<ModuleInfo> mod) {
+    if (!isLegalType(node, mod))
         return false;
-    return isSmallType(node);
+    if (std::shared_ptr<ASTRecordType> record_type = std::dynamic_pointer_cast<ASTRecordType>(node))
+        return mod->isRecordDefined(record_type->getId());
+    return true;
+}
+
+// A type can be a record field if it can be allocated
+bool canBeField(std::shared_ptr<ASTTypeNode> node, std::shared_ptr<ModuleInfo> mod) {
+    return canBeAllocated(node, mod);
+}
+
+// A type can be a function argument if it can be declared
+bool canBeArgument(std::shared_ptr<ASTTypeNode> node, std::shared_ptr<ModuleInfo> mod) {
+    return canBeDeclared(node, mod);
+}
+
+// A type can be returned if it is void or can be declared
+bool canBeReturned(std::shared_ptr<ASTTypeNode> node, std::shared_ptr<ModuleInfo> mod) {
+    if (std::shared_ptr<ASTVoidType> type = std::dynamic_pointer_cast<ASTVoidType>(node))
+        return true;
+
+    return (canBeDeclared(node, mod));
 }
 
 // Sets the type of an expression, propogating through sub-expressions such as
@@ -327,8 +363,8 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         // Otherwise, the types must be the same
         else if (!leftType->equal(rightType))
             throw IllegalTypeException();
-        // May not have void type
-        else if (leftType->equal(ASTVoidType::get()))
+        // May not have void type structurally
+        else if (!isLegalType(leftType, mod))
             throw IllegalTypeException();
         else
             node->setType(leftType);
@@ -371,7 +407,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
     else if (std::shared_ptr<ASTAllocArrayExp> alloc_exp = std::dynamic_pointer_cast<ASTAllocArrayExp>(node)) {
         std::shared_ptr<ASTTypeNode> elemType = alloc_exp->getElemType();
 
-        if (elemType->equal(ASTVoidType::get()))
+        if (!canBeAllocated(elemType, mod))
             throw IllegalTypeException();
 
         // Size must be an integer
@@ -389,7 +425,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
 
         // We cannot allocate certain types
         // TODO: better void check (e.g. structural search for void)
-        if (elemType->equal(ASTVoidType::get()))
+        if (!canBeAllocated(elemType, mod))
             throw IllegalTypeException();
         if (std::shared_ptr<ASTRecordType> recordType = std::dynamic_pointer_cast<ASTRecordType>(elemType)) {
             if (!mod->isRecordDefined(recordType->getId()))
@@ -427,7 +463,7 @@ void typecheck_stmt(
     if (std::shared_ptr<ASTVarDeclStmt> decl_stmt = std::dynamic_pointer_cast<ASTVarDeclStmt>(head)) {
         std::shared_ptr<ASTTypeNode> decl_type = decl_stmt->getType();
 
-        if (!isSmallNonvoidType(decl_type))
+        if (!canBeDeclared(decl_type, mod))
             throw IllegalTypeException();
 
         std::shared_ptr<ASTExpNode> decl_exp = decl_stmt->getExp();
@@ -454,7 +490,7 @@ void typecheck_stmt(
         std::shared_ptr<ASTTypeNode> lhs_type = typecheck_exp(mod, func, true, defn_stmt->getLValue());
         std::shared_ptr<ASTTypeNode> rhs_type = typecheck_exp(mod, func, false, defn_stmt->getExp());
 
-        if (!isSmallNonvoidType(lhs_type))
+        if (!canBeDeclared(lhs_type, mod))
             throw IllegalTypeException();
 
         // If the right handle side is NULL, then it's OK if we're assigning
@@ -567,7 +603,7 @@ void typecheck_stmt(
             }
 
         // The expression cannot be a large type
-        if (!isSmallType(type))
+        if (!canBeReturned(type, mod))
             throw IllegalTypeException();
     }
     else
@@ -592,7 +628,7 @@ void typecheck_top(
         std::shared_ptr<ASTFunType> sig = funDefn->getSignature();
 
         // Function cannot have a large type return value
-        if (!isSmallType(sig->getReturnType()))
+        if (!canBeReturned(sig->getReturnType(), mod))
                 throw IllegalTypeException();
 
         // Make sure:
@@ -611,7 +647,7 @@ void typecheck_top(
             else
                 argNames.insert(arg->getName());
 
-            if (!isSmallNonvoidType(arg->getType()))
+            if (!canBeArgument(arg->getType(), mod))
                 throw IllegalTypeException();
 
             args = args->getTail();
@@ -632,7 +668,7 @@ void typecheck_top(
     // Skip
     else if (std::shared_ptr<ASTTypeDecl> typeDefn = std::dynamic_pointer_cast<ASTTypeDecl>(node)) {
         // Cannot typedef void
-        if (typeDefn->getType()->equal(ASTVoidType::get()))
+        if (!isLegalType(typeDefn->getType(), mod))
             throw IllegalTypeException();
     }
     else if (std::shared_ptr<ASTRecordDecl> recordDecl = std::dynamic_pointer_cast<ASTRecordDecl>(node)) {
@@ -651,10 +687,8 @@ void typecheck_top(
             std::shared_ptr<ASTArgSeqNode> fields = recordDecl->getSignature()->getFields();
             while(fields) {
                 std::shared_ptr<ASTArgNode> field = fields->getHead();
-                if (std::shared_ptr<ASTRecordType> type = std::dynamic_pointer_cast<ASTRecordType>(field->getType())) {
-                    // Can only embed defined structs
-                    if(!mod->isRecordDefined(type->getId()))
-                        throw IllegalTypeException();
+                if (!canBeField(field->getType(), mod)) {
+                    throw IllegalTypeException();
                 }
                 fields = fields->getTail();
             }
