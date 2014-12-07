@@ -23,6 +23,7 @@ private:
     SymbolTable<std::shared_ptr<FunctionInfo>> functions;
     SymbolTable<std::shared_ptr<ASTTypeNode>> typedefs;
     SymbolTable<std::shared_ptr<ASTRecordType>> recordTypes;
+    std::set<std::string> definedRecords;
 
 public:
 
@@ -84,6 +85,20 @@ public:
      * @param[in] name Name of the record
      */
     std::shared_ptr<ASTRecordType> getRecordType(std::string id);
+
+    /**
+     * @brief Returns if the record is fully defined in the module
+     *
+     * @param[in] name Name of the record
+     */
+    bool isRecordDefined(std::string name);
+
+    /**
+     * @brief Marks the record by the given name as defined
+     *
+     * @param[in] name Name of the record
+     */
+    void defineRecord(std::string name);
 
 };
 

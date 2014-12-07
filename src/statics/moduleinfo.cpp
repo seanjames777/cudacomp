@@ -53,3 +53,11 @@ std::shared_ptr<ASTRecordType> ModuleInfo::getRecordType(std::string id) {
 
     return recordTypes.get(id);
 }
+
+bool ModuleInfo::isRecordDefined(std::string name) {
+    return (definedRecords.end() != definedRecords.find(name));
+}
+
+void ModuleInfo::defineRecord(std::string name) {
+    definedRecords.insert(name);
+}
