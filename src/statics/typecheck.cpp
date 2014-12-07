@@ -391,6 +391,10 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
         // TODO: better void check (e.g. structural search for void)
         if (elemType->equal(ASTVoidType::get()))
             throw IllegalTypeException();
+        if (std::shared_ptr<ASTRecordType> recordType = std::dynamic_pointer_cast<ASTRecordType>(elemType)) {
+            if (!mod->isRecordDefined(recordType->getId()))
+                throw IllegalTypeException();
+        }
 
         // Returns a pointer to an elemType
         node->setType(std::make_shared<ASTPtrType>(elemType));
