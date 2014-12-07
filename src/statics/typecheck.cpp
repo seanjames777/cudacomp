@@ -229,9 +229,6 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
                         // Propogate the types back down
                         prop_type(binop_exp->getE1(), ptrType1);
                         prop_type(binop_exp->getE2(), ptrType2);
-
-                        // Set the binop's type
-                        node->setType(ASTBooleanType::get());
                     }
 
                     node->setType(ASTBooleanType::get());
@@ -244,8 +241,8 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
                 else {
                     // Find the definite type
                     std::shared_ptr<ASTTypeNode> definiteType =
-                        ptrType1->getToType() != nullptr ? ptrType1->getToType()
-                                                         : ptrType2->getToType();
+                        ptrType1->getToType() ? ptrType1->getToType()
+                                              : ptrType2->getToType();
 
                     // Make sure both sides have indefinite types
                     ptrType1->setToType(definiteType);
@@ -299,7 +296,7 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             if (ptrType1->equal(ptrType2)) {
                 // If both are null, the whole thing is null
                 if (ptrType1->getToType() == nullptr)
-                    node->setType(ASTPtrType::getNullPtr());
+                    node->setType(std::make_shared<ASTPtrType>(nullptr));
                 // Otherwise, WLOG use the left type
                 else
                     node->setType(ptrType1);
@@ -312,8 +309,8 @@ std::shared_ptr<ASTTypeNode> typecheck_exp(
             else {
                 // Find the definite type
                 std::shared_ptr<ASTTypeNode> definiteType =
-                    ptrType1->getToType() != nullptr ? ptrType1->getToType()
-                                                     : ptrType2->getToType();
+                    ptrType1->getToType() ? ptrType1->getToType()
+                                          : ptrType2->getToType();
 
                 // Make sure both sides have indefinite types
                 ptrType1->setToType(definiteType);
