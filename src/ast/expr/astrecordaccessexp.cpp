@@ -5,6 +5,7 @@
  */
 
 #include <ast/expr/astrecordaccessexp.h>
+#include <iostream>
 
 ASTRecordAccessExp::ASTRecordAccessExp(std::shared_ptr<ASTExpNode> lvalue, std::string id)
     : lvalue(lvalue),

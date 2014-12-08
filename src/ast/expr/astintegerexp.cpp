@@ -5,6 +5,7 @@
  */
 
 #include <ast/expr/astintegerexp.h>
+#include <iostream>
 
 ASTIntegerExp::ASTIntegerExp(int value)
     : value(value)

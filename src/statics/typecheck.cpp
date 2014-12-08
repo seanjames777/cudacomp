@@ -5,6 +5,7 @@
  */
 
 #include <statics/typecheck.h>
+#include <assert.h>
 
 namespace Statics {
 
@@ -676,13 +677,13 @@ void typecheck_top(
 
         // Nothing to do if this is not a definition
         if (recordDecl->isDefn()) {
-            std::string name = recordDecl->getName();   
+            std::string name = recordDecl->getName();
 
             // Records cannot be redefined
             if (mod->isRecordDefined(name))
-                throw RedeclaredTypeException(recordDecl->getName());   
+                throw RedeclaredTypeException(recordDecl->getName());
 
-            mod->defineRecord(name);    
+            mod->defineRecord(name);
 
             std::shared_ptr<ASTArgSeqNode> fields = recordDecl->getSignature()->getFields();
             while(fields) {

@@ -5,6 +5,8 @@
  */
 
 #include <options.h>
+#include <string.h>
+#include <stdlib.h>
 
 struct CCArgs args;
 

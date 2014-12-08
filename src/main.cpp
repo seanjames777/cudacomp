@@ -12,6 +12,8 @@
 #include <statics/statics.h>
 #include <ast/astprint.h>
 #include <options.h>
+#include <iostream>
+#include <fstream>
 
 std::shared_ptr<ASTDeclSeqNode> append(
     std::shared_ptr<ASTDeclSeqNode> to,

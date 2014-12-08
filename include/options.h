@@ -10,6 +10,8 @@
 #define __OPTIONS_H
 
 #include <defs.h>
+#include <vector>
+#include <string>
 
 /**
  * @brief Compiler command line options

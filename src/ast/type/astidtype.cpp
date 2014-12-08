@@ -5,6 +5,7 @@
  */
 
 #include <ast/type/astidtype.h>
+#include <iostream>
 
 ASTIdType::ASTIdType(std::string id)
     : id(id)

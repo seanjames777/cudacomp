@@ -5,6 +5,7 @@
  */
 
 #include <ast/expr/astidentifierexp.h>
+#include <iostream>
 
 ASTIdentifierExp::ASTIdentifierExp(std::string value)
     : value(value),

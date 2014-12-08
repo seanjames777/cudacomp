@@ -5,6 +5,7 @@
  */
 
 #include <ast/decl/asttypedecl.h>
+#include <iostream>
 
 ASTTypeDecl::ASTTypeDecl(std::string name, std::shared_ptr<ASTTypeNode> type)
     : name(name),

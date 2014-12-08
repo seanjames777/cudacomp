@@ -5,6 +5,7 @@
  */
 
 #include <statics/statics.h>
+#include <iostream>
 
 namespace Statics {
 

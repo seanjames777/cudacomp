@@ -5,6 +5,7 @@
  */
 
 #include <ast/expr/astfloatexp.h>
+#include <iostream>
 
 ASTFloatExp::ASTFloatExp(float value)
     : value(value)

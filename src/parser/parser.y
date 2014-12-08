@@ -3,6 +3,8 @@
 #include <string>
 #include <ast/ast.h>
 #include <parser/parse.h>
+#include <unordered_map>
+#include <sstream>
 
 #define YYERROR_VERBOSE
 #define YYMAXDEPTH 100000

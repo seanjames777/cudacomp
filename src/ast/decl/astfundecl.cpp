@@ -5,6 +5,7 @@
  */
 
 #include <ast/decl/astfundecl.h>
+#include <iostream>
 
 ASTFunDecl::ASTFunDecl(std::string name, std::shared_ptr<ASTFunType> sig,
     bool defn, enum ASTDeclNode::Linkage linkage, std::shared_ptr<ASTStmtSeqNode> body)

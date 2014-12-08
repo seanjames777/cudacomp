@@ -10,6 +10,9 @@
 #define __SYMBOLTABLE_H
 
 #include <defs.h>
+#include <unordered_map>
+#include <set>
+#include <string>
 
 /**
  * @brief A symbol, which represents a function, variable, etc.

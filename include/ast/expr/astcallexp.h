@@ -10,6 +10,7 @@
 #define __ASTCALLEXP_H
 
 #include <ast/expr/astexpnode.h>
+#include <string>
 
 /**
  * @brief Function call expression AST node

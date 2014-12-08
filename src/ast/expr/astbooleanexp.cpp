@@ -5,6 +5,7 @@
  */
 
 #include <ast/expr/astbooleanexp.h>
+#include <iostream>
 
 ASTBooleanExp::ASTBooleanExp(bool value)
     : value(value)

@@ -5,6 +5,7 @@
  */
 
 #include <statics/exceptions.h>
+#include <sstream>
 
 namespace Statics {
 

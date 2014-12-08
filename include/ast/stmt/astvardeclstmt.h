@@ -12,6 +12,7 @@
 #include <ast/stmt/aststmtnode.h>
 #include <ast/expr/astexpnode.h>
 #include <ast/type/asttypenode.h>
+#include <string>
 
 /**
  * @brief Variable declaration statement AST node. Declares and optionally

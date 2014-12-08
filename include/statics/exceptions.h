@@ -10,6 +10,7 @@
 #define __STATICS_EXCEPTIONS_H
 
 #include <defs.h>
+#include <string>
 
 namespace Statics {
 

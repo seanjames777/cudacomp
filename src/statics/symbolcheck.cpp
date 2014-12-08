@@ -5,6 +5,8 @@
  */
 
 #include <statics/symbolcheck.h>
+#include <sstream>
+#include <algorithm>
 
 namespace Statics {
 

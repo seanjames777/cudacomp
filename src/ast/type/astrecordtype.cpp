@@ -5,6 +5,7 @@
  */
 
 #include <ast/type/astrecordtype.h>
+#include <iostream>
 
 ASTRecordType::ASTRecordType(std::string id, std::shared_ptr<ASTArgSeqNode> fields)
     : id(id),

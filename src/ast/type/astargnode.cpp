@@ -5,6 +5,7 @@
  */
 
 #include <ast/type/astargnode.h>
+#include <iostream>
 
 ASTArgNode::ASTArgNode(std::shared_ptr<ASTTypeNode> type, std::string name)
     : type(type),

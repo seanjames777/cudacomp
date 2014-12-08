@@ -11,6 +11,7 @@
 
 #include <ast/type/asttypenode.h>
 #include <ast/astseqnode.h>
+#include <string>
 
 /**
  * @brief Function argument signature AST Node. Combines a type and an argument

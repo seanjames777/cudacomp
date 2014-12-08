@@ -5,6 +5,7 @@
  */
 
 #include <ast/expr/astcallexp.h>
+#include <iostream>
 
 ASTCallExp::ASTCallExp(
     std::string id,

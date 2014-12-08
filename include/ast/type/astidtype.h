@@ -10,6 +10,7 @@
 #define __ASTIDTYPE_H
 
 #include <ast/type/asttypenode.h>
+#include <string>
 
 /**
  * @brief Function type AST type node

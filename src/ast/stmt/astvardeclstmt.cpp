@@ -5,6 +5,7 @@
  */
 
 #include <ast/stmt/astvardeclstmt.h>
+#include <iostream>
 
 ASTVarDeclStmt::ASTVarDeclStmt(std::shared_ptr<ASTTypeNode> type, std::string id, std::shared_ptr<ASTExpNode> exp)
     : id(id),

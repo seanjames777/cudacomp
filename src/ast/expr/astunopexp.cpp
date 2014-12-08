@@ -5,6 +5,7 @@
  */
 
 #include <ast/expr/astunopexp.h>
+#include <iostream>
 
 ASTUnopExp::ASTUnopExp(enum op op, std::shared_ptr<ASTExpNode> exp)
     : op(op),

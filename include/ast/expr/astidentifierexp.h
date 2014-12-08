@@ -11,6 +11,7 @@
 
 #include <defs.h>
 #include <ast/expr/astexpnode.h>
+#include <string>
 
 /**
  * @brief AST identifier expression nodes. Refers to a local variable in a

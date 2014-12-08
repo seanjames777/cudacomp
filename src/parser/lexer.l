@@ -5,6 +5,8 @@
 #include <string>
 #include <ast/ast.h>
 #include <parser/parse.h>
+#include <sstream>
+#include <unordered_map>
 
 #define YY_STACK_USED
 #include "parser.hpp"

@@ -5,6 +5,8 @@
  */
 
 #include <ast/expr/astbinopexp.h>
+#include <iostream>
+#include <assert.h>
 
 ASTBinopExp::ASTBinopExp(enum op op, std::shared_ptr<ASTExpNode> e1, std::shared_ptr<ASTExpNode> e2)
     : op(op),

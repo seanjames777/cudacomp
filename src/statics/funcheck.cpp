@@ -5,6 +5,7 @@
  */
 
 #include <statics/funcheck.h>
+#include <algorithm>
 
 namespace Statics {
 

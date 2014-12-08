@@ -5,6 +5,7 @@
  */
 
 #include <ast/decl/astrecorddecl.h>
+#include <iostream>
 
 ASTRecordDecl::ASTRecordDecl(std::string name, std::shared_ptr<ASTRecordType> sig, bool defn)
     : name(name),

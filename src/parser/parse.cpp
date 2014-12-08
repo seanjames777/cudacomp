@@ -5,6 +5,7 @@
  */
 
 #include <parser/parse.h>
+#include <sstream>
 
 extern int yyparse(Parser::ParserArgs *args);
 extern FILE *yyin;

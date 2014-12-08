@@ -5,6 +5,8 @@
  */
 
 #include <statics/symbolmangle.h>
+#include <sstream>
+#include <unordered_set>
 
 std::string SymbolMangle::mangleSymbol(std::string name) {
     std::stringstream ss;

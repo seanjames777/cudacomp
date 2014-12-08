@@ -6,6 +6,7 @@
 
 #include <ast/astprint.h>
 #include <cxxabi.h>
+#include <iostream>
 
 ASTPrint::ASTPrint(std::ostream & out, bool colorize)
     : tabDepth(0),
