@@ -52,6 +52,12 @@ AUTHORS:
     printed as errors to stdout. This simplifies the code, but adds the
     overhead of exception handling code to the executable.
 
+    Also note that some of the design of this compiler, which is essentially
+    just a frontend for LLVM at this point, is subsequently somewhat inspired
+    by Clang. Our AST is fairly similar, although much simpler. We also use
+    a macro generated "AST visitor" class to implement some of our static
+    analyses.
+
 ORGANIZATION:
 
     The source tree, as far as 411 is concerned, is organized as follows:
@@ -59,6 +65,10 @@ ORGANIZATION:
     include/       Header files, corresponding to the files in src/
     src/           Source C++ files
         ast/       Abstract syntax tree class heirarchy
+            decl/  Top-level function, type, and struct declarations
+            expr/  Expressions
+            stmt/  Statements
+            type/  Types
         codegen/   Code generator, translates AST to LLVM IR
         parser/    Flex/Bison parser and lexer files
         statics/   Type checker and other statics rules
