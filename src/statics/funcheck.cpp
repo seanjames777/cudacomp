@@ -34,21 +34,38 @@ void FunCheck::run(std::shared_ptr<ASTDeclSeqNode> ast) {
     struct CCArgs *args = getOptions();
 
     if (!args->entrypoint.empty()) {
-        std::shared_ptr<FunctionInfo> entry = module->getFunction(args->entrypoint);
+        std::shared_ptr<ASTDeclSeqNode> decl = ast;
+        bool found = false;
+
+        while (decl != nullptr) {
+            if (auto fundecl = std::dynamic_pointer_cast<ASTFunDecl>(decl->getHead())) {
+                // Only check the entrypoint
+                if (fundecl->getName().compare(args->entrypoint))
+                    goto next;
+
+                // Must be defined
+                if (!fundecl->isDefn())
+                    goto next;
+
+                std::shared_ptr<ASTFunType> sig = fundecl->getSignature();
+
+                // Must return an integer
+                if (!sig->getReturnType()->equal(ASTIntegerType::get()))
+                    throw InvalidEntrypointException();
+
+                // Must not take any arguments
+                if (sig->getArgs() != nullptr)
+                    throw InvalidEntrypointException();
+
+                found = true;
+                break;
+            }
+next:
+            decl = decl->getTail();
+        }
 
         // Must be present
-        // TODO: This won't ever happen now that main is forward declared.
-        if (!entry)
-            throw InvalidEntrypointException();
-
-        std::shared_ptr<ASTFunType> sig = entry->getSignature();
-
-        // Must return an integer
-        if (!sig->getReturnType()->equal(ASTIntegerType::get()))
-            throw InvalidEntrypointException();
-
-        // Must not take any arguments
-        if (sig->getArgs() != nullptr)
+        if (!found)
             throw InvalidEntrypointException();
     }
 }
