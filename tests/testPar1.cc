@@ -7,25 +7,16 @@ int _cc_main() {
     int[] arr2 = alloc_array(int, 5);
     int[] arr3 = alloc_array(int, 5);
 
-    int i = 0;
-
-    while (i < 5) {
+    for (int i = 0; i < 5; i++) {
         arr1[i] = i;
-        arr2[i] = i;
-        i++;
+        arr2[i] = 2 * i;
     }
 
-    @device
-    for (int j : 0 to 5)
-        par_add<<<j>>>(arr1, arr2, arr3);
+    par_add<<<5>>>(arr1, arr2, arr3);
 
-    i = 0;
-
-    while (i < 5) {
+    for (int i = 0; i < 5; i++)
         if (arr3[i] != arr1[i] + arr2[i])
-            return 0;
-        i++;
-    }
+            return -1;
 
-    return 1;
+    return 0;
 }

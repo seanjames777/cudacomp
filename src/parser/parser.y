@@ -81,6 +81,7 @@ void setParenthesized(ASTExpNode *exp) {
 %type <top_seq> top_list
 %type <top> fundecl typedecl structdecl
 %type <exp_seq> arg_list arg_list_follow dim_arg_list_opt
+%type <linkage> linkage
 
 %right ASSIGN PLUSEQ MINUSEQ TIMESEQ DIVEQ MODEQ SALEQ SAREQ OREQ ANDEQ XOREQ
 %right QUESTION COLON
@@ -242,29 +243,34 @@ typedecl:
   ;
 
 fundecl:
-    type IDENT dim_param_list_opt LPAREN param_list RPAREN LBRACE stmt_list RBRACE
+    linkage type IDENT dim_param_list_opt LPAREN param_list RPAREN LBRACE stmt_list RBRACE
     {
-        $$ = new ASTFunDecl(std::string($2),
-                 std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($1),
-                 std::shared_ptr<ASTArgSeqNode>($3),
-                 std::shared_ptr<ASTArgSeqNode>($5)),
+        $$ = new ASTFunDecl(std::string($3),
+                 std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($2),
+                 std::shared_ptr<ASTArgSeqNode>($4),
+                 std::shared_ptr<ASTArgSeqNode>($6)),
                  true,
-                 args->header ? ASTDeclNode::External : ASTDeclNode::Internal,
-                 std::shared_ptr<ASTStmtSeqNode>($8));
-        free($2);
+                 args->header ? ASTDeclNode::External : $1,
+                 std::shared_ptr<ASTStmtSeqNode>($9));
+        free($3);
     }
-  | type IDENT dim_param_list_opt LPAREN param_list RPAREN SEMI
+  | linkage type IDENT dim_param_list_opt LPAREN param_list RPAREN SEMI
     {
         $$ = new ASTFunDecl(
-                 std::string($2),
-                 std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($1),
-                 std::shared_ptr<ASTArgSeqNode>($3),
-                 std::shared_ptr<ASTArgSeqNode>($5)),
+                 std::string($3),
+                 std::make_shared<ASTFunType>(std::shared_ptr<ASTTypeNode>($2),
+                 std::shared_ptr<ASTArgSeqNode>($4),
+                 std::shared_ptr<ASTArgSeqNode>($6)),
                  false,
-                 args->header ? ASTDeclNode::External : ASTDeclNode::Internal,
+                 args->header ? ASTDeclNode::External : $1,
                  nullptr);
-                 free($2);
+                 free($3);
     }
+  ;
+
+linkage:
+    /* empty */                       { $$ = ASTDeclNode::Internal; }
+  | EXTERN                            { $$ = ASTDeclNode::External; }
   ;
 
 dim_param_list_opt:
